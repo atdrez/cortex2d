@@ -1,0 +1,132 @@
+#!/usr/bin/python
+import re
+import sys
+import glob
+import optparse
+import struct
+
+table = {
+    "string": "s",
+    "char": "c",
+    "int8": "b",
+    "uint8": "B",
+    "int32": "i",
+    "uint32": "I",
+    "int64": "q",
+    "uint64": "Q",
+    "int16": "h",
+    "uint16": "H",
+    "float": "f",
+    "double": "d",
+}
+
+
+def parseStringValue(value):
+    if len(value) < 2 or (value[0] != "\"" or value[-1] != "\""):
+        return None
+    else:
+        # XXX: handle escape chars
+        return value[1:-1]
+
+
+def packLine(line):
+    f, value = line.split(":", 1)
+
+    fLen = None
+
+    m = re.search("([a-z0-9]+)\[(\d+)\]", f)
+
+    if m:
+        f = m.group(1)
+        fLen = int(m.group(2))
+
+    fmt = table.get(f)
+    value = value.split("#", 1)[0].strip()
+
+    if not fmt or not value:
+        return None
+
+    if fLen and fmt != "c":
+        return None
+
+    print fmt, value
+
+    if fmt == "s":
+        value = parseStringValue(value)
+        if value is None:
+            return None
+
+        return struct.pack("<I%ss" % (len(value),), len(value), value)
+    elif fmt == "c":
+        value = parseStringValue(value)
+        if value is None:
+            return None
+
+        if fLen is None:
+            fLen = 1
+
+        if len(value) > fLen:
+            return None
+
+        return struct.pack("<%ss" % (fLen,), value)
+    elif fmt == "f" or fmt == "d":
+        return struct.pack("<%s" % (fmt, ), float(value))
+    else:
+        return struct.pack("<%s" % (fmt, ), int(value))
+
+def packText(fileList):
+    for fileName in fileList:
+        inFile = open(fileName, "r")
+
+        if not inFile:
+            print "Error: unable to open file '%s'" % (fileName, )
+            continue
+
+        outFile = open(fileName + ".out", "wb")
+
+        if not outFile:
+            print "Error: unable to open output file for '%s'" % (fileName, )
+            fp.close()
+            continue
+
+        for line in inFile:
+            line = line.strip()
+
+            # skip comments and blank lines
+            if not line or line[0] == '#':
+                continue
+
+            # parse line
+            entry = packLine(line)
+
+            if not entry:
+                print "Error: invalid line format in file '%s'", (fileName, )
+                break
+
+            if entry:
+                outFile.write(entry)
+
+        inFile.close()
+        outFile.close()
+
+
+def main(argv):
+    parser = optparse.OptionParser(description='Pack text fields into a binary file')
+    (options, arguments) = parser.parse_args()
+
+    if not arguments:
+        print "Input file(s) not specified"
+        sys.exit(2)
+
+    infiles = []
+    for f in arguments:
+        infiles.extend(glob.glob(f))
+
+    infiles = list(set(infiles))
+
+    print "Processing %d files..." % (len(infiles), )
+    packText(infiles)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

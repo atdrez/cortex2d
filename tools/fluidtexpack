@@ -1,0 +1,375 @@
+#!/usr/bin/python
+import sys
+import glob
+import Image
+import optparse
+import struct
+
+debugMode = False
+ATLAS_VERSION = 0x1
+MAGIC_NUMBER = 0xBEEF2012
+
+
+def getBoundingBox(image):
+    bands = image.getbands()
+
+    if 'A' not in bands:
+        return image.getbbox()
+    else:
+        idx = list(bands).index('A')
+        return image.split()[idx].getbbox()
+
+
+def process(fileNames, scale):
+    images = []
+
+    for path in fileNames:
+        image = Image.open(path)
+
+        if scale != 1.0:
+            image = image.resize((int(image.size[0] * scale),
+                                  int(image.size[1] * scale)),
+                                 Image.ANTIALIAS)
+
+        boundingRect = getBoundingBox(image)
+
+        if boundingRect:
+            croppedImage = image.crop(boundingRect).copy()
+            images.append((path, croppedImage, boundingRect[0], boundingRect[1],
+                           image.size[0], image.size[1]))
+
+    return images
+
+# get the max area
+def getMaxArea(slots):
+    maxArea = 0
+    for slot in slots:
+        maxArea = max(maxArea, slot[3] * slot[4])
+
+    return maxArea
+
+# returns the merged slots or None
+def merge(slotA, slotB):
+    aI, aX, aY, aW, aH = slotA
+    bI, bX, bY, bW, bH = slotB
+
+    idx = min(aI, bI)
+
+    # no merge
+    if aX + aW < bX or aX > bX + bW or \
+            aY + aH < bY or aY > bY + bH:
+        return None
+
+    (aX2, aY2) = (aX + aW, aY + aH)
+    (bX2, bY2) = (bX + bW, bY + bH)
+
+    top = min(aY, bY)
+    left = min(aX, bX)
+    right = max(aX2, bX2)
+    bottom = max(aY2, bY2)
+
+    # full merge
+    if (aX == bX and aW == bW) or (aY == bY and aH == bH):
+        area = (right - left) * (bottom - top)
+        return (area, [(idx, left, top, right - left, bottom - top),])
+
+    cutX1 = max(aX, bX)
+    cutX2 = min(aX2, bX2)
+    cutY1 = max(aY, bY)
+    cutY2 = min(aY2, bY2)
+
+    hSlots = []
+    vSlots = []
+
+    # avoid 0-height intersection
+    if cutY2 > cutY1:
+        # intersection
+        hSlots.append((idx, left, cutY1, right - left, cutY2 - cutY1))
+
+        if aY < cutY1:
+            hSlots.append((idx, aX, aY, aW, cutY1 - aY))
+
+        if aY2 > cutY2:
+            hSlots.append((idx, aX, cutY2, aW, aY2 - cutY2))
+
+        if bY < cutY1:
+            hSlots.append((idx, bX, bY, bW, cutY1 - bY))
+
+        if bY2 > cutY2:
+            hSlots.append((idx, bX, cutY2, bW, bY2 - cutY2))
+
+    # avoid 0-width intersection
+    if cutX2 > cutX1:
+        # intersection
+        vSlots.append((idx, cutX1, top, cutX2 - cutX1, bottom - top))
+
+        if aX < cutX1:
+            vSlots.append((idx, aX, aY, cutX1 - aX, aH))
+
+        if aX2 > cutX2:
+            vSlots.append((idx, cutX2, aY, aX2 - cutX2, aH))
+
+        if bX < cutX1:
+            vSlots.append((idx, bX, bY, cutX1 - bX, bH))
+
+        if bX2 > cutX2:
+            vSlots.append((idx, cutX2, bY, bX2 - cutX2, bH))
+
+    hMaxArea = getMaxArea(hSlots)
+    vMaxArea = getMaxArea(vSlots)
+    oldMaxArea = getMaxArea([slotA, slotB])
+
+    if oldMaxArea >= hMaxArea and oldMaxArea >= vMaxArea:
+        return None
+
+    if hMaxArea > vMaxArea:
+        return (hMaxArea, hSlots)
+    else:
+        return (vMaxArea, vSlots)
+
+
+def mergeSlots(inSlots):
+    slots = inSlots[:]
+    count = len(slots)
+
+    for i in xrange(count):
+        j = -1
+        maxArea = 0
+        mergedSlots = None
+
+        for k in xrange(1, len(slots)):
+            # just process slots in the same atlas
+            if slots[0][0] != slots[k][0]:
+                continue
+
+            r = merge(slots[0], slots[k])
+
+            if not r:
+                continue
+
+            localMaxArea, localSlots = r
+            if localMaxArea > maxArea:
+                j = k
+                maxArea = localMaxArea
+                mergedSlots = localSlots
+
+        if mergedSlots:
+            del slots[j]
+            del slots[0]
+            slots.extend(mergedSlots)
+        else:
+            slots.append(slots[0])
+            del slots[0]
+
+    return slots
+
+
+def findFreeSlot(slots, w, h, spacing, globalW, globalH):
+    for idx, slot in enumerate(slots):
+        verticalSpace = ((slot[2] + h + spacing) < globalH)
+        horizontalSpace = ((slot[1] + w + spacing) < globalW)
+
+        if ((slot[3] >= w + spacing) or (slot[3] >= w and not horizontalSpace)) \
+                and ((slot[4] >= h + spacing) or (slot[4] >= h and not verticalSpace)):
+            return (idx, horizontalSpace, verticalSpace)
+
+    return None
+
+
+def generate(fileNames, outputName, atlasWidth, atlasHeight, scale, outputFormat, spacing):
+    images = process(fileNames, scale)
+
+    # sort images by area (from bigger to smaller)
+    images = sorted(images, key = lambda d : d[1].size[0] * d[1].size[1], reverse = True)
+
+    atlasCount = 1
+
+    # tuple: (atlasIndex, x, y, w, h)
+    freeSlots = [(0, 0, 0, atlasWidth, atlasHeight)]
+
+    # tuple: (image, atlasIndex, x, y, w, h, filepath,
+    #         xOffset, yOffset, originalWidth, originalHeight)
+    fullSlots = []
+
+    for info in images:
+        (path, image, xOffset, yOffset, originalWidth, originalHeight) = info
+        imageWidth, imageHeight = image.size
+
+        if imageWidth > atlasWidth or imageHeight > atlasHeight:
+            print "Error: Image '%s' is larger than atlas size" % (path, )
+            sys.exit(2)
+
+        inserted = False
+
+        while not inserted:
+            # find free slot
+            freeBlock = findFreeSlot(freeSlots, imageWidth, imageHeight,
+                                     spacing, atlasWidth, atlasHeight)
+
+            # check if slot was found
+            if freeBlock is None:
+                freeSlots.append((atlasCount, 0, 0, atlasWidth, atlasHeight))
+                atlasCount += 1
+            else:
+                slotIndex, horizontalSpace, verticalSpace = freeBlock
+
+                if not horizontalSpace:
+                    requiredWidth = imageWidth
+                else:
+                    requiredWidth = imageWidth + spacing
+
+                if not verticalSpace:
+                    requiredHeight = imageHeight
+                else:
+                    requiredHeight = imageHeight + spacing
+
+                inserted = True
+                atlasIndex, slotX, slotY, slotWidth, slotHeight = freeSlots[slotIndex]
+                del freeSlots[slotIndex]
+
+                if slotWidth > requiredWidth:
+                    freeSlots.append((atlasIndex, slotX + requiredWidth,
+                                      slotY, slotWidth - requiredWidth, requiredHeight))
+
+                if slotHeight > requiredHeight:
+                    freeSlots.append((atlasIndex, slotX, slotY + requiredHeight,
+                                      slotWidth, slotHeight - requiredHeight))
+
+                # add image to full slots
+                fullSlots.append((image, atlasIndex, slotX, slotY, imageWidth, imageHeight,
+                                  path, xOffset, yOffset, originalWidth, originalHeight))
+
+            # merge fragmented slots
+            freeSlots = mergeSlots(freeSlots)
+            # sort free slots (from smaller to bigger)
+            freeSlots = sorted(freeSlots, key = lambda d : d[3] * d[4])
+
+
+    atlases = [Image.new("RGBA", (atlasWidth, atlasHeight)) for i in range(0, atlasCount)]
+
+    if debugMode:
+        for slot in freeSlots:
+            idx, x, y, w, h = slot
+            atlases[idx].paste((0, 0xFF, 0), (x, y, x + w, y + h))
+            atlases[idx].paste((0xFF, 0, 0), (x, y, x + w - 1, y + h - 1))
+
+    for slot in fullSlots:
+        image, idx, x, y = slot[:4]
+        atlases[idx].paste(image, (x, y))
+
+    # save atlases to disk
+    if outputFormat == "json":
+        generateJsonAtlases(atlases, fullSlots, outputName, ".png")
+    elif outputFormat == "bin":
+        generateBinaryAtlases(atlases, fullSlots, outputName, ".tga")
+
+
+def generateBinaryAtlases(atlases, slots, outputName, ext):
+    for atlasIdx, atlas in enumerate(atlases):
+        if atlasIdx == 0:
+            name = "%s.atlas" % (outputName,)
+        else:
+            name = "%s.%d.atlas" % (outputName, atlasIdx)
+
+        # save atlas to disk
+        atlas.save(name + ext)
+
+        # write atlas coordinates
+        fp = open(name, "wb")
+
+        totalEntries = 0
+
+        for slot in slots:
+            if slot[1] == atlasIdx:
+                totalEntries += 1
+
+        fmt = "<III%ssI" % (len(name), )
+        entry = struct.pack(fmt, MAGIC_NUMBER, ATLAS_VERSION,
+                            len(name), name, totalEntries)
+        fp.write(entry)
+
+        for slot in slots:
+            (image, idx, x, y, imageWidth, imageHeight,
+             path, xOffset, yOffset, originalWidth, originalHeight) = slot
+
+            if idx != atlasIdx:
+                continue
+
+            fmt = "<I%ssIIIIIIII" % (len(path), )
+            entry = struct.pack(fmt, len(path), path, x, y, imageWidth, imageHeight,
+                                xOffset, yOffset, originalWidth, originalHeight)
+            fp.write(entry)
+
+        fp.close()
+
+    print "Generated %d atlas textures" % (len(atlases), )
+
+
+def generateJsonAtlases(atlases, slots, outputName, ext):
+    for atlasIdx, atlas in enumerate(atlases):
+        if atlasIdx == 0:
+            name = "%s.js" % (outputName,)
+        else:
+            name = "%s.%d.js" % (outputName, atlasIdx)
+
+        # save atlas to disk
+        atlas.save(name + ext)
+
+        # write atlas coordinates
+        json = "{\n";
+
+        for slot in slots:
+            (image, idx, x, y, imageWidth, imageHeight,
+             path, xOffset, yOffset, originalWidth, originalHeight) = slot
+
+            if idx != atlasIdx:
+                continue
+
+            json += "'%s':{x:%d,y:%d,w:%d,h:%d," \
+                "ox:%d,oy:%d,ow:%d,oh:%d}," \
+                % (path, x, y, imageWidth, imageHeight,
+                   xOffset, yOffset, originalWidth, originalHeight)
+
+            json += "\n"
+
+        json += "}"
+
+        fp = open(name, "wb")
+        fp.write(json)
+        fp.close()
+
+    print "Generated %d atlas textures" % (len(atlases), )
+
+
+def main(argv):
+    parser = optparse.OptionParser(description='Pack textures into an atlas')
+    parser.add_option('--width', help="atlas width", dest="width", default=512, type=int)
+    parser.add_option('--height', help="atlas height", dest="height", default=512, type=int)
+    parser.add_option('--output', help="output name", dest="output", default="atlas", type='string')
+    parser.add_option('--scale', help="scale ratio", dest="scale", default=1.0, type=float)
+    parser.add_option('--spacing', help="tile spacing", dest="spacing", default=1, type=int)
+    parser.add_option('--format', help="atlas format", dest="format", default="bin", type='string')
+
+    (options, arguments) = parser.parse_args()
+
+    if not arguments:
+        print "Input file(s) not specified"
+        sys.exit(2)
+
+    if options.format not in ("bin", "json"):
+        print "Wrong atlas format (supported formats: bin, json)"
+        sys.exit(2)
+
+    infiles = []
+    for f in arguments:
+        infiles.extend(glob.glob(f))
+
+    infiles = list(set(infiles))
+
+    print "Processing %d files..." % (len(infiles), )
+    generate(infiles, options.output, options.width, options.height,
+             options.scale, options.format, options.spacing)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
