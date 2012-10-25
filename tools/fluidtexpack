@@ -1,5 +1,7 @@
 #!/usr/bin/python
+import os
 import sys
+import md5
 import glob
 import Image
 import optparse
@@ -315,8 +317,10 @@ def generateJsonAtlases(atlases, slots, outputName, ext):
         # save atlas to disk
         atlas.save(name + ext)
 
+        code = md5.new(name).hexdigest()
+
         # write atlas coordinates
-        json = "{\n";
+        json = "var atlas_" + code + " = {\n";
 
         for slot in slots:
             (image, idx, x, y, imageWidth, imageHeight,
@@ -324,6 +328,8 @@ def generateJsonAtlases(atlases, slots, outputName, ext):
 
             if idx != atlasIdx:
                 continue
+
+            path = os.path.splitext(path)[0]
 
             json += "'%s':{x:%d,y:%d,w:%d,h:%d," \
                 "ox:%d,oy:%d,ow:%d,oh:%d}," \
