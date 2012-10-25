@@ -23,6 +23,12 @@ inline T flMin(T a, T b)
     return (a < b) ? a : b;
 }
 
+template<typename T>
+inline T flRound(T a)
+{
+    return floor(a + 0.5);
+}
+
 #define flSqrt(a) sqrt(a)
 
 #endif
