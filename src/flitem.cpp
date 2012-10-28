@@ -1037,6 +1037,16 @@ FlList<FlSceneFragments::Fragment *> FlSceneFragments::fragments() const
     return d->fragments;
 }
 
+void FlSceneFragments::clearFragments()
+{
+    FL_D(FlSceneFragments);
+
+    foreach (Fragment *f, d->fragments)
+        delete f;
+
+    d->fragments.clear();
+}
+
 bool FlSceneFragments::appendFragment(Fragment *fragment)
 {
     return insertFragment(-1, fragment);

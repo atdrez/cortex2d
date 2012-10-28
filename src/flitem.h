@@ -233,6 +233,7 @@ public:
 
     FlList<Fragment *> fragments() const;
 
+    void clearFragments();
     bool appendFragment(Fragment *fragment);
     bool insertFragment(int index, Fragment *fragment);
     bool removeFragment(Fragment *fragment);
