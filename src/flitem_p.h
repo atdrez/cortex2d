@@ -69,13 +69,23 @@ struct FlSceneImagePrivate : public FlSceneItemPrivate
 
     void init(FlSceneItem *parent);
     void release();
-    void draw();
+    virtual void draw();
 
     int textureAtlasIndex;
     bool ownTexture;
     FlTexture *texture;
     FlShaderEffect *shaderEffect;
     FlSceneImage::FillMode fillMode;
+};
+
+struct FlSceneFragmentsPrivate : public FlSceneImagePrivate
+{
+    FlSceneFragmentsPrivate(FlSceneImage *q);
+
+    void release();
+    void draw();
+
+    FlList<FlSceneFragments::Fragment *> fragments;
 };
 
 #endif

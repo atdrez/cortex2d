@@ -89,6 +89,7 @@ private:
     friend class FlSceneImage;
     friend class FlSceneImagePrivate;
     friend class FlSceneRectPrivate;
+    friend class FlSceneFragmentsPrivate;
 };
 
 #endif

@@ -761,6 +761,12 @@ FlSceneImagePrivate::FlSceneImagePrivate(FlSceneImage *q)
 void FlSceneImagePrivate::init(FlSceneItem *parent)
 {
     FlSceneItemPrivate::init(parent);
+
+    if (texture) {
+        q->setWidth(texture->width());
+        q->setHeight(texture->height());
+    }
+
     shaderEffect = fl_sharedTextureShaderEffect();
 }
 
@@ -798,13 +804,14 @@ FlSceneImage::FlSceneImage(FlTexture *texture, FlSceneItem *parent)
     : FlSceneItem(new FlSceneImagePrivate(this))
 {
     FL_D(FlSceneImage);
+    d->texture = texture;
     d->init(parent);
+}
 
-    if (texture) {
-        d->texture = texture;
-        setWidth(texture->width());
-        setHeight(texture->height());
-    }
+FlSceneImage::FlSceneImage(FlSceneImagePrivate *dd)
+    : FlSceneItem(dd)
+{
+
 }
 
 void FlSceneImage::paint()
@@ -915,4 +922,160 @@ bool FlSceneImage::load(const FlString &filePath, Fl::TextureFileType type)
     setHeight(d->texture->height());
 
     return true;
+}
+
+
+/////////////////////////////////////////////////
+// FlSceneFragments
+/////////////////////////////////////////////////
+
+FlSceneFragmentsPrivate::FlSceneFragmentsPrivate(FlSceneImage *q)
+    : FlSceneImagePrivate(q)
+{
+
+}
+
+void FlSceneFragmentsPrivate::release()
+{
+    FlSceneImagePrivate::release();
+
+    foreach (FlSceneFragments::Fragment *f, fragments)
+        delete f;
+}
+
+void FlSceneFragmentsPrivate::draw()
+{
+    if (!shaderEffect || !shaderEffect->init())
+        return;
+
+    FlMatrix matrix = currentViewProjectionMatrix();
+    bool vTile = (fillMode == FlSceneImage::Tile || fillMode == FlSceneImage::TileVertically);
+    bool hTile = (fillMode == FlSceneImage::Tile || fillMode == FlSceneImage::TileHorizontally);
+
+    FlShaderEffect::Element e;
+    FlList<FlShaderEffect::Element> elements;
+
+    foreach (FlSceneFragments::Fragment *f, fragments) {
+        e.x = f->x();
+        e.y = f->y();
+        e.width = f->width();
+        e.height = f->height();
+        e.textureAtlasIndex = f->atlasIndex();
+        elements.push_back(e);
+    }
+
+    shaderEffect->drawElements(matrix, texture, opacity, vTile, hTile, elements);
+}
+
+
+FlSceneFragments::Fragment::Fragment()
+    : m_x(0),
+      m_y(0),
+      m_width(0),
+      m_height(0),
+      m_atlasIndex(-1),
+      m_userData(0)
+{
+
+}
+
+void FlSceneFragments::Fragment::setX(flreal x)
+{
+    m_x = x;
+}
+
+void FlSceneFragments::Fragment::setY(flreal y)
+{
+    m_y = y;
+}
+
+void FlSceneFragments::Fragment::setWidth(flreal w)
+{
+    m_width = w;
+}
+
+void FlSceneFragments::Fragment::setHeight(flreal h)
+{
+    m_height = h;
+}
+
+void FlSceneFragments::Fragment::setAtlasIndex(int index)
+{
+    m_atlasIndex = index;
+}
+
+void FlSceneFragments::Fragment::setUserData(void *data)
+{
+    m_userData = data;
+}
+
+
+FlSceneFragments::FlSceneFragments(FlSceneItem *parent)
+    : FlSceneImage(new FlSceneFragmentsPrivate(this))
+{
+    FL_D(FlSceneFragments);
+    d->init(parent);
+}
+
+FlSceneFragments::FlSceneFragments(FlTexture *texture, FlSceneItem *parent)
+    : FlSceneImage(new FlSceneFragmentsPrivate(this))
+{
+    FL_D(FlSceneFragments);
+    d->texture = texture;
+    d->init(parent);
+}
+
+void FlSceneFragments::paint()
+{
+    FL_D(FlSceneFragments);
+    d->draw();
+}
+
+FlList<FlSceneFragments::Fragment *> FlSceneFragments::fragments() const
+{
+    FL_D(FlSceneFragments);
+    return d->fragments;
+}
+
+bool FlSceneFragments::appendFragment(Fragment *fragment)
+{
+    return insertFragment(-1, fragment);
+}
+
+bool FlSceneFragments::insertFragment(int index, Fragment *fragment)
+{
+    FL_D(FlSceneFragments);
+
+    foreach (Fragment *f, d->fragments) {
+        if (fragment == f)
+            return false;
+    }
+
+    if (index < 0 || index >= d->fragments.size()) {
+        d->fragments.push_back(fragment);
+    } else {
+        FlList<Fragment *>::iterator it;
+        it = d->fragments.begin();
+        std::advance(it, index);
+        d->fragments.insert(it, fragment);
+    }
+
+    return true;
+}
+
+bool FlSceneFragments::removeFragment(Fragment *fragment)
+{
+    FL_D(FlSceneFragments);
+
+    FlList<Fragment *>::iterator it;
+
+    for (it = d->fragments.begin(); it != d->fragments.end(); it++) {
+        if (*it == fragment) {
+            d->fragments.erase(it);
+            delete fragment;
+            return true;
+        }
+    }
+
+    return false;
 }

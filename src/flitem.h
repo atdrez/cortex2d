@@ -14,6 +14,7 @@ class FlSceneView;
 class FlSceneViewData;
 class FlSceneItemPrivate;
 class FlShaderEffect;
+class FlSceneImagePrivate;
 
 class FlSceneItem
 {
@@ -185,6 +186,56 @@ public:
 
     FlShaderEffect *shaderEffect() const;
     void setShaderEffect(FlShaderEffect *effect);
+
+protected:
+    FlSceneImage(FlSceneImagePrivate *dd);
+
+    void paint();
+};
+
+
+class FlSceneFragments : public FlSceneImage
+{
+public:
+    class Fragment {
+    public:
+        Fragment();
+
+        flreal x() const { return m_x; }
+        void setX(flreal x);
+
+        flreal y() const { return m_y; }
+        void setY(flreal y);
+
+        flreal width() const { return m_width; }
+        void setWidth(flreal w);
+
+        flreal height() const { return m_height; }
+        void setHeight(flreal h);
+
+        int atlasIndex() const { return m_atlasIndex; }
+        void setAtlasIndex(int index);
+
+        void *userData() const { return m_userData; }
+        void setUserData(void *data);
+
+    private:
+        flreal m_x;
+        flreal m_y;
+        flreal m_width;
+        flreal m_height;
+        int m_atlasIndex;
+        void *m_userData;
+    };
+
+    FlSceneFragments(FlSceneItem *parent = 0);
+    FlSceneFragments(FlTexture *texture, FlSceneItem *parent = 0);
+
+    FlList<Fragment *> fragments() const;
+
+    bool appendFragment(Fragment *fragment);
+    bool insertFragment(int index, Fragment *fragment);
+    bool removeFragment(Fragment *fragment);
 
 protected:
     void paint();
