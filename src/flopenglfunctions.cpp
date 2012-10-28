@@ -143,6 +143,7 @@ FL_GL_FPTR(void, glBlendFunc, (GLenum  sfactor,  GLenum  dfactor))
 FL_GL_FPTR(void, glDeleteTextures, (GLsizei n, const GLuint *textures))
 FL_GL_FPTR(const GLubyte *, glGetString, (GLenum  name))
 FL_GL_FPTR(void, glCompressedTexImage2D, (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize,  const GLvoid *data))
+FL_GL_FPTR(void, glDrawElements, (GLenum mode, GLsizei count, GLenum type, const GLvoid * indices))
 
 #undef FL_GL_FPTR
 
@@ -200,6 +201,7 @@ void FlGL::assignFunctions(Func_GetProcAddress f)
     FL_GL_FASSIGN(glDeleteTextures);
     FL_GL_FASSIGN(glGetString);
     FL_GL_FASSIGN(glCompressedTexImage2D);
+    FL_GL_FASSIGN(glDrawElements);
 
 #   undef FL_GL_FASSIGN
 
@@ -423,4 +425,9 @@ void FlGL::glCompressedTexImage2D(GLenum target,  GLint level, GLenum internalfo
 {
     return fl_glCompressedTexImage2D(target, level, internalformat,
                                      width, height, border, imageSize, data);
+}
+
+void FlGL::glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid * indices)
+{
+    return fl_glDrawElements(mode, count, type, indices);
 }

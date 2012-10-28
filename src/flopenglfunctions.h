@@ -65,6 +65,8 @@ public:
     static void glCompressedTexImage2D(GLenum target,  GLint level, GLenum internalformat, GLsizei width, GLsizei height,
                                        GLint border, GLsizei imageSize, const GLvoid *data);
 
+    static void glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid * indices);
+
     static FlString getGlErrorMessage(GLenum error);
     static GLuint loadTGATexture(const char *fileName);
     static void assignFunctions(Func_GetProcAddress func);
