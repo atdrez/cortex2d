@@ -16,6 +16,32 @@ public:
         Texture
     };
 
+    struct Element {
+        flreal x;
+        flreal y;
+        flreal width;
+        flreal height;
+        int textureAtlasIndex;
+
+        Element()
+            : x(0),
+              y(0),
+              width(0),
+              height(0),
+              textureAtlasIndex(-1)
+        {
+        }
+
+        Element(const Element &e)
+            : x(e.x),
+              y(e.y),
+              width(e.width),
+              height(e.height),
+              textureAtlasIndex(e.textureAtlasIndex)
+        {
+        }
+    };
+
     FlShaderEffect(Type type = Texture);
     virtual ~FlShaderEffect();
 
@@ -30,14 +56,21 @@ public:
 
 protected:
     bool init();
+    void applyPosition(const GLfloat *matrix, const GLfloat *vertices);
+    void applyColor(flreal r, flreal g, flreal b, flreal a, flreal opacity);
+    void applyTexture(const GLfloat *texCoords, GLint textureId, bool vTile, bool hTile);
     void applyCustomUniforms();
 
     void drawSolid(const FlMatrix &matrix, flreal width, flreal height,
                    flreal r, flreal g, flreal b, flreal a, flreal opacity);
 
-    void drawTexture(const FlMatrix &projectionMatrix, FlTexture *texture,
+    void drawTexture(const FlMatrix &matrix, FlTexture *texture,
                      flreal width, flreal height, flreal opacity,
                      bool tileVertically, bool tileHorizontally, int textureAtlasIndex);
+
+    void drawElements(const FlMatrix &matrix, FlTexture *texture,
+                      flreal opacity,  bool tileVertically, bool tileHorizontally,
+                      const FlList<Element> &elements);
 
 private:
     Type m_type;

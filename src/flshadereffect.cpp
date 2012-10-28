@@ -50,6 +50,24 @@ static const char fl_solidFragmentShader[] = " \
     ";
 
 
+static bool fl_updateVertexAttributes(flreal x, flreal y, flreal w, flreal h,
+                                      FlTexture *texture, int atlasIndex, bool vTile, bool hTile,
+                                      GLfloat *vertices, GLfloat *texCoords, bool triangleStrip);
+
+static inline void fl_setTriangleArray(GLfloat *v, flreal x1, flreal y1, flreal x2, flreal y2)
+{
+    v[0] = x1; v[1] = y1; v[2] = x2; v[3] = y1; v[4] = x1;
+    v[5] = y2; v[6] = x1; v[7] = y2; v[8] = x2; v[9] = y1;
+    v[10] = x2; v[11] = y2;
+}
+
+static inline void fl_setTriangleStripArray(GLfloat *v, flreal x1, flreal y1, flreal x2, flreal y2)
+{
+    v[0] = x1; v[1] = y1; v[2] = x2; v[3] = y1;
+    v[4] = x1; v[5] = y2; v[6] = x2; v[7] = y2;
+}
+
+
 FlShaderEffect::FlShaderEffect(Type type)
     : m_type(type),
       m_ready(false),
@@ -160,28 +178,11 @@ void FlShaderEffect::drawSolid(const FlMatrix &matrix, flreal dw, flreal dh,
 {
     m_program.bind();
 
-    flreal dx = 0;
-    flreal dy = 0;
+    GLfloat vertices[8];
+    fl_setTriangleStripArray(vertices, 0, 0, dw, dh);
 
-    const GLfloat vertices[8] = {
-        dx, dy, (dx + dw), dy, dx,
-        (dy + dh), (dx + dw), (dy + dh)
-    };
-
-    if (m_locOpacity >= 0)
-        FlGL::glUniform1f(m_locOpacity, opacity);
-
-    if (m_locColor >= 0)
-        FlGL::glUniform4f(m_locColor, r, g, b, a);
-
-    if (m_locMatrix >= 0)
-        FlGL::glUniformMatrix4fv(m_locMatrix, 1, GL_FALSE, (GLfloat *)matrix.data());
-
-    if (m_locPosition >= 0) {
-        FlGL::glVertexAttribPointer(m_locPosition, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-        FlGL::glEnableVertexAttribArray(m_locPosition);
-    }
-
+    applyPosition((GLfloat *)matrix.data(), vertices);
+    applyColor(r, g, b, a, opacity);
     applyCustomUniforms();
 
     FlGL::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -196,70 +197,102 @@ void FlShaderEffect::drawTexture(const FlMatrix &matrix, FlTexture *texture,
     if (!texture)
         return;
 
-    m_program.bind();
+    GLfloat vertices[8];
+    GLfloat texCoords[8];
+    bool ok = fl_updateVertexAttributes(0, 0, width, height, texture, textureAtlasIndex,
+                                        vTile, hTile, vertices, texCoords, true);
 
-    GLfloat tw = texture->width();
-    GLfloat th = texture->height();
-    GLfloat sx = 0, sy = 0, sw = tw, sh = th;
-    GLfloat dx = 0, dy = 0, dw = width, dh = height;
+    if (ok) {
+        m_program.bind();
 
-    if (texture->isAtlas() && textureAtlasIndex >= 0) {
-        FlAtlasTexture *atlas = static_cast<FlAtlasTexture *>(texture);
+        applyPosition((GLfloat *)matrix.data(), vertices);
+        applyColor(1, 1, 1, 1, opacity);
+        applyTexture(texCoords, texture->id(), vTile, hTile);
+        applyCustomUniforms();
 
-        FlRect sourceRect = atlas->sourceRectAt(textureAtlasIndex);
-        if (sourceRect.isValid()) {
-            sx = sourceRect.x();
-            sy = sourceRect.y();
-            sw = sourceRect.width();
-            sh = sourceRect.height();
-        }
+        FlGL::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-        FlRect viewRect = atlas->viewportRectAt(textureAtlasIndex);
-        if (viewRect.isValid()) {
-            dx = width * flreal(-viewRect.x()) / viewRect.width();
-            dy = height * flreal(-viewRect.y()) / viewRect.height();
-            dw = width * sw / viewRect.width();
-            dh = height * sh / viewRect.height();
+        m_program.release();
+    }
+}
+
+void FlShaderEffect::drawElements(const FlMatrix &matrix, FlTexture *texture,
+                                  flreal opacity, bool vTile, bool hTile,
+                                  const FlList<Element> &elements)
+{
+    const int count = elements.size();
+
+    if (!texture || count == 0)
+        return;
+
+    GLfloat vertices[12 * count];
+    GLfloat texCoords[12 * count];
+    unsigned short indexes[count * 6];
+
+    int n = 0;
+    int j = 0;
+
+    foreach (const Element &e, elements) {
+        int offset = n * 12;
+        bool ok = fl_updateVertexAttributes(e.x, e.y, e.width, e.height,
+                                            texture, e.textureAtlasIndex, vTile, hTile,
+                                            vertices + offset, texCoords + offset, false);
+
+        if (ok) {
+            // indexes
+            for (int w = j + 6; j < w; j++)
+                indexes[j] = j;
+            n++;
         }
     }
 
-    GLfloat texXFactor = hTile ? width / tw : 1.0f;
-    GLfloat texYFactor = vTile ? height / th : 1.0f;
-    GLfloat texY1 = !texture->isInverted() ? (sy / th) : (1.0 - (sy / th));
-    GLfloat texY2 = !texture->isInverted() ? ((sy + sh) / th) : (1.0 - ((sy + sh) / th));
+    if (n > 0) {
+        m_program.bind();
 
-    const GLfloat vertices[8] = {
-        dx, dy, (dx + dw), dy, dx,
-        (dy + dh), (dx + dw), (dy + dh)
-    };
+        applyPosition((GLfloat *)matrix.data(), vertices);
+        applyColor(1, 1, 1, 1, opacity);
+        applyTexture(texCoords, texture->id(), vTile, hTile);
+        applyCustomUniforms();
 
-    const GLfloat texCoords[8] = {
-        (sx / tw), texY1 * texYFactor, ((sx + sw) / tw) * texXFactor, texY1 * texYFactor,
-        (sx / tw), texY2 * texYFactor, ((sx + sw) / tw) * texXFactor, texY2 * texYFactor
-    };
+        FlGL::glDrawElements(GL_TRIANGLES, n * 6, GL_UNSIGNED_SHORT, indexes);
 
+        m_program.release();
+    }
+}
+
+void FlShaderEffect::applyPosition(const GLfloat *matrix, const GLfloat *vertices)
+{
     // XXX: HANDLE Z-ORDER
 
-    if (m_locOpacity >= 0)
-        FlGL::glUniform1f(m_locOpacity, opacity);
-
     if (m_locMatrix >= 0)
-        FlGL::glUniformMatrix4fv(m_locMatrix, 1, GL_FALSE, (GLfloat *)matrix.data());
+        FlGL::glUniformMatrix4fv(m_locMatrix, 1, GL_FALSE, matrix);
 
     if (m_locPosition >= 0) {
         FlGL::glVertexAttribPointer(m_locPosition, 2, GL_FLOAT, GL_FALSE, 0, vertices);
         FlGL::glEnableVertexAttribArray(m_locPosition);
     }
+}
 
-    if (m_locTexCoord >= 0) {
+void FlShaderEffect::applyColor(flreal r, flreal g, flreal b, flreal a, flreal opacity)
+{
+    if (m_locOpacity >= 0)
+        FlGL::glUniform1f(m_locOpacity, opacity);
+
+    if (m_locColor >= 0)
+        FlGL::glUniform4f(m_locColor, r, g, b, a);
+}
+
+void FlShaderEffect::applyTexture(const GLfloat *texCoords, GLint textureId, bool vTile, bool hTile)
+{
+    if (m_locTexCoord >= 0 && texCoords) {
         FlGL::glVertexAttribPointer(m_locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
         FlGL::glEnableVertexAttribArray(m_locTexCoord);
     }
 
-    if (m_locTexture >= 0) {
+    if (m_locTexture >= 0 && textureId >= 0) {
         // bind texture
         FlGL::glActiveTexture(GL_TEXTURE0);
-        FlGL::glBindTexture(GL_TEXTURE_2D, texture->id());
+        FlGL::glBindTexture(GL_TEXTURE_2D, textureId);
 
         // use texture unit 0 (GL_TEXTURE0)
         FlGL::glUniform1i(m_locTexture, 0);
@@ -270,11 +303,6 @@ void FlShaderEffect::drawTexture(const FlMatrix &matrix, FlTexture *texture,
         FlGL::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
                               vTile ? GL_REPEAT : GL_CLAMP_TO_EDGE);
     }
-
-    applyCustomUniforms();
-
-    FlGL::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    m_program.release();
 }
 
 void FlShaderEffect::applyCustomUniforms()
@@ -298,4 +326,86 @@ void FlShaderEffect::applyCustomUniforms()
             break;
         }
     }
+}
+
+bool fl_updateVertexAttributes(flreal x, flreal y, flreal w, flreal h,
+                               FlTexture *texture, int atlasIndex, bool vTile, bool hTile,
+                               GLfloat *vertices, GLfloat *texCoords, bool triangleStrip)
+{
+    if (!texture)
+        return false;
+
+    const GLfloat tw = texture->width();
+    const GLfloat th = texture->height();
+    const bool inverted = texture->isInverted();
+
+    if (tw == 0 || th == 0)
+        return false;
+
+    GLfloat sx = 0;
+    GLfloat sy = 0;
+    GLfloat sw = tw;
+    GLfloat sh = th;
+
+    GLfloat dx = x;
+    GLfloat dy = y;
+    GLfloat dw = w;
+    GLfloat dh = h;
+
+    if (atlasIndex >= 0 && texture->isAtlas()) {
+        const FlAtlasTexture *atlas = static_cast<FlAtlasTexture *>(texture);
+        const FlRect &sourceRect = atlas->sourceRectAt(atlasIndex);
+        const FlRect &viewRect = atlas->viewportRectAt(atlasIndex);
+
+        if (sourceRect.isValid()) {
+            sx = sourceRect.x();
+            sy = sourceRect.y();
+            sw = sourceRect.width();
+            sh = sourceRect.height();
+        }
+
+        if (viewRect.isValid()) {
+            const GLfloat vw = viewRect.width();
+            const GLfloat vh = viewRect.height();
+
+            if (vw == 0 || vh == 0)
+                return false;
+
+            dx += w * flreal(-viewRect.x()) / vw;
+            dy += h * flreal(-viewRect.y()) / vh;
+            dw = w * sw / vw;
+            dh = h * sh / vh;
+        }
+    }
+
+    // nothing to draw
+    if (sw == 0 || sh == 0 || dw == 0 || dh == 0)
+        return false;
+
+    const GLfloat txf = hTile ? (w / tw) : 1.0f;
+    const GLfloat tyf = vTile ? (h / th) : 1.0f;
+    const GLfloat tty1 = !inverted ? (sy / th) : (1.0 - (sy / th));
+    const GLfloat tty2 = !inverted ? ((sy + sh) / th) : (1.0 - ((sy + sh) / th));
+
+    // vertex coords
+    const GLfloat dx1 = dx;
+    const GLfloat dy1 = dy;
+    const GLfloat dx2 = (dx + dw);
+    const GLfloat dy2 = (dy + dh);
+
+    // texture coords
+    const GLfloat tx1 = (sx / tw);
+    const GLfloat ty1 = tty1 * tyf;
+    const GLfloat tx2 = ((sx + sw) / tw) * txf;
+    const GLfloat ty2 = tty2 * tyf;
+
+    if (triangleStrip) {
+        fl_setTriangleStripArray(vertices, dx1, dy1, dx2, dy2);
+        fl_setTriangleStripArray(texCoords, tx1, ty1, tx2, ty2);
+    } else {
+        fl_setTriangleArray(vertices, dx1, dy1, dx2, dy2);
+        fl_setTriangleArray(texCoords, tx1, ty1, tx2, ty2);
+    }
+
+    return true;
 }
