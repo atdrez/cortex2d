@@ -1,11 +1,11 @@
 TEMPLATE = lib
-TARGET = fluid
+TARGET = cortex2d
 
 ###
 QT -= gui core
 LIBS = -lGLESv2 -lm -lX11
 
-DEFINES += FL_SDL_BACKEND
+DEFINES += CT_SDL_BACKEND
 
 unix {
     CONFIG += link_pkgconfig
@@ -13,64 +13,65 @@ unix {
 }
 
 HEADERS += \
-    flwindow.h \
-    flapplication.h \
-    flevents.h \
-    flmatrix.h \
-    flglobal.h \
-    flitem.h \
-    flGL.h \
-    flrect.h \
-    flpoint.h \
-    fltexture.h \
-    flfunctor.h \
-    flmap.h \
-    flvector.h \
-    flstring.h \
-    fllist.h \
-    flmath.h \
-    flsceneview.h \
-    fldragcursor.h \
-    flshadereffect.h \
-    flshaderprogram.h \
-    flshaderuniform.h \
-    flanimations.h \
-    fleasingcurve.h \
-    utils/flfile.h \
-    utils/flbuffer.h \
-    utils/fltgaloader.h \
-    utils/flpvrloader.h \
-    utils/flddsloader.h \
+    cortex2d.h \
+    ctwindow.h \
+    ctapplication.h \
+    ctevents.h \
+    ctmatrix.h \
+    ctglobal.h \
+    ctitem.h \
+    ctGL.h \
+    ctrect.h \
+    ctpoint.h \
+    cttexture.h \
+    ctfunctor.h \
+    ctmap.h \
+    ctvector.h \
+    ctstring.h \
+    ctlist.h \
+    ctmath.h \
+    ctsceneview.h \
+    ctdragcursor.h \
+    ctshadereffect.h \
+    ctshaderprogram.h \
+    ctshaderuniform.h \
+    ctanimations.h \
+    cteasingcurve.h \
+    utils/ctfile.h \
+    utils/ctbuffer.h \
+    utils/cttgaloader.h \
+    utils/ctpvrloader.h \
+    utils/ctddsloader.h \
     3rdparty/tricollision.h \
-    flopenglfunctions.h
+    ctopenglfunctions.h
 
 SOURCES += \
-    flwindow.cpp \
-    flwindow_sdl.cpp \
-    flapplication.cpp \
-    flapplication_p.cpp \
-    flapplication_sdl.cpp \
-    flevents.cpp \
-    flmatrix.cpp \
-    flitem.cpp \
-    fltexture.cpp \
-    flsceneview.cpp \
-    flshadereffect.cpp \
-    flshaderprogram.cpp \
-    flanimations.cpp \
-    fleasingcurve.cpp \
-    utils/flfile.cpp \
-    utils/flbuffer.cpp \
-    utils/fltgaloader.cpp \
-    utils/flpvrloader.cpp \
-    utils/flddsloader.cpp \
+    ctwindow.cpp \
+    ctwindow_sdl.cpp \
+    ctapplication.cpp \
+    ctapplication_p.cpp \
+    ctapplication_sdl.cpp \
+    ctevents.cpp \
+    ctmatrix.cpp \
+    ctitem.cpp \
+    cttexture.cpp \
+    ctsceneview.cpp \
+    ctshadereffect.cpp \
+    ctshaderprogram.cpp \
+    ctanimations.cpp \
+    cteasingcurve.cpp \
+    utils/ctfile.cpp \
+    utils/ctbuffer.cpp \
+    utils/cttgaloader.cpp \
+    utils/ctpvrloader.cpp \
+    utils/ctddsloader.cpp \
     3rdparty/tricollision.cpp \
-    flopenglfunctions.cpp
+    ctopenglfunctions.cpp
 
 include(audio/audio.pri)
 include(../include/include.pri)
 
 target.path = /usr/local/lib
-headers.path = /usr/local/include/Fluid
+headers.path = /usr/local/include/Cortex2D
 headers.files = $$HEADERS
 INSTALLS += target headers

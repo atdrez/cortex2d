@@ -1,9 +1,7 @@
-#include <FlApplication>
-#include <FlSceneView>
-#include <FlSceneItem>
+#include <Cortex2D>
 
 
-class MainWindow : public FlSceneView
+class MainWindow : public CtSceneView
 {
 public:
     MainWindow();
@@ -12,11 +10,11 @@ protected:
     bool init();
 
 private:
-    FlAtlasTexture m_texture;
+    CtAtlasTexture m_texture;
 };
 
 
-class BlockFragments : public FlSceneFragments
+class BlockFragments : public CtSceneFragments
 {
 public:
     struct Info {
@@ -24,22 +22,22 @@ public:
         bool moveLeft;
     };
 
-    BlockFragments(FlAtlasTexture *texture, FlSceneItem *item);
+    BlockFragments(CtAtlasTexture *texture, CtSceneItem *item);
     ~BlockFragments();
 
     void init();
-    void advance(fluint ms);
+    void advance(ctuint ms);
 
 protected:
-    void initFragment(const FlString &name,
-                      flreal x, flreal y, flreal w, flreal h);
+    void initFragment(const CtString &name,
+                      ctreal x, ctreal y, ctreal w, ctreal h);
 
-    FlList<Info *> m_info;
+    CtList<Info *> m_info;
 };
 
 
-BlockFragments::BlockFragments(FlAtlasTexture *texture, FlSceneItem *parent)
-    : FlSceneFragments(texture, parent)
+BlockFragments::BlockFragments(CtAtlasTexture *texture, CtSceneItem *parent)
+    : CtSceneFragments(texture, parent)
 {
 
 }
@@ -60,10 +58,10 @@ void BlockFragments::init()
     }
 }
 
-void BlockFragments::initFragment(const FlString &name,
-                                  flreal x, flreal y, flreal w, flreal h)
+void BlockFragments::initFragment(const CtString &name,
+                                  ctreal x, ctreal y, ctreal w, ctreal h)
 {
-    FlAtlasTexture *atlas = static_cast<FlAtlasTexture *>(texture());
+    CtAtlasTexture *atlas = static_cast<CtAtlasTexture *>(texture());
 
     Fragment *frag = new Fragment();
     frag->setX(x);
@@ -80,13 +78,13 @@ void BlockFragments::initFragment(const FlString &name,
     appendFragment(frag);
 }
 
-void BlockFragments::advance(fluint ms)
+void BlockFragments::advance(ctuint ms)
 {
     setRotation(rotation() + 0.5);
 
-    const flreal w = width();
-    const flreal h = height();
-    FlList<Fragment *> frags = fragments();
+    const ctreal w = width();
+    const ctreal h = height();
+    CtList<Fragment *> frags = fragments();
 
     foreach (Fragment *frag, frags) {
         Info *info = static_cast<Info *>(frag->userData());
@@ -108,18 +106,18 @@ void BlockFragments::advance(fluint ms)
 
 
 MainWindow::MainWindow()
-    : FlSceneView("Fragments", 400, 400)
+    : CtSceneView("Fragments", 400, 400)
 {
 
 }
 
 bool MainWindow::init()
 {
-    FlApplication *app = FlApplication::instance();
+    CtApplication *app = CtApplication::instance();
     bool ok = m_texture.loadAtlas(app->applicationDir() + "/blocks.atlas");
 
     if (!ok) {
-        FL_WARNING("Unable to load atlas");
+        CT_WARNING("Unable to load atlas");
         return false;
     }
 
@@ -142,7 +140,7 @@ bool MainWindow::init()
 
 int main(int argc, char *argv[])
 {
-    FlApplication app(argc, argv);
+    CtApplication app(argc, argv);
 
     MainWindow window;
     window.show();

@@ -1,9 +1,9 @@
 HEADERS += \
-           $$PWD/flsoundmixer.h \
-           $$PWD/flsoundsample.h
+           $$PWD/ctsoundmixer.h \
+           $$PWD/ctsoundsample.h
 
 SOURCES += \
-           $$PWD/flsoundmixer.cpp \
-           $$PWD/flsoundsample.cpp \
-           $$PWD/flsoundmixer_sdl.cpp \
-           $$PWD/flsoundsample_sdl.cpp
+           $$PWD/ctsoundmixer.cpp \
+           $$PWD/ctsoundsample.cpp \
+           $$PWD/ctsoundmixer_sdl.cpp \
+           $$PWD/ctsoundsample_sdl.cpp

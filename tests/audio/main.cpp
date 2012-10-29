@@ -1,10 +1,7 @@
 #include <stdlib.h>
-#include <FlApplication>
-#include <FlWindow>
-#include <FlSoundMixer>
-#include <FlSoundSample>
+#include <Cortex2D>
 
-class MainWindow : public FlWindow
+class MainWindow : public CtWindow
 {
 public:
     MainWindow();
@@ -12,29 +9,29 @@ public:
 
 protected:
     bool init();
-    bool event(FlEvent *event);
+    bool event(CtEvent *event);
 
 private:
-    FlSoundSample m_sample1;
-    FlSoundSample m_sample2;
+    CtSoundSample m_sample1;
+    CtSoundSample m_sample2;
 };
 
 
 MainWindow::MainWindow()
-    : FlWindow("Audio", 320, 240)
+    : CtWindow("Audio", 320, 240)
 {
     printf("Press 't' to toggle mixer activation and '1' and '2' to toggle samples.\n");
 }
 
 MainWindow::~MainWindow()
 {
-    FlSoundMixer::instance()->close();
+    CtSoundMixer::instance()->close();
 }
 
 bool MainWindow::init()
 {
-    FlSoundMixer *mixer = FlSoundMixer::instance();
-    FlString dir = FlApplication::instance()->applicationDir();
+    CtSoundMixer *mixer = CtSoundMixer::instance();
+    CtString dir = CtApplication::instance()->applicationDir();
 
     if (!mixer->open())
         fprintf(stderr, "Error: Unable to open sound mixer\n");
@@ -57,14 +54,14 @@ bool MainWindow::init()
     return true;
 }
 
-bool MainWindow::event(FlEvent *event)
+bool MainWindow::event(CtEvent *event)
 {
-    if (event->type() == FlEvent::KeyPress) {
-        FlKeyEvent *ev = static_cast<FlKeyEvent *>(event);
+    if (event->type() == CtEvent::KeyPress) {
+        CtKeyEvent *ev = static_cast<CtKeyEvent *>(event);
 
         switch (ev->key()) {
         case 't': {
-            FlSoundMixer *mixer = FlSoundMixer::instance();
+            CtSoundMixer *mixer = CtSoundMixer::instance();
             if (mixer->isActive()) {
                 mixer->setActive(false);
                 printf("Disabling sound mixer\n");
@@ -99,13 +96,13 @@ bool MainWindow::event(FlEvent *event)
         }
     }
 
-    return FlWindow::event(event);
+    return CtWindow::event(event);
 }
 
 
 int main(int argc, char *argv[])
 {
-    FlApplication app(argc, argv);
+    CtApplication app(argc, argv);
 
     MainWindow window;
     window.show();

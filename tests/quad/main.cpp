@@ -1,10 +1,7 @@
 #include <stdlib.h>
-#include <FlApplication>
-#include <FlWindow>
-#include <FlGL>
-#include <FlShaderProgram>
+#include <Cortex2D>
 
-class MainWindow : public FlWindow
+class MainWindow : public CtWindow
 {
 public:
     MainWindow();
@@ -12,17 +9,17 @@ public:
 protected:
     bool init();
     void paint();
-    bool event(FlEvent *event);
+    bool event(CtEvent *event);
 
 private:
-    FlShaderProgram m_program;
+    CtShaderProgram m_program;
     GLint m_color;
     bool m_highlight;
 };
 
 
 MainWindow::MainWindow()
-    : FlWindow("Quad", 320, 240),
+    : CtWindow("Quad", 320, 240),
       m_highlight(false)
 {
 
@@ -49,9 +46,9 @@ bool MainWindow::init()
     m_program.loadFragmentShader(fShaderStr);
     m_program.link();
 
-    FlGL::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    CtGL::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-    m_color = FlGL::glGetUniformLocation(m_program.id(), "uColor");
+    m_color = CtGL::glGetUniformLocation(m_program.id(), "uColor");
 
     return true;
 }
@@ -60,8 +57,8 @@ void MainWindow::paint()
 {
     m_program.bind();
 
-    FlGL::glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    FlGL::glClear(GL_COLOR_BUFFER_BIT);
+    CtGL::glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    CtGL::glClear(GL_COLOR_BUFFER_BIT);
 
     GLfloat vertices[8];
     GLfloat xMin = (GLfloat)(-0.5);
@@ -78,44 +75,44 @@ void MainWindow::paint()
     vertices[6] = xMax;
     vertices[7] = yMax;
 
-    FlGL::glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-    FlGL::glEnableVertexAttribArray(0);
-    FlGL::glUniform4f(m_color, m_highlight ? 1.0 : 0.0, 0.0, 0.0, 1.0);
+    CtGL::glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+    CtGL::glEnableVertexAttribArray(0);
+    CtGL::glUniform4f(m_color, m_highlight ? 1.0 : 0.0, 0.0, 0.0, 1.0);
 
-    FlGL::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    CtGL::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    if (FlGL::glGetError() != GL_NO_ERROR)
-        FL_WARNING("Failed to render poly");
+    if (CtGL::glGetError() != GL_NO_ERROR)
+        CT_WARNING("Failed to render poly");
 
     m_program.release();
 
     swapBuffers();
 }
 
-bool MainWindow::event(FlEvent *event)
+bool MainWindow::event(CtEvent *event)
 {
     switch (event->type()) {
-    case FlEvent::MousePress: {
+    case CtEvent::MousePress: {
         m_highlight = true;
         break;
     }
-    case FlEvent::MouseMove: {
-        FlMouseEvent *ev = static_cast<FlMouseEvent *>(event);
+    case CtEvent::MouseMove: {
+        CtMouseEvent *ev = static_cast<CtMouseEvent *>(event);
         m_highlight = ev->x() > width() / 2.0;
         break;
     }
-    case FlEvent::MouseRelease: {
+    case CtEvent::MouseRelease: {
         m_highlight = false;
         break;
     }
-    case FlEvent::KeyPress: {
-        FlKeyEvent *ev = static_cast<FlKeyEvent *>(event);
+    case CtEvent::KeyPress: {
+        CtKeyEvent *ev = static_cast<CtKeyEvent *>(event);
         printf("KeyPress %d : autoRepeat: %d\n",
                ev->key(), ev->isAutoRepeat() ? 1 : 0);
         break;
     }
-    case FlEvent::KeyRelease: {
-        FlKeyEvent *ev = static_cast<FlKeyEvent *>(event);
+    case CtEvent::KeyRelease: {
+        CtKeyEvent *ev = static_cast<CtKeyEvent *>(event);
         printf("KeyRelease %d : autoRepeat: %d\n",
                ev->key(), ev->isAutoRepeat() ? 1 : 0);
         break;
@@ -124,13 +121,13 @@ bool MainWindow::event(FlEvent *event)
         break;
     }
 
-    return FlWindow::event(event);
+    return CtWindow::event(event);
 }
 
 
 int main(int argc, char *argv[])
 {
-    FlApplication app(argc, argv);
+    CtApplication app(argc, argv);
 
     MainWindow window;
     window.show();

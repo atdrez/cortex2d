@@ -1,12 +1,7 @@
 #include <stdlib.h>
-#include <FlApplication>
-#include <FlSceneView>
-#include <FlGL>
-#include <FlSceneItem>
-#include <FlSceneRect>
-#include <FlSceneImage>
+#include <Cortex2D>
 
-class MainWindow : public FlSceneView
+class MainWindow : public CtSceneView
 {
 public:
     MainWindow();
@@ -15,28 +10,28 @@ protected:
     bool init();
 
 private:
-    FlTexture m_texture;
+    CtTexture m_texture;
 };
 
-class PulsatingRect : public FlSceneRect
+class PulsatingRect : public CtSceneRect
 {
 public:
-    PulsatingRect(FlSceneItem *parent = 0)
-        : FlSceneRect(parent), m_pressed(false) {}
+    PulsatingRect(CtSceneItem *parent = 0)
+        : CtSceneRect(parent), m_pressed(false) {}
 
 protected:
-    void advance(fluint phase);
-    void mousePressEvent(FlMouseEvent *) { m_pressed = true; }
-    void mouseReleaseEvent(FlMouseEvent *) { m_pressed = false; }
+    void advance(ctuint phase);
+    void mousePressEvent(CtMouseEvent *) { m_pressed = true; }
+    void mouseReleaseEvent(CtMouseEvent *) { m_pressed = false; }
 
 private:
     bool m_pressed;
 };
 
-void PulsatingRect::advance(fluint ms)
+void PulsatingRect::advance(ctuint ms)
 {
-    flreal step = 0.02;
-    flreal value = (r() + step > 1.0f) ? 0.0f : (r() + step);
+    ctreal step = 0.02;
+    ctreal value = (r() + step > 1.0f) ? 0.0f : (r() + step);
 
     if (m_pressed)
         setColor(value, 0, 0);
@@ -46,18 +41,18 @@ void PulsatingRect::advance(fluint ms)
 
 
 MainWindow::MainWindow()
-    : FlSceneView("Items", 500, 400)
+    : CtSceneView("Items", 500, 400)
 {
 
 }
 
 bool MainWindow::init()
 {
-    FlApplication *app = FlApplication::instance();
+    CtApplication *app = CtApplication::instance();
     m_texture.loadTGA(app->applicationDir() + "/flag.tga");
 
     // create root item
-    FlSceneImage *root = new FlSceneImage(&m_texture, 0);
+    CtSceneImage *root = new CtSceneImage(&m_texture, 0);
     root->setX(50);
     root->setY(90);
     root->setRotation(10);
@@ -65,7 +60,7 @@ bool MainWindow::init()
                              root->height() / 2);
 
     // child of root
-    FlSceneImage *item1 = new FlSceneImage(&m_texture, root);
+    CtSceneImage *item1 = new CtSceneImage(&m_texture, root);
     item1->setX(20);
     item1->setY(20);
     item1->setZ(2); // should be in front of rect1
@@ -74,7 +69,7 @@ bool MainWindow::init()
     item1->setOpacity(0.7);
 
     // child of item1
-    FlSceneImage *item2 = new FlSceneImage(&m_texture, item1);
+    CtSceneImage *item2 = new CtSceneImage(&m_texture, item1);
     item2->setX(14);
     item2->setY(14);
     item2->scale(0.8, 0.8);
@@ -95,7 +90,7 @@ bool MainWindow::init()
 
 int main(int argc, char *argv[])
 {
-    FlApplication app(argc, argv);
+    CtApplication app(argc, argv);
 
     MainWindow window;
     window.show();
