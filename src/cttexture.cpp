@@ -62,10 +62,34 @@ void CtTexture::release()
     }
 }
 
-bool CtTexture::loadTGA(const CtString &fileName)
+bool CtTexture::reset(int w, int h, bool alpha, const GLvoid *data)
 {
     release();
 
+    CtGL::glGenTextures(1, &m_textureId);
+    CT_CHECK_GL_ERROR(return false);
+
+    m_width = w;
+    m_height = h;
+    m_format = alpha ? GL_RGBA : GL_RGB;
+
+    CtGL::glBindTexture(GL_TEXTURE_2D, m_textureId);
+    CT_CHECK_GL_ERROR(return false);
+
+    CtGL::glTexImage2D(GL_TEXTURE_2D, 0, m_format, m_width,
+                       m_height, 0, m_format, GL_UNSIGNED_BYTE, data);
+
+    CT_CHECK_GL_ERROR(return false);
+
+    CtGL::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    CtGL::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    m_inverted = true;
+    return true;
+}
+
+bool CtTexture::loadTGA(const CtString &fileName)
+{
     CtTGATexture texture;
 
     if (!texture.loadFromFile((char *)fileName.c_str())) {
@@ -73,62 +97,24 @@ bool CtTexture::loadTGA(const CtString &fileName)
         return false;
     }
 
-    CtGL::glGenTextures(1, &m_textureId);
-    CT_CHECK_GL_ERROR(return false);
-
-    m_width = texture.width;
-    m_height = texture.height;
-    m_format = (texture.bitsPerPixel == 24) ? GL_RGB : GL_RGBA;
-
-    CtGL::glBindTexture(GL_TEXTURE_2D, m_textureId);
-    CT_CHECK_GL_ERROR(return false);
-
-    CtGL::glTexImage2D(GL_TEXTURE_2D, 0, m_format, m_width,
-                       m_height, 0, m_format, GL_UNSIGNED_BYTE, texture.buffer);
-    CT_CHECK_GL_ERROR(return false);
-
-    CtGL::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    CtGL::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    m_inverted = true;
-    return true;
+    return reset(texture.width, texture.height,
+                 texture.bitsPerPixel == 32, texture.buffer);
 }
 
 bool CtTexture::loadPVR(const CtString &fileName)
 {
-    release();
-
     CtPVRTexture texture;
     if (!texture.loadFromFile((char *)fileName.c_str())) {
         m_error = texture.errorMessage;
         return false;
     }
 
-    CtGL::glGenTextures(1, &m_textureId);
-    CT_CHECK_GL_ERROR(return false);
-
-    CtGL::glBindTexture(GL_TEXTURE_2D, m_textureId);
-    CT_CHECK_GL_ERROR(return false);
-
-    m_width = texture.width;
-    m_height = texture.height;
-    m_format = (texture.bitsPerPixel == 24) ? GL_RGB : GL_RGBA;
-
-    CtGL::glCompressedTexImage2D(GL_TEXTURE_2D, 0, texture.internalFormat,
-                                 m_width, m_height, 0, texture.bufferSize, texture.buffer);
-    CT_CHECK_GL_ERROR(return false);
-
-    CtGL::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    CtGL::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    m_inverted = true;
-    return true;
+    return reset(texture.width, texture.height,
+                 texture.bitsPerPixel == 32, texture.buffer);
 }
 
 bool CtTexture::loadDDS(const CtString &fileName)
 {
-    release();
-
     CtDDSTexture texture;
     if (!texture.loadFromFile((char *)fileName.c_str())) {
         m_error = texture.errorMessage;
@@ -136,25 +122,8 @@ bool CtTexture::loadDDS(const CtString &fileName)
         return false;
     }
 
-    CtGL::glGenTextures(1, &m_textureId);
-    CT_CHECK_GL_ERROR(return false);
-
-    CtGL::glBindTexture(GL_TEXTURE_2D, m_textureId);
-    CT_CHECK_GL_ERROR(return false);
-
-    m_width = texture.width;
-    m_height = texture.height;
-    m_format = (texture.bitsPerPixel == 24) ? GL_RGB : GL_RGBA;
-
-    CtGL::glCompressedTexImage2D(GL_TEXTURE_2D, 0, texture.internalFormat,
-                                 m_width, m_height, 0, texture.bufferSize, texture.buffer);
-    CT_CHECK_GL_ERROR(return false);
-
-    CtGL::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    CtGL::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    m_inverted = false;
-    return true;
+    return reset(texture.width, texture.height,
+                 texture.bitsPerPixel == 32, texture.buffer);
 }
 
 CtAtlasTexture::CtAtlasTexture()

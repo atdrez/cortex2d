@@ -26,6 +26,8 @@ public:
     CtString error() const { return m_error; }
     bool isValid() const { return m_textureId != 0; }
 
+    bool reset(int w, int h, bool alpha = true, const GLvoid *data = 0);
+
     void release();
     bool loadTGA(const CtString &fileName);
     bool loadPVR(const CtString &fileName);
