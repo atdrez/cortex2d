@@ -145,11 +145,19 @@ CT_GL_FPTR(const GLubyte *, glGetString, (GLenum  name))
 CT_GL_FPTR(void, glCompressedTexImage2D, (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize,  const GLvoid *data))
 CT_GL_FPTR(void, glDrawElements, (GLenum mode, GLsizei count, GLenum type, const GLvoid * indices))
 
+CT_GL_FPTR(void, glRenderbufferStorage, (GLenum target, GLenum internalformat, GLsizei width, GLsizei height))
+CT_GL_FPTR(void, glGenFramebuffers, (GLsizei n, GLuint *ids))
+CT_GL_FPTR(void, glGenRenderbuffers, (GLsizei n, GLuint *renderbuffers))
+CT_GL_FPTR(void, glFramebufferRenderbuffer, (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer))
+CT_GL_FPTR(void, glBindFramebuffer, (GLenum target, GLuint framebuffer))
+CT_GL_FPTR(void, glBindRenderbuffer, (GLenum target, GLuint renderbuffer))
+CT_GL_FPTR(GLenum, glCheckFramebufferStatus, (GLenum target))
+
 #undef CT_GL_FPTR
 
 void CtGL::assignFunctions(Func_GetProcAddress f)
 {
-// We don't need to change this pointers for Android
+// We don't need to change these pointers for Android
 #ifndef CT_ANDROID
 
     if (!f)
@@ -202,6 +210,13 @@ void CtGL::assignFunctions(Func_GetProcAddress f)
     CT_GL_FASSIGN(glGetString);
     CT_GL_FASSIGN(glCompressedTexImage2D);
     CT_GL_FASSIGN(glDrawElements);
+    CT_GL_FASSIGN(glRenderbufferStorage);
+    CT_GL_FASSIGN(glGenFramebuffers);
+    CT_GL_FASSIGN(glGenRenderbuffers);
+    CT_GL_FASSIGN(glFramebufferRenderbuffer);
+    CT_GL_FASSIGN(glBindFramebuffer);
+    CT_GL_FASSIGN(glBindRenderbuffer);
+    CT_GL_FASSIGN(glCheckFramebufferStatus);
 
 #   undef CT_GL_FASSIGN
 
@@ -430,4 +445,39 @@ void CtGL::glCompressedTexImage2D(GLenum target,  GLint level, GLenum internalfo
 void CtGL::glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid * indices)
 {
     return ct_glDrawElements(mode, count, type, indices);
+}
+
+void CtGL::glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width, GLsizei height)
+{
+    return ct_glRenderbufferStorage(target, internalformat, width, height);
+}
+
+void CtGL::glGenFramebuffers(GLsizei n, GLuint *ids)
+{
+    return ct_glGenFramebuffers(n, ids);
+}
+
+void CtGL::glGenRenderbuffers(GLsizei n, GLuint *renderbuffers)
+{
+    return ct_glGenRenderbuffers(n, renderbuffers);
+}
+
+void CtGL::glFramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer)
+{
+    return ct_glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer);
+}
+
+void CtGL::glBindFramebuffer(GLenum target, GLuint framebuffer)
+{
+    return ct_glBindFramebuffer(target, framebuffer);
+}
+
+void CtGL::glBindRenderbuffer(GLenum target, GLuint renderbuffer)
+{
+    return ct_glBindRenderbuffer(target, renderbuffer);
+}
+
+GLenum CtGL::glCheckFramebufferStatus(GLenum target)
+{
+    return ct_glCheckFramebufferStatus(target);
 }

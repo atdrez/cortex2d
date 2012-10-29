@@ -72,6 +72,14 @@ public:
     static void assignFunctions(Func_GetProcAddress func);
 
     static void resetGlError();
+
+    static void glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
+    static void glGenFramebuffers(GLsizei n, GLuint *ids);
+    static void glGenRenderbuffers(GLsizei n, GLuint *renderbuffers);
+    static void glFramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
+    static void glBindFramebuffer(GLenum target, GLuint framebuffer);
+    static void glBindRenderbuffer(GLenum target, GLuint renderbuffer);
+    static GLenum glCheckFramebufferStatus(GLenum target);
 };
 
 #endif
