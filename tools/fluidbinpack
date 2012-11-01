@@ -29,9 +29,7 @@ def parseStringValue(value):
         return value[1:-1]
 
 
-def packLine(line):
-    f, value = line.split(":", 1)
-
+def packLine(f, value):
     fLen = None
 
     m = re.search("([a-z0-9]+)\[(\d+)\]", f)
@@ -48,8 +46,6 @@ def packLine(line):
 
     if fLen and fmt != "c":
         return None
-
-    print fmt, value
 
     if fmt == "s":
         value = parseStringValue(value)
@@ -74,6 +70,78 @@ def packLine(line):
     else:
         return struct.pack("<%s" % (fmt, ), int(value))
 
+
+def parseLines(lines, isDef):
+    if isDef:
+        result = {}
+        fields = []
+        headRE = re.compile("^def[ \t]+([a-zA-Z0-9]+)[ \t]*\:")
+        fieldRE = re.compile("[ \t]+([a-zA-Z0-9\[\]]+)[ \t]+"
+                             "([a-zA-Z0-9]+)[ \t]*\:[ \t]*([\.\-\"_a-zA-Z0-9]+)")
+    else:
+        result = []
+        fields = {}
+        headRE = re.compile("^([a-zA-Z0-9]+)[ \t]*\:")
+        fieldRE = re.compile("[ \t]+([a-zA-Z0-9]+)[ \t]*\:[ \t]*([\.\-\"_a-zA-Z0-9]+)")
+
+    group = None
+    ignoreBlock = False
+
+    def addBlock(n, f):
+        if n:
+            if isDef:
+                result[n] = f
+            else:
+                result.append((n, f))
+
+    for line in lines:
+        sline = line.strip()
+
+        # skip comments and blank lines
+        if not sline or sline[0] == '#':
+            addBlock(group, fields)
+            group = None
+            ignoreBlock = False
+
+            if isDef:
+                fields = []
+            else:
+                fields = {}
+
+            continue
+
+        if ignoreBlock:
+            continue
+
+        if line[0] in (' ', '\t'):
+            if not group:
+                return None
+
+            p = fieldRE.search(line)
+
+            if not p:
+                return None
+
+            v = p.groups()
+
+            if not isDef:
+                fields[v[0]] = v[1]
+            else:
+                fields.append(v)
+        else:
+            p = headRE.search(line)
+
+            if p:
+                group = p.group(1)
+                ignoreBlock = False
+            else:
+                ignoreBlock = True
+
+    addBlock(group, fields)
+
+    return result
+
+
 def packText(fileList):
     for fileName in fileList:
         inFile = open(fileName, "r")
@@ -89,22 +157,35 @@ def packText(fileList):
             fp.close()
             continue
 
-        for line in inFile:
-            line = line.strip()
+        lines = inFile.readlines()
+        defs = parseLines(lines, True)
+        imps = parseLines(lines, False)
 
-            # skip comments and blank lines
-            if not line or line[0] == '#':
-                continue
+        if defs is None or imps is None:
+            print "Error: invalid format in file '%s'" % (fileName, )
+            break
 
-            # parse line
-            entry = packLine(line)
+        for name, fields in imps:
+            print "\n[%s]" % (name,)
 
-            if not entry:
-                print "Error: invalid line format in file '%s'", (fileName, )
-                break
+            regs = defs[name]
+            for fmt, fid, defaultValue in regs:
+                if fid in fields:
+                    value = fields[fid]
+                else:
+                    value = defaultValue
 
-            if entry:
-                outFile.write(entry)
+                print "  %-10s %-18s : %s" % (fmt, fid, value)
+
+                # pack line
+                entry = packLine(fmt, value)
+
+                if not entry:
+                    print "Error: invalid line format in file '%s'" % (fileName, )
+                    break
+
+                if entry:
+                    outFile.write(entry)
 
         inFile.close()
         outFile.close()
