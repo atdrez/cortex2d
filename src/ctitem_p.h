@@ -42,6 +42,7 @@ struct CtSceneItemPrivate
     ctreal yCenter;
     bool transformDirty;
     int flags;
+    bool pendingDelete;
     CtMatrix localTransformMatrix;
     CtMatrix sceneTransformMatrix;
     CtList<CtSceneItem *> children;

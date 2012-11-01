@@ -37,7 +37,8 @@ CtSceneItemPrivate::CtSceneItemPrivate(CtSceneItem *q)
       xCenter(0),
       yCenter(0),
       transformDirty(true),
-      flags(CtSceneItem::NoFlag)
+      flags(CtSceneItem::NoFlag),
+      pendingDelete(false)
 {
 
 }
@@ -337,6 +338,12 @@ void CtSceneItem::setFlag(Flag flag, bool enabled)
         if ((d->flags & flag))
             d->flags ^= flag;
     }
+}
+
+void CtSceneItem::deleteLater()
+{
+    CT_D(CtSceneItem);
+    d->pendingDelete = true;
 }
 
 ctreal CtSceneItem::width() const

@@ -103,6 +103,8 @@ public:
     bool isVisible() const;
     void setVisible(bool visible);
 
+    void deleteLater();
+
     virtual CtRectReal boundingRect() const;
 
     bool collidesWith(CtSceneItem *item) const;

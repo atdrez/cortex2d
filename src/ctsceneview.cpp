@@ -422,6 +422,11 @@ void CtSceneView::advance(ctuint ms)
 
     foreach (CtSceneItem *item, data->sortedItems)
         item->advance(ms);
+
+    foreach (CtSceneItem *item, data->sortedItems) {
+        if (item->d_ptr->pendingDelete)
+            delete item;
+    }
 }
 
 void CtSceneView::paint()
