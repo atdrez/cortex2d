@@ -20,6 +20,9 @@ struct CtSceneItemPrivate
     void removeItem(CtSceneItem *item);
     void setScene(CtSceneView *newScene);
 
+    bool relativeVisible();
+    ctreal relativeOpacity();
+
     void checkTransformMatrix();
     CtMatrix currentLocalTransformMatrix();
     CtMatrix currentSceneTransformMatrix();

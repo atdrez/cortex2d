@@ -62,6 +62,24 @@ void CtSceneItemPrivate::release()
         delete item;
 }
 
+ctreal CtSceneItemPrivate::relativeOpacity()
+{
+    // XXX: optimize
+    if (!parent || opacity == 0.0)
+        return opacity;
+    else
+        return opacity * parent->opacity();
+}
+
+bool CtSceneItemPrivate::relativeVisible()
+{
+    // XXX: optimize
+    if (!parent)
+        return visible;
+    else
+        return visible && parent->isVisible();
+}
+
 void CtSceneItemPrivate::addItem(CtSceneItem *item)
 {
     children.remove(item);
@@ -307,7 +325,7 @@ void CtSceneItem::scale(ctreal xScale, ctreal yScale)
 ctreal CtSceneItem::opacity() const
 {
     CT_D(CtSceneItem);
-    return d->opacity;
+    return d->relativeOpacity();
 }
 
 void CtSceneItem::setOpacity(ctreal opacity)
@@ -403,7 +421,7 @@ void CtSceneItem::advance(ctuint ms)
 bool CtSceneItem::isVisible() const
 {
     CT_D(CtSceneItem);
-    return d->visible;
+    return d->relativeVisible();
 }
 
 void CtSceneItem::setVisible(bool visible)
@@ -685,7 +703,7 @@ void CtSceneRectPrivate::draw()
         return;
 
     CtMatrix matrix = currentViewProjectionMatrix();
-    shaderEffect->drawSolid(matrix, width, height, r, g, b, 1.0, opacity);
+    shaderEffect->drawSolid(matrix, width, height, r, g, b, 1.0, relativeOpacity());
 }
 
 
@@ -796,7 +814,7 @@ void CtSceneImagePrivate::draw()
     bool vTile = (fillMode == CtSceneImage::Tile || fillMode == CtSceneImage::TileVertically);
     bool hTile = (fillMode == CtSceneImage::Tile || fillMode == CtSceneImage::TileHorizontally);
 
-    shaderEffect->drawTexture(matrix, texture, width, height, opacity, vTile, hTile, textureAtlasIndex);
+    shaderEffect->drawTexture(matrix, texture, width, height, relativeOpacity(), vTile, hTile, textureAtlasIndex);
 }
 
 
@@ -971,7 +989,7 @@ void CtSceneFragmentsPrivate::draw()
         elements.push_back(e);
     }
 
-    shaderEffect->drawElements(matrix, texture, opacity, vTile, hTile, elements);
+    shaderEffect->drawElements(matrix, texture, relativeOpacity(), vTile, hTile, elements);
 }
 
 
