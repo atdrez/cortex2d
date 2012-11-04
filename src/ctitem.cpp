@@ -118,10 +118,15 @@ void CtSceneItemPrivate::checkTransformMatrix()
         return;
 
     CtMatrix modelMatrix;
-    ctreal ox = xCenter;
-    ctreal oy = yCenter;
 
-    modelMatrix.translate(x, y, 0);
+    ctreal ox = ctRound(xCenter);
+    ctreal oy = ctRound(yCenter);
+
+    // pixel aligned
+    ctreal rx = ctRound(x);
+    ctreal ry = ctRound(y);
+
+    modelMatrix.translate(rx, ry, 0);
 
     modelMatrix.translate(ox, oy, 0);
     modelMatrix.scale(xScale, yScale, 1);
