@@ -21,6 +21,8 @@ bool CtWindowSdlPrivate::init(const char *title, int width, int height)
 {
 #ifdef CT_ANDROID
     int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN;
+#elif CT_IPHONE
+    int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS;
 #else
     int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 #endif
