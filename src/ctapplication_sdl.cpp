@@ -131,7 +131,16 @@ void CtApplicationSdlPrivate::processEvent(const SDL_Event &event)
             else if (event.button.button == 3)
                 button = Ct::ButtonRight;
 
-            CtPointReal pos(event.button.x, event.button.y);
+            ctreal fx = event.button.x;
+            ctreal fy = event.button.y;
+
+            // XXX: ugly hack to workaround a SDL bug
+#ifdef CT_RETINA_DISPLAY
+            fx *= 2;
+            fy *= 2;
+#endif
+
+            CtPointReal pos(fx, fy);
 
             if (!isUp) {
                 mouseButton = button;
@@ -170,9 +179,15 @@ void CtApplicationSdlPrivate::processEvent(const SDL_Event &event)
                 if (!finger)
                     continue;
 
-                const ctreal fx = (w->width * finger->x) / ctreal(touch->xres);
-                const ctreal fy = (w->height * finger->y) / ctreal(touch->yres);
+                ctreal fx = (w->width * finger->x) / ctreal(touch->xres);
+                ctreal fy = (w->height * finger->y) / ctreal(touch->yres);
                 CtPointReal firstPress = m_touchPoints.value(finger->id, CtPointReal());
+
+                // XXX: ugly hack to workaround a SDL bug
+#ifdef CT_RETINA_DISPLAY
+                fx *= 2;
+                fy *= 2;
+#endif
 
                 if (!firstPress.isValid()) {
                     firstPress = CtPointReal(fx, fy);

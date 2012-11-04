@@ -12,6 +12,7 @@
 // XXX: adjust mesa
 //#define CT_ANDROID
 //#define CT_OPENGL_ES2
+//#define CT_RETINA_DISPLAY
 
 #define CT_SIMULATE_TOUCH
 
