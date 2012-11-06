@@ -23,6 +23,7 @@ struct CtWindowPrivate
     int width;
     int height;
     void *userData;
+    bool minimized;
 };
 
 #endif

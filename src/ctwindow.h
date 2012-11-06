@@ -22,6 +22,8 @@ public:
     int width() const;
     int height() const;
 
+    bool isMinimized() const;
+
     void show();
 
 protected:
@@ -35,6 +37,8 @@ protected:
     virtual bool event(CtEvent *event);
     virtual void closeEvent(CtWindowCloseEvent *event);
     virtual void resizeEvent(CtWindowResizeEvent *event);
+    virtual void restoreEvent(CtWindowRestoreEvent *event);
+    virtual void minimizeEvent(CtWindowMinimizeEvent *event);
 
     void swapBuffers();
 

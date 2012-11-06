@@ -264,6 +264,22 @@ void CtApplicationSdlPrivate::processEvent(const SDL_Event &event)
             }
             break;
         }
+        case SDL_WINDOWEVENT_MINIMIZED: {
+            CtWindowSdlPrivate *w = findWindowById(event.window.windowID);
+            if (w) {
+                CtWindowMinimizeEvent ev;
+                postEvent(w, &ev);
+            }
+            break;
+        }
+        case SDL_WINDOWEVENT_RESTORED: {
+            CtWindowSdlPrivate *w = findWindowById(event.window.windowID);
+            if (w) {
+                CtWindowRestoreEvent ev;
+                postEvent(w, &ev);
+            }
+            break;
+        }
         }
         break;
     default:

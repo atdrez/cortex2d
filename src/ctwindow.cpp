@@ -18,7 +18,10 @@
 
 CtWindowPrivate::CtWindowPrivate(CtWindow *q)
     : q_ptr(q),
-      userData(0)
+      width(0),
+      height(0),
+      userData(0),
+      minimized(false)
 {
 
 }
@@ -82,6 +85,12 @@ void CtWindow::show()
     init();
 }
 
+bool CtWindow::isMinimized() const
+{
+    CT_D(CtWindow);
+    return d->minimized;
+}
+
 bool CtWindow::init()
 {
     return true;
@@ -111,6 +120,14 @@ bool CtWindow::event(CtEvent *event)
         if (event->isAccepted())
             d->release();
         break;
+    case CtEvent::WindowRestore:
+        d->minimized = false;
+        restoreEvent(static_cast<CtWindowRestoreEvent *>(event));
+        break;
+    case CtEvent::WindowMinimize:
+        d->minimized = true;
+        minimizeEvent(static_cast<CtWindowMinimizeEvent *>(event));
+        break;
     default:
         break;
     }
@@ -130,6 +147,16 @@ void CtWindow::resizeEvent(CtWindowResizeEvent *event)
 
     d->updateViewPort();
     d->render();
+}
+
+void CtWindow::restoreEvent(CtWindowRestoreEvent *event)
+{
+    CT_UNUSED(event);
+}
+
+void CtWindow::minimizeEvent(CtWindowMinimizeEvent *event)
+{
+    CT_UNUSED(event);
 }
 
 void CtWindow::paint()

@@ -432,6 +432,10 @@ void CtSceneView::advance(ctuint ms)
 void CtSceneView::paint()
 {
     CT_D(CtWindow);
+
+    if (isMinimized())
+        return;
+
     CtSceneViewData *data = static_cast<CtSceneViewData *>(d->userData);
 
     CtGL::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

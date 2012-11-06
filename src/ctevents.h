@@ -25,7 +25,9 @@ public:
         DragLeave,
         Drop,
         DragCursorDrop,
-        DragCursorCancel
+        DragCursorCancel,
+        WindowMinimize,
+        WindowRestore
     };
 
     CtEvent(Type type);
@@ -38,6 +40,22 @@ public:
 private:
     Type m_type;
     bool m_accepted;
+};
+
+
+class CtWindowMinimizeEvent : public CtEvent
+{
+public:
+    CtWindowMinimizeEvent()
+        : CtEvent(WindowMinimize) {}
+};
+
+
+class CtWindowRestoreEvent : public CtEvent
+{
+public:
+    CtWindowRestoreEvent()
+        : CtEvent(WindowRestore) {}
 };
 
 
