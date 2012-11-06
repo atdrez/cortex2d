@@ -29,6 +29,18 @@ inline T ctRound(T a)
     return floor(a + 0.5);
 }
 
+template<typename T>
+inline T ctCeil(T a)
+{
+    return ceil(a);
+}
+
+template<typename T>
+inline T ctFloor(T a)
+{
+    return floor(a);
+}
+
 #define ctSqrt(a) sqrt(a)
 
 #endif
