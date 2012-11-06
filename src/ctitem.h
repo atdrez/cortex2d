@@ -15,6 +15,7 @@ class CtSceneViewData;
 class CtSceneItemPrivate;
 class CtShaderEffect;
 class CtSceneImagePrivate;
+class CtSceneTextureItemPrivate;
 
 class CtSceneItem
 {
@@ -160,21 +161,11 @@ protected:
     void paint();
 };
 
-class CtSceneImage : public CtSceneItem
+class CtSceneTextureItem : public CtSceneItem
 {
 public:
-    enum FillMode {
-        Stretch,
-        Tile,
-        TileVertically,
-        TileHorizontally
-    };
-
-    CtSceneImage(CtSceneItem *parent = 0);
-    CtSceneImage(CtTexture *texture, CtSceneItem *parent = 0);
-
-    FillMode fillMode() const;
-    void setFillMode(FillMode mode);
+    CtSceneTextureItem(CtSceneItem *parent = 0);
+    CtSceneTextureItem(CtTexture *texture, CtSceneItem *parent = 0);
 
     CtTexture *texture() const;
     void setTexture(CtTexture *texture);
@@ -190,13 +181,34 @@ public:
     void setShaderEffect(CtShaderEffect *effect);
 
 protected:
+    CtSceneTextureItem(CtSceneTextureItemPrivate *dd);
+};
+
+
+class CtSceneImage : public CtSceneTextureItem
+{
+public:
+    enum FillMode {
+        Stretch,
+        Tile,
+        TileVertically,
+        TileHorizontally
+    };
+
+    CtSceneImage(CtSceneItem *parent = 0);
+    CtSceneImage(CtTexture *texture, CtSceneItem *parent = 0);
+
+    FillMode fillMode() const;
+    void setFillMode(FillMode mode);
+
+protected:
     CtSceneImage(CtSceneImagePrivate *dd);
 
     void paint();
 };
 
 
-class CtSceneFragments : public CtSceneImage
+class CtSceneFragments : public CtSceneTextureItem
 {
 public:
     class Fragment {

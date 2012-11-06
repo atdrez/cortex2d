@@ -12,6 +12,7 @@
 struct CtSceneItemPrivate
 {
     CtSceneItemPrivate(CtSceneItem *q);
+    virtual ~CtSceneItemPrivate();
 
     virtual void init(CtSceneItem *parent);
     virtual void release();
@@ -66,28 +67,34 @@ struct CtSceneRectPrivate : public CtSceneItemPrivate
     CtShaderEffect *shaderEffect;
 };
 
-
-struct CtSceneImagePrivate : public CtSceneItemPrivate
+struct CtSceneTextureItemPrivate : public CtSceneItemPrivate
 {
-    CtSceneImagePrivate(CtSceneImage *q);
+    CtSceneTextureItemPrivate(CtSceneTextureItem *q);
 
     void init(CtSceneItem *parent);
     void release();
-    virtual void draw();
 
     int textureAtlasIndex;
     bool ownTexture;
     CtTexture *texture;
     CtShaderEffect *shaderEffect;
+};
+
+struct CtSceneImagePrivate : public CtSceneTextureItemPrivate
+{
+    CtSceneImagePrivate(CtSceneImage *q);
+
+    void draw();
+
     CtSceneImage::FillMode fillMode;
 };
 
-struct CtSceneFragmentsPrivate : public CtSceneImagePrivate
+struct CtSceneFragmentsPrivate : public CtSceneTextureItemPrivate
 {
-    CtSceneFragmentsPrivate(CtSceneImage *q);
+    CtSceneFragmentsPrivate(CtSceneFragments *q);
 
-    void release();
     void draw();
+    void release();
 
     CtList<CtSceneFragments::Fragment *> fragments;
 };

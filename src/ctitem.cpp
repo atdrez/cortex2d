@@ -43,6 +43,11 @@ CtSceneItemPrivate::CtSceneItemPrivate(CtSceneItem *q)
 
 }
 
+CtSceneItemPrivate::~CtSceneItemPrivate()
+{
+
+}
+
 void CtSceneItemPrivate::init(CtSceneItem *p)
 {
     parent = p;
@@ -774,21 +779,20 @@ void CtSceneRect::setShaderEffect(CtShaderEffect *effect)
 }
 
 /////////////////////////////////////////////////
-// CtSceneImage
+// CtSceneTextureItem
 /////////////////////////////////////////////////
 
-CtSceneImagePrivate::CtSceneImagePrivate(CtSceneImage *q)
+CtSceneTextureItemPrivate::CtSceneTextureItemPrivate(CtSceneTextureItem *q)
     : CtSceneItemPrivate(q),
       textureAtlasIndex(-1),
       ownTexture(false),
       texture(0),
-      shaderEffect(0),
-      fillMode(CtSceneImage::Stretch)
+      shaderEffect(0)
 {
 
 }
 
-void CtSceneImagePrivate::init(CtSceneItem *parent)
+void CtSceneTextureItemPrivate::init(CtSceneItem *parent)
 {
     CtSceneItemPrivate::init(parent);
 
@@ -800,7 +804,7 @@ void CtSceneImagePrivate::init(CtSceneItem *parent)
     shaderEffect = ct_sharedTextureShaderEffect();
 }
 
-void CtSceneImagePrivate::release()
+void CtSceneTextureItemPrivate::release()
 {
     if (texture && ownTexture) {
         delete texture;
@@ -810,67 +814,37 @@ void CtSceneImagePrivate::release()
     CtSceneItemPrivate::release();
 }
 
-void CtSceneImagePrivate::draw()
+
+CtSceneTextureItem::CtSceneTextureItem(CtSceneItem *parent)
+    : CtSceneItem(new CtSceneTextureItemPrivate(this))
 {
-    if (!shaderEffect || !shaderEffect->init())
-        return;
-
-    CtMatrix matrix = currentViewProjectionMatrix();
-    bool vTile = (fillMode == CtSceneImage::Tile || fillMode == CtSceneImage::TileVertically);
-    bool hTile = (fillMode == CtSceneImage::Tile || fillMode == CtSceneImage::TileHorizontally);
-
-    shaderEffect->drawTexture(matrix, texture, width, height, relativeOpacity(), vTile, hTile, textureAtlasIndex);
-}
-
-
-CtSceneImage::CtSceneImage(CtSceneItem *parent)
-    : CtSceneItem(new CtSceneImagePrivate(this))
-{
-    CT_D(CtSceneImage);
+    CT_D(CtSceneTextureItem);
     d->init(parent);
 }
 
-CtSceneImage::CtSceneImage(CtTexture *texture, CtSceneItem *parent)
-    : CtSceneItem(new CtSceneImagePrivate(this))
+CtSceneTextureItem::CtSceneTextureItem(CtTexture *texture, CtSceneItem *parent)
+    : CtSceneItem(new CtSceneTextureItemPrivate(this))
 {
-    CT_D(CtSceneImage);
+    CT_D(CtSceneTextureItem);
     d->texture = texture;
     d->init(parent);
 }
 
-CtSceneImage::CtSceneImage(CtSceneImagePrivate *dd)
+CtSceneTextureItem::CtSceneTextureItem(CtSceneTextureItemPrivate *dd)
     : CtSceneItem(dd)
 {
 
 }
 
-void CtSceneImage::paint()
+CtTexture *CtSceneTextureItem::texture() const
 {
-    CT_D(CtSceneImage);
-    d->draw();
-}
-
-CtSceneImage::FillMode CtSceneImage::fillMode() const
-{
-    CT_D(CtSceneImage);
-    return d->fillMode;
-}
-
-void CtSceneImage::setFillMode(FillMode mode)
-{
-    CT_D(CtSceneImage);
-    d->fillMode = mode;
-}
-
-CtTexture *CtSceneImage::texture() const
-{
-    CT_D(CtSceneImage);
+    CT_D(CtSceneTextureItem);
     return d->texture;
 }
 
-void CtSceneImage::setTexture(CtTexture *texture)
+void CtSceneTextureItem::setTexture(CtTexture *texture)
 {
-    CT_D(CtSceneImage);
+    CT_D(CtSceneTextureItem);
     if (d->texture == texture)
         return;
 
@@ -883,31 +857,31 @@ void CtSceneImage::setTexture(CtTexture *texture)
     d->texture = texture;
 }
 
-int CtSceneImage::textureAtlasIndex() const
+int CtSceneTextureItem::textureAtlasIndex() const
 {
-    CT_D(CtSceneImage);
+    CT_D(CtSceneTextureItem);
     return d->textureAtlasIndex;
 }
 
-void CtSceneImage::setTextureAtlasIndex(int index)
+void CtSceneTextureItem::setTextureAtlasIndex(int index)
 {
-    CT_D(CtSceneImage);
+    CT_D(CtSceneTextureItem);
     d->textureAtlasIndex = index;
 }
 
-CtShaderEffect *CtSceneImage::shaderEffect() const
+CtShaderEffect *CtSceneTextureItem::shaderEffect() const
 {
-    CT_D(CtSceneImage);
+    CT_D(CtSceneTextureItem);
     return d->shaderEffect;
 }
 
-void CtSceneImage::setShaderEffect(CtShaderEffect *effect)
+void CtSceneTextureItem::setShaderEffect(CtShaderEffect *effect)
 {
-    CT_D(CtSceneImage);
+    CT_D(CtSceneTextureItem);
     d->shaderEffect = effect;
 }
 
-bool CtSceneImage::load(const CtString &filePath)
+bool CtSceneTextureItem::load(const CtString &filePath)
 {
     int pos = filePath.rfind(".");
     CtString ext = pos >= 0 ? filePath.substr(pos) : "";
@@ -922,9 +896,9 @@ bool CtSceneImage::load(const CtString &filePath)
     return false;
 }
 
-bool CtSceneImage::load(const CtString &filePath, Ct::TextureFileType type)
+bool CtSceneTextureItem::load(const CtString &filePath, Ct::TextureFileType type)
 {
-    CT_D(CtSceneImage);
+    CT_D(CtSceneTextureItem);
 
     if (!d->ownTexture) {
         d->texture = new CtTexture();
@@ -954,20 +928,82 @@ bool CtSceneImage::load(const CtString &filePath, Ct::TextureFileType type)
     return true;
 }
 
+/////////////////////////////////////////////////
+// CtSceneImage
+/////////////////////////////////////////////////
+
+CtSceneImagePrivate::CtSceneImagePrivate(CtSceneImage *q)
+    : CtSceneTextureItemPrivate(q),
+      fillMode(CtSceneImage::Stretch)
+{
+
+}
+
+void CtSceneImagePrivate::draw()
+{
+    if (!shaderEffect || !shaderEffect->init())
+        return;
+
+    CtMatrix matrix = currentViewProjectionMatrix();
+    bool vTile = (fillMode == CtSceneImage::Tile || fillMode == CtSceneImage::TileVertically);
+    bool hTile = (fillMode == CtSceneImage::Tile || fillMode == CtSceneImage::TileHorizontally);
+
+    shaderEffect->drawTexture(matrix, texture, width, height, relativeOpacity(), vTile, hTile, textureAtlasIndex);
+}
+
+
+CtSceneImage::CtSceneImage(CtSceneItem *parent)
+    : CtSceneTextureItem(new CtSceneImagePrivate(this))
+{
+    CT_D(CtSceneImage);
+    d->init(parent);
+}
+
+CtSceneImage::CtSceneImage(CtTexture *texture, CtSceneItem *parent)
+    : CtSceneTextureItem(new CtSceneImagePrivate(this))
+{
+    CT_D(CtSceneImage);
+    d->texture = texture;
+    d->init(parent);
+}
+
+CtSceneImage::CtSceneImage(CtSceneImagePrivate *dd)
+    : CtSceneTextureItem(dd)
+{
+
+}
+
+CtSceneImage::FillMode CtSceneImage::fillMode() const
+{
+    CT_D(CtSceneImage);
+    return d->fillMode;
+}
+
+void CtSceneImage::setFillMode(FillMode mode)
+{
+    CT_D(CtSceneImage);
+    d->fillMode = mode;
+}
+
+void CtSceneImage::paint()
+{
+    CT_D(CtSceneImage);
+    d->draw();
+}
 
 /////////////////////////////////////////////////
 // CtSceneFragments
 /////////////////////////////////////////////////
 
-CtSceneFragmentsPrivate::CtSceneFragmentsPrivate(CtSceneImage *q)
-    : CtSceneImagePrivate(q)
+CtSceneFragmentsPrivate::CtSceneFragmentsPrivate(CtSceneFragments *q)
+    : CtSceneTextureItemPrivate(q)
 {
 
 }
 
 void CtSceneFragmentsPrivate::release()
 {
-    CtSceneImagePrivate::release();
+    CtSceneTextureItemPrivate::release();
 
     foreach (CtSceneFragments::Fragment *f, fragments)
         delete f;
@@ -979,8 +1015,6 @@ void CtSceneFragmentsPrivate::draw()
         return;
 
     CtMatrix matrix = currentViewProjectionMatrix();
-    bool vTile = (fillMode == CtSceneImage::Tile || fillMode == CtSceneImage::TileVertically);
-    bool hTile = (fillMode == CtSceneImage::Tile || fillMode == CtSceneImage::TileHorizontally);
 
     CtShaderEffect::Element e;
     CtList<CtShaderEffect::Element> elements;
@@ -994,7 +1028,7 @@ void CtSceneFragmentsPrivate::draw()
         elements.push_back(e);
     }
 
-    shaderEffect->drawElements(matrix, texture, relativeOpacity(), vTile, hTile, elements);
+    shaderEffect->drawElements(matrix, texture, relativeOpacity(), false, false, elements);
 }
 
 
@@ -1007,6 +1041,12 @@ CtSceneFragments::Fragment::Fragment()
       m_userData(0)
 {
 
+}
+
+void CtSceneFragments::paint()
+{
+    CT_D(CtSceneFragments);
+    d->draw();
 }
 
 void CtSceneFragments::Fragment::setX(ctreal x)
@@ -1041,24 +1081,18 @@ void CtSceneFragments::Fragment::setUserData(void *data)
 
 
 CtSceneFragments::CtSceneFragments(CtSceneItem *parent)
-    : CtSceneImage(new CtSceneFragmentsPrivate(this))
+    : CtSceneTextureItem(new CtSceneFragmentsPrivate(this))
 {
     CT_D(CtSceneFragments);
     d->init(parent);
 }
 
 CtSceneFragments::CtSceneFragments(CtTexture *texture, CtSceneItem *parent)
-    : CtSceneImage(new CtSceneFragmentsPrivate(this))
+    : CtSceneTextureItem(new CtSceneFragmentsPrivate(this))
 {
     CT_D(CtSceneFragments);
     d->texture = texture;
     d->init(parent);
-}
-
-void CtSceneFragments::paint()
-{
-    CT_D(CtSceneFragments);
-    d->draw();
 }
 
 CtList<CtSceneFragments::Fragment *> CtSceneFragments::fragments() const
