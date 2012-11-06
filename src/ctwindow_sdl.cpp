@@ -76,6 +76,9 @@ void CtWindowSdlPrivate::release()
 
 bool CtWindowSdlPrivate::makeCurrent()
 {
+    if (!window)
+        return false;
+
     bool result = (SDL_GL_MakeCurrent(window, context) == 0);
 
     if (!result)
@@ -86,15 +89,24 @@ bool CtWindowSdlPrivate::makeCurrent()
 
 void CtWindowSdlPrivate::updateViewPort()
 {
+    if (!window)
+        return;
+
     CtGL::glViewport(0, 0, width, height);
 }
 
 void CtWindowSdlPrivate::swapBuffers()
 {
+    if (!window)
+        return;
+
     SDL_GL_SwapWindow(window);
 }
 
 void CtWindowSdlPrivate::updateWindowSize()
 {
+    if (!window)
+        return;
+
     SDL_GetWindowSize(window, &width, &height);
 }

@@ -100,6 +100,10 @@ CtWindowSdlPrivate *CtApplicationSdlPrivate::findWindowById(int winId)
 void CtApplicationSdlPrivate::processEvent(const SDL_Event &event)
 {
     switch (event.type) {
+    case SDL_QUIT: {
+        quit();
+        break;
+    }
     case SDL_MOUSEMOTION: {
         CtWindowSdlPrivate *w = findWindowById(event.button.windowID);
 
