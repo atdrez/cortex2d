@@ -16,6 +16,7 @@ class CtSceneItemPrivate;
 class CtShaderEffect;
 class CtSceneImagePrivate;
 class CtSceneTextureItemPrivate;
+class CtRenderer;
 
 class CtSceneItem
 {
@@ -113,7 +114,7 @@ public:
 protected:
     CtSceneItem(CtSceneItemPrivate *dd);
 
-    virtual void paint();
+    virtual void paint(CtRenderer *renderer);
     virtual void advance(ctuint ms);
     virtual bool event(CtEvent *event);
     virtual void itemChanged(ChangeType, const ChangeValue &) {}
@@ -140,6 +141,7 @@ private:
     friend class CtSceneView;
     friend class CtSceneViewData;
     friend class CtSceneItemPrivate;
+    friend class CtSceneFrameBufferPrivate;
 };
 
 
@@ -158,8 +160,26 @@ public:
     void setShaderEffect(CtShaderEffect *effect);
 
 protected:
-    void paint();
+    void paint(CtRenderer *renderer);
 };
+
+
+class CtSceneFrameBuffer : public CtSceneItem
+{
+public:
+    CtSceneFrameBuffer(CtSceneItem *parent = 0);
+
+    CtShaderEffect *shaderEffect() const;
+    void setShaderEffect(CtShaderEffect *effect);
+
+    bool isValidBuffer() const;
+
+    void setBufferSize(int width, int height);
+
+protected:
+    void paint(CtRenderer *renderer);
+};
+
 
 class CtSceneTextureItem : public CtSceneItem
 {
@@ -204,7 +224,7 @@ public:
 protected:
     CtSceneImage(CtSceneImagePrivate *dd);
 
-    void paint();
+    void paint(CtRenderer *renderer);
 };
 
 
@@ -253,7 +273,7 @@ public:
     bool removeFragment(Fragment *fragment);
 
 protected:
-    void paint();
+    void paint(CtRenderer *renderer);
 };
 
 #endif

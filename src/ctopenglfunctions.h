@@ -81,6 +81,8 @@ public:
     static void glBindRenderbuffer(GLenum target, GLuint renderbuffer);
     static GLenum glCheckFramebufferStatus(GLenum target);
 
+    static void glGetIntegerv(GLenum pname, GLint *params);
+
     static void glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
 };
 

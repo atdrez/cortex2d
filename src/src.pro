@@ -30,6 +30,7 @@ HEADERS += \
     ctstring.h \
     ctlist.h \
     ctmath.h \
+    ctrenderer.h \
     ctsceneview.h \
     ctdragcursor.h \
     ctshadereffect.h \
@@ -55,6 +56,7 @@ SOURCES += \
     ctmatrix.cpp \
     ctitem.cpp \
     cttexture.cpp \
+    ctrenderer.cpp \
     ctsceneview.cpp \
     ctshadereffect.cpp \
     ctshaderprogram.cpp \

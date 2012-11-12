@@ -8,6 +8,9 @@
 #include "ctshaderprogram.h"
 #include "ctopenglfunctions.h"
 #include "ctGL.h"
+#include "ctmath.h"
+
+class CtRenderer;
 
 struct CtSceneItemPrivate
 {
@@ -23,11 +26,19 @@ struct CtSceneItemPrivate
 
     bool relativeVisible();
     ctreal relativeOpacity();
+    CtSceneFrameBuffer *frameBufferItem();
 
     void checkTransformMatrix();
+    CtMatrix mappedTransformMatrix(CtSceneItem *root);
+
     CtMatrix currentLocalTransformMatrix();
     CtMatrix currentSceneTransformMatrix();
-    CtMatrix currentViewProjectionMatrix();
+    CtMatrix currentViewportProjectionMatrix();
+
+    void fillItems(CtList<CtSceneItem *> &lst);
+    virtual void recursivePaint(CtRenderer *state);
+
+    const CtList<CtSceneItem *> &orderedChildren();
 
     CtSceneItem *q;
     ctreal x;
@@ -44,12 +55,17 @@ struct CtSceneItemPrivate
     CtSceneView *scene;
     ctreal xCenter;
     ctreal yCenter;
+    bool sortDirty;
     bool transformDirty;
     int flags;
+    bool isFrameBuffer;
     bool pendingDelete;
+    CtMatrix fboTransformMatrix;
     CtMatrix localTransformMatrix;
     CtMatrix sceneTransformMatrix;
+
     CtList<CtSceneItem *> children;
+    CtList<CtSceneItem *> sortedChildren;
 };
 
 struct CtSceneRectPrivate : public CtSceneItemPrivate
@@ -58,12 +74,31 @@ struct CtSceneRectPrivate : public CtSceneItemPrivate
 
     void init(CtSceneItem *parent);
     void release();
-    void draw();
 
     ctreal r;
     ctreal g;
     ctreal b;
 
+    CtShaderEffect *shaderEffect;
+};
+
+struct CtSceneFrameBufferPrivate : public CtSceneItemPrivate
+{
+    CtSceneFrameBufferPrivate(CtSceneFrameBuffer *q);
+
+    void init(CtSceneItem *parent);
+    void release();
+
+    void deleteBuffers();
+    void resizeBuffer(int w, int h);
+
+    virtual void recursivePaint(CtRenderer *state);
+
+    int bufferWidth;
+    int bufferHeight;
+    GLuint framebuffer;
+    GLuint depthbuffer;
+    CtTexture *texture;
     CtShaderEffect *shaderEffect;
 };
 
@@ -84,8 +119,6 @@ struct CtSceneImagePrivate : public CtSceneTextureItemPrivate
 {
     CtSceneImagePrivate(CtSceneImage *q);
 
-    void draw();
-
     CtSceneImage::FillMode fillMode;
 };
 
@@ -93,7 +126,6 @@ struct CtSceneFragmentsPrivate : public CtSceneTextureItemPrivate
 {
     CtSceneFragmentsPrivate(CtSceneFragments *q);
 
-    void draw();
     void release();
 
     CtList<CtSceneFragments::Fragment *> fragments;

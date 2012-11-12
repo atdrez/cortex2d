@@ -1,6 +1,7 @@
 #include "ctitem.h"
 #include "ctmath.h"
 #include "ctitem_p.h"
+#include "ctrenderer.h"
 #include "ctsceneview.h"
 #include "ctdragcursor.h"
 #include "ctshadereffect.h"
@@ -17,6 +18,11 @@ static CtShaderEffect *ct_sharedTextureShaderEffect()
 {
     static CtShaderEffect *r = new CtShaderEffect(CtShaderEffect::Texture);
     return r;
+}
+
+bool CtSceneItemPrivate_sort_compare(CtSceneItem *a, CtSceneItem *b)
+{
+    return (!a || !b) ? false : (a->z() < b->z());
 }
 
 
@@ -36,8 +42,10 @@ CtSceneItemPrivate::CtSceneItemPrivate(CtSceneItem *q)
       scene(0),
       xCenter(0),
       yCenter(0),
+      sortDirty(false),
       transformDirty(true),
       flags(CtSceneItem::NoFlag),
+      isFrameBuffer(false),
       pendingDelete(false)
 {
 
@@ -85,10 +93,61 @@ bool CtSceneItemPrivate::relativeVisible()
         return visible && parent->isVisible();
 }
 
+CtSceneFrameBuffer *CtSceneItemPrivate::frameBufferItem()
+{
+    // XXX: optimize
+    if (!parent)
+        return 0;
+    else if (parent->d_ptr->isFrameBuffer)
+        return static_cast<CtSceneFrameBuffer *>(parent);
+    else
+        return parent->d_ptr->frameBufferItem();
+}
+
+void CtSceneItemPrivate::fillItems(CtList<CtSceneItem *> &lst)
+{
+    lst.push_back(q);
+
+    const CtList<CtSceneItem *> &items = orderedChildren();
+
+    foreach (CtSceneItem *item, items)
+        item->d_ptr->fillItems(lst);
+}
+
+const CtList<CtSceneItem *> &CtSceneItemPrivate::orderedChildren()
+{
+    if (!sortDirty)
+        return sortedChildren;
+
+    sortDirty = false;
+    sortedChildren = children;
+    sortedChildren.sort(CtSceneItemPrivate_sort_compare);
+
+    return sortedChildren;
+}
+
+void CtSceneItemPrivate::recursivePaint(CtRenderer *renderer)
+{
+    renderer->begin();
+    renderer->m_opacity = relativeOpacity();
+    renderer->m_projectionMatrix = currentViewportProjectionMatrix();
+    q->paint(renderer);
+    renderer->end();
+
+    const CtList<CtSceneItem *> &lst = orderedChildren();
+
+    foreach (CtSceneItem *item, lst) {
+        if (item->isVisible())
+            item->d_ptr->recursivePaint(renderer);
+    }
+}
+
 void CtSceneItemPrivate::addItem(CtSceneItem *item)
 {
     children.remove(item);
     children.push_back(item);
+
+    sortDirty = true;
 
     CtSceneView *mScene = q->scene();
 
@@ -99,6 +158,8 @@ void CtSceneItemPrivate::addItem(CtSceneItem *item)
 void CtSceneItemPrivate::removeItem(CtSceneItem *item)
 {
     children.remove(item);
+
+    sortDirty = true;
 
     CtSceneView *mScene = q->scene();
 
@@ -112,25 +173,16 @@ void CtSceneItemPrivate::setScene(CtSceneView *newScene)
     // update cache
 }
 
-bool CtSceneItemPrivate_sort_compare(CtSceneItem *a, CtSceneItem *b)
+CtMatrix CtSceneItemPrivate::mappedTransformMatrix(CtSceneItem *root)
 {
-    return (!a || !b) ? false : (a->z() < b->z());
-}
-
-void CtSceneItemPrivate::checkTransformMatrix()
-{
-    if (!transformDirty)
-        return;
-
-    CtMatrix modelMatrix;
-
-    ctreal ox = ctRound(xCenter);
-    ctreal oy = ctRound(yCenter);
+    const ctreal ox = ctRound(xCenter);
+    const ctreal oy = ctRound(yCenter);
 
     // pixel aligned
-    ctreal rx = ctRound(x);
-    ctreal ry = ctRound(y);
+    const ctreal rx = ctRound(x);
+    const ctreal ry = ctRound(y);
 
+    CtMatrix modelMatrix;
     modelMatrix.translate(rx, ry, 0);
 
     modelMatrix.translate(ox, oy, 0);
@@ -138,15 +190,34 @@ void CtSceneItemPrivate::checkTransformMatrix()
     modelMatrix.rotate(-(GLfloat)rotation, 0, 0, 1);
     modelMatrix.translate(-ox, -oy, 0);
 
-    if (!parent) {
+    if (parent && (parent != root))
+        modelMatrix.multiply(parent->d_ptr->mappedTransformMatrix(root));
+
+    if (!root) {
         sceneTransformMatrix = modelMatrix;
-    } else {
-        sceneTransformMatrix = modelMatrix;
-        sceneTransformMatrix.multiply(parent->sceneTransformMatrix());
+        localTransformMatrix = modelMatrix;
+        localTransformMatrix.invert();
     }
 
+    return modelMatrix;
+}
+
+void CtSceneItemPrivate::checkTransformMatrix()
+{
+    if (!transformDirty)
+        return;
+
+    sceneTransformMatrix = mappedTransformMatrix(0);
     localTransformMatrix = sceneTransformMatrix;
     localTransformMatrix.invert();
+
+    // fbo
+    CtSceneFrameBuffer *fbo = frameBufferItem();
+
+    if (!fbo || !fbo->isValidBuffer())
+        fboTransformMatrix = sceneTransformMatrix;
+    else
+        fboTransformMatrix = mappedTransformMatrix(fbo);
 
     //transformDirty = true; // XXX: enable for optimization
 }
@@ -163,12 +234,21 @@ CtMatrix CtSceneItemPrivate::currentLocalTransformMatrix()
     return localTransformMatrix;
 }
 
-CtMatrix CtSceneItemPrivate::currentViewProjectionMatrix()
+CtMatrix CtSceneItemPrivate::currentViewportProjectionMatrix()
 {
     CtSceneView *sc = q->scene();
-    CtMatrix result = currentSceneTransformMatrix();
+    CtSceneFrameBuffer *fb = frameBufferItem();
+
+    checkTransformMatrix();
+
+    CtMatrix result;
 
     if (sc) {
+        if (!fb || !fb->isValidBuffer())
+            result = sceneTransformMatrix;
+        else
+            result = fboTransformMatrix;
+
         CtMatrix orthoMatrix;
         orthoMatrix.ortho(0, sc->width(), sc->height(), 0, 1, -1);
         result.multiply(orthoMatrix);
@@ -418,9 +498,9 @@ bool CtSceneItem::contains(ctreal x, ctreal y)
     return (x >= 0 && y >= 0 && x < d->width && y < d->height);
 }
 
-void CtSceneItem::paint()
+void CtSceneItem::paint(CtRenderer *renderer)
 {
-
+    CT_UNUSED(renderer);
 }
 
 void CtSceneItem::advance(ctuint ms)
@@ -707,15 +787,6 @@ void CtSceneRectPrivate::release()
     CtSceneItemPrivate::release();
 }
 
-void CtSceneRectPrivate::draw()
-{
-    if (!shaderEffect || !shaderEffect->init())
-        return;
-
-    CtMatrix matrix = currentViewProjectionMatrix();
-    shaderEffect->drawSolid(matrix, width, height, r, g, b, 1.0, relativeOpacity());
-}
-
 
 CtSceneRect::CtSceneRect(CtSceneItem *parent)
     : CtSceneItem(new CtSceneRectPrivate(this))
@@ -734,10 +805,10 @@ CtSceneRect::CtSceneRect(ctreal r, ctreal g, ctreal b, CtSceneItem *parent)
     d->b = b;
 }
 
-void CtSceneRect::paint()
+void CtSceneRect::paint(CtRenderer *renderer)
 {
     CT_D(CtSceneRect);
-    d->draw();
+    renderer->drawSolid(d->shaderEffect, d->width, d->height, d->r, d->g, d->b, 1.0);
 }
 
 ctreal CtSceneRect::r() const
@@ -776,6 +847,161 @@ void CtSceneRect::setShaderEffect(CtShaderEffect *effect)
 {
     CT_D(CtSceneRect);
     d->shaderEffect = effect;
+}
+
+/////////////////////////////////////////////////
+// CtSceneFrameBuffer
+/////////////////////////////////////////////////
+
+CtSceneFrameBufferPrivate::CtSceneFrameBufferPrivate(CtSceneFrameBuffer *q)
+    : CtSceneItemPrivate(q),
+      bufferWidth(0),
+      bufferHeight(0),
+      framebuffer(0),
+      depthbuffer(0),
+      texture(0),
+      shaderEffect(0)
+{
+    isFrameBuffer = true;
+}
+
+void CtSceneFrameBufferPrivate::init(CtSceneItem *parent)
+{
+    CtSceneItemPrivate::init(parent);
+
+    shaderEffect = ct_sharedTextureShaderEffect();
+    texture = new CtTexture();
+}
+
+void CtSceneFrameBufferPrivate::release()
+{
+    CtSceneItemPrivate::release();
+    delete texture;
+}
+
+void CtSceneFrameBufferPrivate::recursivePaint(CtRenderer *renderer)
+{
+    if (!texture->isValid()) {
+        // invalid framebuffer
+        CtSceneItemPrivate::recursivePaint(renderer);
+        return;
+    }
+
+    renderer->bindBuffer(framebuffer);
+
+    const CtList<CtSceneItem *> &lst = orderedChildren();
+
+    foreach (CtSceneItem *item, lst) {
+        if (item->isVisible())
+            item->d_ptr->recursivePaint(renderer);
+    }
+
+    renderer->releaseBuffer();
+
+    renderer->begin();
+    renderer->m_opacity = relativeOpacity();
+    renderer->m_projectionMatrix = currentViewportProjectionMatrix();
+    q->paint(renderer);
+    renderer->end();
+}
+
+void CtSceneFrameBufferPrivate::deleteBuffers()
+{
+    if (framebuffer > 0) {
+        glDeleteFramebuffers(1, &framebuffer);
+        framebuffer = 0;
+    }
+
+    if (depthbuffer > 0) {
+        glDeleteRenderbuffers(1, &depthbuffer);
+        depthbuffer = 0;
+    }
+}
+
+void CtSceneFrameBufferPrivate::resizeBuffer(int w, int h)
+{
+    if (w == bufferWidth && h == bufferHeight)
+        return;
+
+    bufferWidth = w;
+    bufferHeight = h;
+
+    deleteBuffers();
+    texture->release();
+
+    if (w <= 0 || h <= 0)
+        return;
+
+    texture->reset(w, h, true, 0);
+
+    GLint defaultFBO;
+    CtGL::glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+
+    CtGL::glGenFramebuffers(1, &framebuffer);
+
+    // create render buffer object
+    CtGL::glGenRenderbuffers(1, &depthbuffer);
+
+    // bind render buffer
+    CtGL::glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
+    // set render buffer storage
+    CtGL::glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, w, h);
+
+    // bind framebuffer object
+    CtGL::glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    // attach texture and render buffer
+    CtGL::glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                 GL_TEXTURE_2D, texture->id(), 0);
+
+    CtGL::glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                    GL_RENDERBUFFER, depthbuffer);
+
+    // check if framebuffer is ready
+    GLuint status = CtGL::glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+    if (status != GL_FRAMEBUFFER_COMPLETE)
+        CT_WARNING("Could not create framebuffer");
+
+    CtGL::glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+}
+
+
+CtSceneFrameBuffer::CtSceneFrameBuffer(CtSceneItem *parent)
+    : CtSceneItem(new CtSceneFrameBufferPrivate(this))
+{
+    CT_D(CtSceneFrameBuffer);
+    d->init(parent);
+}
+
+void CtSceneFrameBuffer::paint(CtRenderer *renderer)
+{
+    CT_D(CtSceneFrameBuffer);
+    renderer->drawTexture(d->shaderEffect, d->texture, d->width, d->height);
+}
+
+CtShaderEffect *CtSceneFrameBuffer::shaderEffect() const
+{
+    CT_D(CtSceneFrameBuffer);
+    return d->shaderEffect;
+}
+
+void CtSceneFrameBuffer::setShaderEffect(CtShaderEffect *effect)
+{
+    CT_D(CtSceneFrameBuffer);
+    d->shaderEffect = effect;
+}
+
+bool CtSceneFrameBuffer::isValidBuffer() const
+{
+    CT_D(CtSceneFrameBuffer);
+    return d->texture->isValid();
+}
+
+void CtSceneFrameBuffer::setBufferSize(int width, int height)
+{
+    CT_D(CtSceneFrameBuffer);
+    d->resizeBuffer(width, height);
 }
 
 /////////////////////////////////////////////////
@@ -939,19 +1165,6 @@ CtSceneImagePrivate::CtSceneImagePrivate(CtSceneImage *q)
 
 }
 
-void CtSceneImagePrivate::draw()
-{
-    if (!shaderEffect || !shaderEffect->init())
-        return;
-
-    CtMatrix matrix = currentViewProjectionMatrix();
-    bool vTile = (fillMode == CtSceneImage::Tile || fillMode == CtSceneImage::TileVertically);
-    bool hTile = (fillMode == CtSceneImage::Tile || fillMode == CtSceneImage::TileHorizontally);
-
-    shaderEffect->drawTexture(matrix, texture, width, height, relativeOpacity(), vTile, hTile, textureAtlasIndex);
-}
-
-
 CtSceneImage::CtSceneImage(CtSceneItem *parent)
     : CtSceneTextureItem(new CtSceneImagePrivate(this))
 {
@@ -985,10 +1198,18 @@ void CtSceneImage::setFillMode(FillMode mode)
     d->fillMode = mode;
 }
 
-void CtSceneImage::paint()
+void CtSceneImage::paint(CtRenderer *renderer)
 {
     CT_D(CtSceneImage);
-    d->draw();
+
+    const bool vTile = (d->fillMode == CtSceneImage::Tile ||
+                        d->fillMode == CtSceneImage::TileVertically);
+
+    const bool hTile = (d->fillMode == CtSceneImage::Tile ||
+                        d->fillMode == CtSceneImage::TileHorizontally);
+
+    renderer->drawTexture(d->shaderEffect, d->texture, d->width, d->height,
+                          vTile, hTile, d->textureAtlasIndex);
 }
 
 /////////////////////////////////////////////////
@@ -1009,28 +1230,6 @@ void CtSceneFragmentsPrivate::release()
         delete f;
 }
 
-void CtSceneFragmentsPrivate::draw()
-{
-    if (!shaderEffect || !shaderEffect->init())
-        return;
-
-    CtMatrix matrix = currentViewProjectionMatrix();
-
-    CtShaderEffect::Element e;
-    CtList<CtShaderEffect::Element> elements;
-
-    foreach (CtSceneFragments::Fragment *f, fragments) {
-        e.x = f->x();
-        e.y = f->y();
-        e.width = f->width();
-        e.height = f->height();
-        e.textureAtlasIndex = f->atlasIndex();
-        elements.push_back(e);
-    }
-
-    shaderEffect->drawElements(matrix, texture, relativeOpacity(), false, false, elements);
-}
-
 
 CtSceneFragments::Fragment::Fragment()
     : m_x(0),
@@ -1041,12 +1240,6 @@ CtSceneFragments::Fragment::Fragment()
       m_userData(0)
 {
 
-}
-
-void CtSceneFragments::paint()
-{
-    CT_D(CtSceneFragments);
-    d->draw();
 }
 
 void CtSceneFragments::Fragment::setX(ctreal x)
@@ -1152,4 +1345,26 @@ bool CtSceneFragments::removeFragment(Fragment *fragment)
     }
 
     return false;
+}
+
+void CtSceneFragments::paint(CtRenderer *renderer)
+{
+    CT_D(CtSceneFragments);
+
+    if (!d->shaderEffect)
+        return;
+
+    CtShaderEffect::Element e;
+    CtList<CtShaderEffect::Element> elements;
+
+    foreach (CtSceneFragments::Fragment *f, d->fragments) {
+        e.x = f->x();
+        e.y = f->y();
+        e.width = f->width();
+        e.height = f->height();
+        e.textureAtlasIndex = f->atlasIndex();
+        elements.push_back(e);
+    }
+
+    renderer->drawElements(d->shaderEffect, d->texture, elements);
 }

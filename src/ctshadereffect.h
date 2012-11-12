@@ -6,6 +6,7 @@
 #include "ctshaderprogram.h"
 #include <map>
 
+class CtRenderer;
 class CtShaderUniform;
 
 class CtShaderEffect
@@ -86,10 +87,7 @@ private:
     GLint m_locTexCoord;
     CtList<CtShaderUniform *> m_uniforms;
 
-    friend class CtSceneImage;
-    friend class CtSceneImagePrivate;
-    friend class CtSceneRectPrivate;
-    friend class CtSceneFragmentsPrivate;
+    friend class CtRenderer;
 };
 
 #endif

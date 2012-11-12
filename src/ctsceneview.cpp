@@ -1,6 +1,7 @@
 #include "ctsceneview.h"
 #include "ctitem.h"
 #include "ctitem_p.h"
+#include "ctrenderer.h"
 #include "ctdragcursor.h"
 #include "ctwindow_p.h"
 #include "ctopenglfunctions.h"
@@ -27,10 +28,6 @@ struct CtSceneViewData
     bool deliverTouchEnd(CtTouchEvent *event);
 
     CtTouchPointList mapTouchPoints(CtSceneItem *item, const CtTouchPointList &points) const;
-
-    static bool sort_compare_zvalue(CtSceneItem *a, CtSceneItem *b) {
-        return (!a || !b) ? false : (a->z() > b->z());
-    }
 
     CtDragCursor *drag;
     CtSceneItem *rootItem;
@@ -59,26 +56,8 @@ void CtSceneViewData::checkSortedItems()
 
     sortedItems.clear();
 
-    if (!rootItem)
-        return;
-
-    CtList<CtSceneItem *> stack;
-    CtList<CtSceneItem *> children;
-    stack.push_back(rootItem);
-
-    while (!stack.empty()) {
-        CtSceneItem *item = stack.back();
-        stack.pop_back();
-
-        sortedItems.push_back(item);
-
-        children = item->children();
-        // sort from greater z-value to lower z-value
-        children.sort(CtSceneViewData::sort_compare_zvalue);
-
-        foreach (CtSceneItem *item, children)
-            stack.push_back(item);
-    }
+    if (rootItem)
+        rootItem->d_ptr->fillItems(sortedItems);
 
     sortedItemsDirty = false;
 }
@@ -447,12 +426,11 @@ void CtSceneView::paint()
     CtGL::glClear(GL_COLOR_BUFFER_BIT);
 
     // update if list necessary
-    data->checkSortedItems();
 
-    foreach (CtSceneItem *item, data->sortedItems) {
-        if (item->isVisible())
-            item->paint();
-    }
+    CtRenderer renderer;
+
+    if (data->rootItem && data->rootItem->isVisible())
+        data->rootItem->d_ptr->recursivePaint(&renderer);
 
     CT_GL_DEBUG_CHECK();
 
