@@ -152,6 +152,7 @@ CT_GL_FPTR(void, glFramebufferRenderbuffer, (GLenum target, GLenum attachment, G
 CT_GL_FPTR(void, glBindFramebuffer, (GLenum target, GLuint framebuffer))
 CT_GL_FPTR(void, glBindRenderbuffer, (GLenum target, GLuint renderbuffer))
 CT_GL_FPTR(GLenum, glCheckFramebufferStatus, (GLenum target))
+CT_GL_FPTR(void, glFramebufferTexture2D, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level))
 
 #undef CT_GL_FPTR
 
@@ -217,6 +218,7 @@ void CtGL::assignFunctions(Func_GetProcAddress f)
     CT_GL_FASSIGN(glBindFramebuffer);
     CT_GL_FASSIGN(glBindRenderbuffer);
     CT_GL_FASSIGN(glCheckFramebufferStatus);
+    CT_GL_FASSIGN(glFramebufferTexture2D);
 
 #   undef CT_GL_FASSIGN
 
@@ -480,4 +482,9 @@ void CtGL::glBindRenderbuffer(GLenum target, GLuint renderbuffer)
 GLenum CtGL::glCheckFramebufferStatus(GLenum target)
 {
     return ct_glCheckFramebufferStatus(target);
+}
+
+void CtGL::glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level)
+{
+    return ct_glFramebufferTexture2D(target, attachment, textarget, texture, level);
 }

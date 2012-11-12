@@ -80,6 +80,8 @@ public:
     static void glBindFramebuffer(GLenum target, GLuint framebuffer);
     static void glBindRenderbuffer(GLenum target, GLuint renderbuffer);
     static GLenum glCheckFramebufferStatus(GLenum target);
+
+    static void glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
 };
 
 #endif
