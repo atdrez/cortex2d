@@ -55,11 +55,19 @@ public:
     void addUniform(CtShaderUniform *uniform);
     void removeUniform(CtShaderUniform *uniform);
 
-protected:
     bool init();
+
+    void drawPoly(const CtMatrix &matrix, GLfloat *vertices, int count,
+                  ctreal r, ctreal g, ctreal b, ctreal a, ctreal opacity);
+
+    void drawSolidPoly(const CtMatrix &matrix, GLfloat *vertices, int count,
+                       ctreal r, ctreal g, ctreal b, ctreal a, ctreal opacity);
+
+protected:
     void applyPosition(const GLfloat *matrix, const GLfloat *vertices);
+    void applyTexCoordinates(const GLfloat *coords);
     void applyColor(ctreal r, ctreal g, ctreal b, ctreal a, ctreal opacity);
-    void applyTexture(const GLfloat *texCoords, GLint textureId, bool vTile, bool hTile);
+    void applyTexture(GLint textureId, bool vTile, bool hTile);
     void applyCustomUniforms();
 
     void drawSolid(const CtMatrix &matrix, ctreal width, ctreal height,

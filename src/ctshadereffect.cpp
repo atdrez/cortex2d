@@ -31,9 +31,12 @@ static const char ct_textureFragmentShader[] = " \
 static const char ct_solidVertexShader[] = " \
     uniform mediump mat4 ct_Matrix; \
     attribute mediump vec2 ct_Vertex; \
+    attribute mediump vec2 ct_TexCoord; \
+    varying mediump vec2 ct_TexCoord0; \
     \
     void main() \
     { \
+        ct_TexCoord0 = ct_TexCoord;                          \
         gl_Position = ct_Matrix * vec4(ct_Vertex, 1.0, 1.0); \
     } \
    ";
@@ -41,6 +44,7 @@ static const char ct_solidVertexShader[] = " \
 static const char ct_solidFragmentShader[] = " \
     uniform mediump vec4 ct_Color; \
     uniform mediump float ct_Opacity; \
+    varying mediump vec2 ct_TexCoord0; \
     \
     void main() \
     { \
@@ -161,6 +165,7 @@ bool CtShaderEffect::init()
         m_locTexture = CtGL::glGetUniformLocation(m_program.id(), "ct_Texture0");
     } else if (m_type == Solid) {
         m_locColor = CtGL::glGetUniformLocation(m_program.id(), "ct_Color");
+        m_locTexCoord = CtGL::glGetAttribLocation(m_program.id(), "ct_TexCoord");
     }
 
     // update custom uniforms
@@ -181,11 +186,44 @@ void CtShaderEffect::drawSolid(const CtMatrix &matrix, ctreal dw, ctreal dh,
     GLfloat vertices[8];
     ct_setTriangleStripArray(vertices, 0, 0, dw, dh);
 
+    // XXX: do we need to expose this for gradients?
+    GLfloat pixCoordinates[8];
+    ct_setTriangleStripArray(pixCoordinates, 0, 0, 1, 1);
+
+    applyPosition((GLfloat *)matrix.data(), vertices);
+    applyColor(r, g, b, a, opacity);
+    applyTexCoordinates(pixCoordinates);
+    applyCustomUniforms();
+
+    CtGL::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    m_program.release();
+}
+
+void CtShaderEffect::drawPoly(const CtMatrix &matrix, GLfloat *vertices, int count,
+                              ctreal r, ctreal g, ctreal b, ctreal a, ctreal opacity)
+{
+    m_program.bind();
+
     applyPosition((GLfloat *)matrix.data(), vertices);
     applyColor(r, g, b, a, opacity);
     applyCustomUniforms();
 
-    CtGL::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    CtGL::glDrawArrays(GL_LINE_LOOP, 0, count);
+
+    m_program.release();
+}
+
+void CtShaderEffect::drawSolidPoly(const CtMatrix &matrix, GLfloat *vertices, int count,
+                                   ctreal r, ctreal g, ctreal b, ctreal a, ctreal opacity)
+{
+    m_program.bind();
+
+    applyPosition((GLfloat *)matrix.data(), vertices);
+    applyColor(r, g, b, a, opacity);
+    applyCustomUniforms();
+
+    CtGL::glDrawArrays(GL_TRIANGLE_FAN, 0, count);
 
     m_program.release();
 }
@@ -207,7 +245,8 @@ void CtShaderEffect::drawTexture(const CtMatrix &matrix, CtTexture *texture,
 
         applyPosition((GLfloat *)matrix.data(), vertices);
         applyColor(1, 1, 1, 1, opacity);
-        applyTexture(texCoords, texture->id(), vTile, hTile);
+        applyTexture(texture->id(), vTile, hTile);
+        applyTexCoordinates(texCoords);
         applyCustomUniforms();
 
         CtGL::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -251,7 +290,8 @@ void CtShaderEffect::drawElements(const CtMatrix &matrix, CtTexture *texture,
 
         applyPosition((GLfloat *)matrix.data(), vertices);
         applyColor(1, 1, 1, 1, opacity);
-        applyTexture(texCoords, texture->id(), vTile, hTile);
+        applyTexture(texture->id(), vTile, hTile);
+        applyTexCoordinates(texCoords);
         applyCustomUniforms();
 
         CtGL::glDrawElements(GL_TRIANGLES, n * 6, GL_UNSIGNED_SHORT, indexes);
@@ -273,6 +313,14 @@ void CtShaderEffect::applyPosition(const GLfloat *matrix, const GLfloat *vertice
     }
 }
 
+void CtShaderEffect::applyTexCoordinates(const GLfloat *coords)
+{
+    if (m_locTexCoord >= 0) {
+        CtGL::glVertexAttribPointer(m_locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, coords);
+        CtGL::glEnableVertexAttribArray(m_locTexCoord);
+    }
+}
+
 void CtShaderEffect::applyColor(ctreal r, ctreal g, ctreal b, ctreal a, ctreal opacity)
 {
     if (m_locOpacity >= 0)
@@ -282,13 +330,8 @@ void CtShaderEffect::applyColor(ctreal r, ctreal g, ctreal b, ctreal a, ctreal o
         CtGL::glUniform4f(m_locColor, r, g, b, a);
 }
 
-void CtShaderEffect::applyTexture(const GLfloat *texCoords, GLint textureId, bool vTile, bool hTile)
+void CtShaderEffect::applyTexture(GLint textureId, bool vTile, bool hTile)
 {
-    if (m_locTexCoord >= 0 && texCoords) {
-        CtGL::glVertexAttribPointer(m_locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
-        CtGL::glEnableVertexAttribArray(m_locTexCoord);
-    }
-
     if (m_locTexture >= 0 && textureId >= 0) {
         // bind texture
         CtGL::glActiveTexture(GL_TEXTURE0);
