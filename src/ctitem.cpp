@@ -38,6 +38,8 @@ CtSceneItemPrivate::CtSceneItemPrivate(CtSceneItem *q)
       rotation(0),
       opacity(1.0),
       visible(true),
+      implicitWidth(0),
+      implicitHeight(0),
       parent(0),
       scene(0),
       xCenter(0),
@@ -491,6 +493,44 @@ void CtSceneItem::setHeight(ctreal height)
     ChangeValue value;
     value.realValue = height;
     itemChanged(HeightChange, value);
+}
+
+ctreal CtSceneItem::implicitWidth() const
+{
+    CT_D(CtSceneItem);
+    return d->implicitWidth;
+}
+
+void CtSceneItem::setImplicitWidth(ctreal width)
+{
+    CT_D(CtSceneItem);
+    if (d->implicitWidth == width)
+        return;
+
+    d->implicitWidth = width;
+
+    ChangeValue value;
+    value.realValue = width;
+    itemChanged(ImplicitWidthChange, value);
+}
+
+ctreal CtSceneItem::implicitHeight() const
+{
+    CT_D(CtSceneItem);
+    return d->implicitHeight;
+}
+
+void CtSceneItem::setImplicitHeight(ctreal height)
+{
+    CT_D(CtSceneItem);
+    if (d->implicitHeight == height)
+        return;
+
+    d->implicitHeight = height;
+
+    ChangeValue value;
+    value.realValue = height;
+    itemChanged(ImplicitHeightChange, value);
 }
 
 void CtSceneItem::resize(ctreal width, ctreal height)

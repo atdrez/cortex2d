@@ -32,7 +32,9 @@ public:
         XScaleChange,
         YScaleChange,
         OpacityChange,
-        VisibilityChange
+        VisibilityChange,
+        ImplicitWidthChange,
+        ImplicitHeightChange,
     };
 
     union ChangeValue {
@@ -66,6 +68,12 @@ public:
 
     ctreal height() const;
     void setHeight(ctreal width);
+
+    ctreal implicitWidth() const;
+    void setImplicitWidth(ctreal width);
+
+    ctreal implicitHeight() const;
+    void setImplicitHeight(ctreal height);
 
     void resize(ctreal width, ctreal height);
 

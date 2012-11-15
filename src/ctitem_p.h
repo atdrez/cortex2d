@@ -51,6 +51,8 @@ struct CtSceneItemPrivate
     ctreal rotation;
     ctreal opacity;
     bool visible;
+    ctreal implicitWidth;
+    ctreal implicitHeight;
     CtSceneItem *parent;
     CtSceneView *scene;
     ctreal xCenter;
