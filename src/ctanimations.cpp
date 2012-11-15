@@ -165,11 +165,6 @@ void CtNumberAnimation::updateCurrentValue()
     ctreal oldValue = m_currentValue;
     m_currentValue = (m_finalValue - m_startValue) * progress() + m_startValue;
 
-    if (m_currentValue != oldValue && m_valueChangeCallback)
-        (*m_valueChangeCallback)((ctreal)m_currentValue);
-}
-
-void CtNumberAnimation::setValueChangeCallback(CtFunctor *f)
-{
-    m_valueChangeCallback = f;
+    if (m_currentValue != oldValue && !valueChanged.isEmpty())
+        valueChanged((ctreal)m_currentValue);
 }

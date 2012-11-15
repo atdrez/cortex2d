@@ -3,7 +3,7 @@
 
 #include "ctglobal.h"
 #include "cteasingcurve.h"
-#include "ctfunctor.h"
+#include "ctsignal.h"
 
 class CtSceneItem;
 
@@ -79,7 +79,8 @@ public:
     ctreal finalValue() const { return m_finalValue; }
     void setFinalValue(ctreal value);
 
-    void setValueChangeCallback(CtFunctor *f);
+public:
+    CtSignal1<ctreal> valueChanged;
 
 protected:
     void updateCurrentValue();
@@ -89,7 +90,6 @@ private:
     ctreal m_startValue;
     ctreal m_finalValue;
     ctreal m_currentValue;
-    CtFunctor *m_valueChangeCallback;
 };
 
 #endif

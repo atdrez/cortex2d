@@ -258,7 +258,8 @@ CtMatrix CtSceneItemPrivate::currentViewportProjectionMatrix()
 }
 
 CtSceneItem::CtSceneItem(CtSceneItem *parent)
-    : d_ptr(new CtSceneItemPrivate(this))
+    : CtObject(parent),
+      d_ptr(new CtSceneItemPrivate(this))
 {
     CT_D(CtSceneItem);
     d->init(parent);
@@ -490,6 +491,12 @@ void CtSceneItem::setHeight(ctreal height)
     ChangeValue value;
     value.realValue = height;
     itemChanged(HeightChange, value);
+}
+
+void CtSceneItem::resize(ctreal width, ctreal height)
+{
+    setWidth(width);
+    setHeight(height);
 }
 
 bool CtSceneItem::contains(ctreal x, ctreal y)

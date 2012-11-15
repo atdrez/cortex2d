@@ -7,6 +7,7 @@
 #include "ctevents.h"
 #include "ctmatrix.h"
 #include "cttexture.h"
+#include "ctobject.h"
 
 class CtDragCursor;
 class CtSceneItem;
@@ -18,7 +19,7 @@ class CtSceneImagePrivate;
 class CtSceneTextureItemPrivate;
 class CtRenderer;
 
-class CtSceneItem
+class CtSceneItem : public CtObject
 {
 public:
     enum ChangeType {
@@ -65,6 +66,8 @@ public:
 
     ctreal height() const;
     void setHeight(ctreal width);
+
+    void resize(ctreal width, ctreal height);
 
     ctreal rotation() const;
     void setRotation(ctreal rotation);

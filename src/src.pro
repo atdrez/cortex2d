@@ -23,13 +23,14 @@ HEADERS += \
     ctGL.h \
     ctrect.h \
     ctpoint.h \
+    ctsignal.h \
     cttexture.h \
-    ctfunctor.h \
     ctmap.h \
     ctvector.h \
     ctstring.h \
     ctlist.h \
     ctmath.h \
+    ctobject.h \
     ctrenderer.h \
     ctsceneview.h \
     ctdragcursor.h \
