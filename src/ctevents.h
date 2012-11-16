@@ -27,7 +27,8 @@ public:
         DragCursorDrop,
         DragCursorCancel,
         WindowMinimize,
-        WindowRestore
+        WindowRestore,
+        Custom = 0x80
     };
 
     CtEvent(Type type);
