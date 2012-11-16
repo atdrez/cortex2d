@@ -27,7 +27,7 @@ public:
         va_end(args);
 
         CtString result(buffer);
-        delete buffer;
+        delete [] buffer;
 
         return result;
     }
