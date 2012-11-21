@@ -399,8 +399,10 @@ void CtSceneView::advance(ctuint ms)
 
     data->checkSortedItems();
 
-    foreach (CtSceneItem *item, data->sortedItems)
-        item->advance(ms);
+    foreach (CtSceneItem *item, data->sortedItems) {
+        if (!item->isFrozen())
+            item->advance(ms);
+    }
 
     foreach (CtSceneItem *item, data->sortedItems) {
         if (item->d_ptr->pendingDelete)

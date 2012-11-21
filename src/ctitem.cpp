@@ -38,6 +38,7 @@ CtSceneItemPrivate::CtSceneItemPrivate(CtSceneItem *q)
       rotation(0),
       opacity(1.0),
       visible(true),
+      isFrozen(false),
       implicitWidth(0),
       implicitHeight(0),
       parent(0),
@@ -93,6 +94,15 @@ bool CtSceneItemPrivate::relativeVisible()
         return visible;
     else
         return visible && parent->isVisible();
+}
+
+bool CtSceneItemPrivate::relativeFrozen()
+{
+    // XXX: optimize
+    if (!parent)
+        return isFrozen;
+    else
+        return isFrozen || parent->isFrozen();
 }
 
 CtSceneFrameBuffer *CtSceneItemPrivate::frameBufferItem()
@@ -371,6 +381,26 @@ void CtSceneItem::setRotation(ctreal rotation)
     itemChanged(RotationChange, value);
 }
 
+bool CtSceneItem::isFrozen() const
+{
+    CT_D(CtSceneItem);
+    return d->relativeFrozen();
+}
+
+void CtSceneItem::setFrozen(bool frozen)
+{
+    CT_D(CtSceneItem);
+    if (d->isFrozen == frozen)
+        return;
+
+    d->isFrozen = frozen;
+
+    // XXX: should emit when parent changes too
+    ChangeValue value;
+    value.boolValue = frozen;
+    itemChanged(FrozenChange, value);
+}
+
 ctreal CtSceneItem::xScale() const
 {
     CT_D(CtSceneItem);
@@ -569,6 +599,7 @@ void CtSceneItem::setVisible(bool visible)
 
     d->visible = visible;
 
+    // XXX: should emit when parent changes too
     ChangeValue value;
     value.boolValue = visible;
     itemChanged(VisibilityChange, value);

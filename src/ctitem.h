@@ -35,6 +35,7 @@ public:
         VisibilityChange,
         ImplicitWidthChange,
         ImplicitHeightChange,
+        FrozenChange
     };
 
     union ChangeValue {
@@ -85,6 +86,9 @@ public:
 
     ctreal yScale() const;
     void setYScale(ctreal scale);
+
+    bool isFrozen() const;
+    void setFrozen(bool frozen);
 
     void scale(ctreal xScale, ctreal yScale);
 

@@ -26,6 +26,7 @@ struct CtSceneItemPrivate
 
     bool relativeVisible();
     ctreal relativeOpacity();
+    bool relativeFrozen();
     CtSceneFrameBuffer *frameBufferItem();
 
     void checkTransformMatrix();
@@ -51,6 +52,7 @@ struct CtSceneItemPrivate
     ctreal rotation;
     ctreal opacity;
     bool visible;
+    bool isFrozen;
     ctreal implicitWidth;
     ctreal implicitHeight;
     CtSceneItem *parent;
