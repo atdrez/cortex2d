@@ -2,6 +2,7 @@
 #include "ctopenglfunctions.h"
 #include "utils/ctfile.h"
 #include "utils/cttgaloader.h"
+#include "utils/ctpngloader.h"
 #include "utils/ctpvrloader.h"
 #include "utils/ctddsloader.h"
 #include <string.h>
@@ -99,6 +100,24 @@ bool CtTexture::loadTGA(const CtString &fileName)
 
     return reset(texture.width, texture.height,
                  texture.bitsPerPixel == 32, texture.buffer);
+}
+
+bool CtTexture::loadPNG(const CtString &fileName)
+{
+    CtPNGTexture texture;
+
+    if (!texture.loadFromFile((char *)fileName.c_str())) {
+        m_error = texture.errorMessage;
+        return false;
+    }
+
+    bool ok = reset(texture.width, texture.height,
+                    texture.bytesPerPixel == 4, texture.buffer);
+
+    if (ok)
+        m_inverted = false;
+
+    return ok;
 }
 
 bool CtTexture::loadPVR(const CtString &fileName)
@@ -224,6 +243,8 @@ bool CtAtlasTexture::loadAtlas(const CtString &filePath)
     } else if (!skipPVR && extensions.contains(" GL_IMG_texture_compression_pvrtc ") &&
                CtFile::canOpen(filePath + ".pvr", CtFile::ReadOnly)) {
         ok = loadPVR(filePath + ".pvr");
+    } else if (CtFile::canOpen(filePath + ".png", CtFile::ReadOnly)) {
+        ok = loadPNG(filePath + ".png");
     } else if (CtFile::canOpen(filePath + ".tga", CtFile::ReadOnly)) {
         ok = loadTGA(filePath + ".tga");
     }

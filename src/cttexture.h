@@ -30,6 +30,7 @@ public:
 
     void release();
     bool loadTGA(const CtString &fileName);
+    bool loadPNG(const CtString &fileName);
     bool loadPVR(const CtString &fileName);
     bool loadDDS(const CtString &fileName);
 

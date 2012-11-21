@@ -3,13 +3,13 @@ TARGET = cortex2d
 
 ###
 QT -= gui core
-LIBS = -lGLESv2 -lm -lX11
+LIBS = -lGLESv2 -lm -lX11 -lpng
 
 DEFINES += CT_SDL_BACKEND
 
 unix {
     CONFIG += link_pkgconfig
-    PKGCONFIG += sdl2
+    PKGCONFIG += sdl2 libpng
 }
 
 HEADERS += \
@@ -42,6 +42,7 @@ HEADERS += \
     utils/ctfile.h \
     utils/ctbuffer.h \
     utils/cttgaloader.h \
+    utils/ctpngloader.h \
     utils/ctpvrloader.h \
     utils/ctddsloader.h \
     3rdparty/tricollision.h \
@@ -66,6 +67,7 @@ SOURCES += \
     utils/ctfile.cpp \
     utils/ctbuffer.cpp \
     utils/cttgaloader.cpp \
+    utils/ctpngloader.cpp \
     utils/ctpvrloader.cpp \
     utils/ctddsloader.cpp \
     3rdparty/tricollision.cpp \
