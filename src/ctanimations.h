@@ -24,6 +24,8 @@ public:
     void stop();
     State state() const { return m_state; }
 
+    bool isRunning() const { return m_state == Running; }
+
     int loopCount() const { return m_loopCount; }
     void setLoopCount(int loopCount);
 
@@ -34,7 +36,6 @@ protected:
     virtual void stateChanged(State oldState, State newState) = 0;
 
 private:
-
     State m_state;
     int m_loopCount;
 };
@@ -50,6 +51,9 @@ public:
 
     CtEasingCurve easingCurve() const;
     void setEasingCurve(const CtEasingCurve &easing);
+
+public:
+    CtSignal0 finished;
 
 protected:
     ctreal progress() const { return m_progress; }

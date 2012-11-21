@@ -114,6 +114,7 @@ void CtRangeAnimation::updateProgress()
             m_loops++;
             m_consumedTime -= m_duration;
         } else {
+            finished();
             stop();
         }
     }
@@ -141,7 +142,7 @@ CtNumberAnimation::CtNumberAnimation()
 
 void CtNumberAnimation::setStartValue(ctreal value)
 {
-    if (m_startValue == value) {
+    if (m_startValue != value) {
         m_startValue = value;
         updateCurrentValue();
     }
