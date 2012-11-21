@@ -262,8 +262,10 @@ def generate(fileNames, outputName, atlasWidth, atlasHeight, scale, outputFormat
     # save atlases to disk
     if outputFormat == "json":
         generateJsonAtlases(atlases, fullSlots, outputName, ".png")
-    elif outputFormat == "bin":
+    elif outputFormat == "bin-tga":
         generateBinaryAtlases(atlases, fullSlots, outputName, ".tga")
+    elif outputFormat == "bin-png":
+        generateBinaryAtlases(atlases, fullSlots, outputName, ".png")
 
 
 def generateBinaryAtlases(atlases, slots, outputName, ext):
@@ -354,7 +356,7 @@ def main(argv):
     parser.add_option('--output', help="output name", dest="output", default="atlas", type='string')
     parser.add_option('--scale', help="scale ratio", dest="scale", default=1.0, type=float)
     parser.add_option('--spacing', help="tile spacing", dest="spacing", default=1, type=int)
-    parser.add_option('--format', help="atlas format", dest="format", default="bin", type='string')
+    parser.add_option('--format', help="atlas format", dest="format", default="bin-tga", type='string')
 
     (options, arguments) = parser.parse_args()
 
@@ -362,7 +364,7 @@ def main(argv):
         print "Input file(s) not specified"
         sys.exit(2)
 
-    if options.format not in ("bin", "json"):
+    if options.format not in ("bin-tga", "bin-png", "json"):
         print "Wrong atlas format (supported formats: bin, json)"
         sys.exit(2)
 
