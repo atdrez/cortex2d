@@ -12,6 +12,14 @@ unix {
     PKGCONFIG += sdl2 libpng
 }
 
+unix {
+    PKGCONFIG += openal
+    DEFINES += CT_OPENAL_AUDIO
+    include(3rdparty/alut/alut.pri)
+} else {
+    DEFINES += CT_SDL_AUDIO
+}
+
 HEADERS += \
     cortex2d.h \
     ctwindow.h \
@@ -72,6 +80,9 @@ SOURCES += \
     utils/ctddsloader.cpp \
     3rdparty/tricollision.cpp \
     ctopenglfunctions.cpp
+
+
+INCLUDEPATH += ./utils
 
 include(audio/audio.pri)
 include(../include/include.pri)

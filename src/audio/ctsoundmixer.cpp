@@ -1,8 +1,18 @@
 #include "ctsoundmixer.h"
+
+#ifdef CT_OPENAL_AUDIO
+#include "ctsoundmixer_openal_p.h"
+#else
 #include "ctsoundmixer_sdl_p.h"
+#endif
+
 
 CtSoundMixer::CtSoundMixer()
+#ifdef CT_OPENAL_AUDIO
+    : d_ptr(new CtSoundMixerOpenALPrivate)
+#else
     : d_ptr(new CtSoundMixerSdlPrivate)
+#endif
 {
 
 }

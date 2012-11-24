@@ -1,8 +1,17 @@
 #include "ctsoundsample.h"
+
+#ifdef CT_OPENAL_AUDIO
+#include "ctsoundsample_openal_p.h"
+#else
 #include "ctsoundsample_sdl_p.h"
+#endif
 
 CtSoundSample::CtSoundSample()
+#ifdef CT_OPENAL_AUDIO
+    : d_ptr(new CtSoundSampleOpenALPrivate())
+#else
     : d_ptr(new CtSoundSampleSdlPrivate())
+#endif
 {
 
 }

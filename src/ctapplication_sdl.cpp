@@ -101,7 +101,7 @@ void CtApplicationSdlPrivate::processEvent(const SDL_Event &event)
 {
     switch (event.type) {
     case SDL_QUIT: {
-        quit();
+        //quit();
         break;
     }
     case SDL_MOUSEMOTION: {
