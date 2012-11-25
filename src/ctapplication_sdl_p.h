@@ -21,6 +21,7 @@ struct CtApplicationSdlPrivate : public CtApplicationPrivate
     CtWindowSdlPrivate *findWindowById(int winId);
 
     bool m_quit;
+    bool m_ready;
     int m_touchId;
     CtMap<int, CtPointReal> m_touchPoints;
     CtPointReal mousePressPos;

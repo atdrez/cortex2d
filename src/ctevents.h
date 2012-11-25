@@ -28,6 +28,8 @@ public:
         DragCursorCancel,
         WindowMinimize,
         WindowRestore,
+        ApplicationReady,
+        ApplicationRelease,
         Custom = 0x80
     };
 

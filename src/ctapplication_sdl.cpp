@@ -3,10 +3,21 @@
 #include "ctwindow_sdl_p.h"
 #include "ctapplication_sdl_p.h"
 
+int ctMain(int argc, char **argv, CtApplication *app)
+{
+    CT_UNUSED(argc);
+    CT_UNUSED(argv);
+
+    if (!app)
+        return 0;
+    else
+        return app->d_ptr->exec();
+}
 
 CtApplicationSdlPrivate::CtApplicationSdlPrivate(CtApplication *q)
     : CtApplicationPrivate(q),
       m_quit(false),
+      m_ready(false),
       m_touchId(-1),
       mouseButton(Ct::NoButton)
 {
@@ -18,6 +29,7 @@ bool CtApplicationSdlPrivate::init(int argc, char **argv)
     CtApplicationPrivate::init(argc, argv);
     CT_ASSERT(SDL_Init(SDL_INIT_AUDIO) < 0, "Unable to initialize SDL audio");
     CT_ASSERT(SDL_Init(SDL_INIT_VIDEO) < 0, "Unable to initialize SDL video");
+
     return true;
 }
 
@@ -38,6 +50,12 @@ int CtApplicationSdlPrivate::exec()
     SDL_Event event;
     bool done = false;
     Uint32 previousTick = SDL_GetTicks();
+
+    if (!m_ready) {
+        CtEvent ev(CtEvent::ApplicationReady);
+        CtObject::sendEvent(q_ptr, &ev);
+        m_ready = true;
+    }
 
     while (!done) {
         while (SDL_PollEvent(&event))
@@ -70,6 +88,9 @@ int CtApplicationSdlPrivate::exec()
         if (renderTime < 16)
             SDL_Delay(16 - renderTime);
     }
+
+    CtEvent ev(CtEvent::ApplicationRelease);
+    CtObject::sendEvent(q_ptr, &ev);
 
     quit();
     return 1;

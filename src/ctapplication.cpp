@@ -11,10 +11,11 @@ static CtApplication *ct_application = 0;
  *****************************************************************************/
 
 CtApplication::CtApplication(int argc, char **argv)
+    : CtObject()
 #ifdef CT_SDL_BACKEND
-    : d_ptr(new CtApplicationSdlPrivate(this))
+    , d_ptr(new CtApplicationSdlPrivate(this))
 #else
-    : d_ptr(0)
+    , d_ptr(0)
 #endif
 {
     CT_D(CtApplication);
@@ -23,8 +24,9 @@ CtApplication::CtApplication(int argc, char **argv)
     if (ct_application)
         CT_FATAL("CtApplication is already created");
 
-    d->init(argc, argv);
     ct_application = this;
+
+    d->init(argc, argv);
 }
 
 CtApplication::~CtApplication()
@@ -36,12 +38,6 @@ CtApplication::~CtApplication()
 CtApplication *CtApplication::instance()
 {
     return ct_application;
-}
-
-int CtApplication::exec()
-{
-    CT_D(CtApplication);
-    return d->exec();
 }
 
 void CtApplication::quit()
@@ -73,4 +69,32 @@ CtString CtApplication::applicationPath() const
     if (d->argc > 0)
         result = d->argv[0];
     return result;
+}
+
+bool CtApplication::event(CtEvent *event)
+{
+    event->setAccepted(true);
+
+    switch (event->type()) {
+    case CtEvent::ApplicationReady:
+        readyEvent(event);
+        break;
+    case CtEvent::ApplicationRelease:
+        releaseEvent(event);
+        break;
+    default:
+        return CtObject::event(event);
+    }
+
+    return event->isAccepted();
+}
+
+void CtApplication::readyEvent(CtEvent *event)
+{
+
+}
+
+void CtApplication::releaseEvent(CtEvent *event)
+{
+
 }

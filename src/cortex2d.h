@@ -22,3 +22,4 @@
 #include "ctfile.h"
 #include "ctbuffer.h"
 #include "ctopenglfunctions.h"
+#include "ctbasicapplication.h"

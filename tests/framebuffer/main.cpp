@@ -151,10 +151,6 @@ bool MainWindow::init()
 
 int main(int argc, char *argv[])
 {
-    CtApplication app(argc, argv);
-
-    MainWindow window;
-    window.show();
-
-    return app.exec();
+    CtBasicApplication<MainWindow> app(argc, argv);
+    return ctMain(argc, argv, &app);
 }

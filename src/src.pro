@@ -24,6 +24,7 @@ HEADERS += \
     cortex2d.h \
     ctwindow.h \
     ctapplication.h \
+    ctbasicapplication.h \
     ctevents.h \
     ctmatrix.h \
     ctglobal.h \
