@@ -1195,6 +1195,8 @@ bool CtSceneTextureItem::load(const CtString &filePath)
         return load(filePath, Ct::DDSTextureFile);
     else if (ext == ".tga")
         return load(filePath, Ct::TGATextureFile);
+    else if (ext == ".png")
+        return load(filePath, Ct::PNGTextureFile);
 
     return false;
 }
@@ -1219,6 +1221,10 @@ bool CtSceneTextureItem::load(const CtString &filePath, Ct::TextureFileType type
         break;
     case Ct::TGATextureFile:
         if (!d->texture->loadTGA(filePath))
+            return false;
+        break;
+    case Ct::PNGTextureFile:
+        if (!d->texture->loadPNG(filePath))
             return false;
         break;
     default:

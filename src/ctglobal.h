@@ -43,6 +43,7 @@ namespace Ct
 
     enum TextureFileType {
         TGATextureFile,
+        PNGTextureFile,
         PVRTextureFile,
         DDSTextureFile
     };
