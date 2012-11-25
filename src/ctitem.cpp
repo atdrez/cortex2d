@@ -773,8 +773,7 @@ bool CtSceneItem::event(CtEvent *event)
         dragCursorCancelEvent(static_cast<CtDragDropEvent *>(event));
         break;
     default:
-        event->setAccepted(false);
-        break;
+        return CtObject::event(event);
     }
 
     return event->isAccepted();

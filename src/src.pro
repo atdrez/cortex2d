@@ -65,6 +65,7 @@ SOURCES += \
     ctevents.cpp \
     ctmatrix.cpp \
     ctitem.cpp \
+    ctobject.cpp \
     cttexture.cpp \
     ctrenderer.cpp \
     ctsceneview.cpp \
