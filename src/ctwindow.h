@@ -40,8 +40,6 @@ protected:
     virtual void restoreEvent(CtWindowRestoreEvent *event);
     virtual void minimizeEvent(CtWindowMinimizeEvent *event);
 
-    void swapBuffers();
-
     CtWindowPrivate *d_ptr;
 
 private:

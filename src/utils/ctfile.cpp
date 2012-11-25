@@ -1,7 +1,7 @@
 #include "ctfile.h"
 #include "ctbuffer.h"
 
-#if defined(CT_ANDROID) || defined(CT_IPHONE)
+#if defined(CT_ANDROID)
 #    include "SDL.h"
 #    define CT_FILE_RW
 #endif

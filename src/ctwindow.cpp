@@ -7,7 +7,9 @@
 #include "ctapplication_p.h"
 #include "ctopenglfunctions.h"
 
-#ifdef CT_SDL_BACKEND
+#if defined(CT_IOS_BACKEND)
+#    include "ctwindow_ios_p.h"
+#elif defined(CT_SDL_BACKEND)
 #    include "ctwindow_sdl_p.h"
 #endif
 
@@ -26,10 +28,16 @@ CtWindowPrivate::CtWindowPrivate(CtWindow *q)
 
 }
 
+CtWindowPrivate::~CtWindowPrivate()
+{
+
+}
+
 void CtWindowPrivate::render()
 {
-    updateViewPort();
+    prepareGL();
     q_ptr->paint();
+    presentGL();
 }
 
 void CtWindowPrivate::advance(ctuint ms)
@@ -42,7 +50,9 @@ void CtWindowPrivate::advance(ctuint ms)
  *****************************************************************************/
 
 CtWindow::CtWindow(const char *title, int width, int height)
-#ifdef CT_SDL_BACKEND
+#if defined(CT_IOS_BACKEND)
+    : d_ptr(new CtWindowIOSPrivate(this))
+#elif defined(CT_SDL_BACKEND)
     : d_ptr(new CtWindowSdlPrivate(this))
 #else
     : d_ptr(0)
@@ -142,11 +152,7 @@ void CtWindow::closeEvent(CtWindowCloseEvent *event)
 
 void CtWindow::resizeEvent(CtWindowResizeEvent *event)
 {
-    CT_D(CtWindow);
     CT_UNUSED(event);
-
-    d->updateViewPort();
-    d->render();
 }
 
 void CtWindow::restoreEvent(CtWindowRestoreEvent *event)
@@ -162,10 +168,4 @@ void CtWindow::minimizeEvent(CtWindowMinimizeEvent *event)
 void CtWindow::paint()
 {
 
-}
-
-void CtWindow::swapBuffers()
-{
-    CT_D(CtWindow);
-    d->swapBuffers();
 }

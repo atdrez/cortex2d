@@ -419,14 +419,6 @@ void CtSceneView::paint()
 
     CtSceneViewData *data = static_cast<CtSceneViewData *>(d->userData);
 
-    CtGL::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    CtGL::glEnable(GL_BLEND);
-
-    CtGL::glViewport(0, 0, width(), height());
-
-    CtGL::glClearColor(1.0, 1.0, 1.0, 1.0);
-    CtGL::glClear(GL_COLOR_BUFFER_BIT);
-
     // update if list necessary
 
     CtRenderer renderer;
@@ -435,8 +427,6 @@ void CtSceneView::paint()
         data->rootItem->d_ptr->recursivePaint(&renderer);
 
     CT_GL_DEBUG_CHECK();
-
-    swapBuffers();
 }
 
 bool CtSceneView::setDragCursor(CtDragCursor *drag)

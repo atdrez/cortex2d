@@ -11,7 +11,7 @@ int ctMain(int argc, char **argv, CtApplication *app)
     if (!app)
         return 0;
     else
-        return app->d_ptr->exec();
+        return static_cast<CtApplicationSdlPrivate *>(app->d_ptr)->exec();
 }
 
 CtApplicationSdlPrivate::CtApplicationSdlPrivate(CtApplication *q)
@@ -73,11 +73,8 @@ int CtApplicationSdlPrivate::exec()
 
         foreach (CtWindowPrivate *ww, windows) {
             CtWindowSdlPrivate *window = static_cast<CtWindowSdlPrivate *>(ww);
-
-            if (window->makeCurrent()) {
-                window->advance(deltaMs);
-                window->render();
-            }
+            window->advance(deltaMs);
+            window->render();
         }
 
         previousTick = currentTick;
@@ -273,8 +270,7 @@ void CtApplicationSdlPrivate::processEvent(const SDL_Event &event)
         case SDL_WINDOWEVENT_RESIZED: {
             CtWindowSdlPrivate *w = findWindowById(event.window.windowID);
             if (w) {
-                if (!w->makeCurrent())
-                    break;
+                w->updateWindowSize();
                 CtWindowResizeEvent ev(event.window.data1, event.window.data2);
                 postEvent(w, &ev);
                 break;

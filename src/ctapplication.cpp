@@ -1,6 +1,8 @@
 #include "ctapplication.h"
 
-#ifdef CT_SDL_BACKEND
+#if defined(CT_IOS_BACKEND)
+#    include "ctapplication_ios_p.h"
+#elif defined(CT_SDL_BACKEND)
 #    include "ctapplication_sdl_p.h"
 #endif
 
@@ -12,7 +14,9 @@ static CtApplication *ct_application = 0;
 
 CtApplication::CtApplication(int argc, char **argv)
     : CtObject()
-#ifdef CT_SDL_BACKEND
+#if defined(CT_IOS_BACKEND)
+    , d_ptr(new CtApplicationIOSPrivate(this))
+#elif defined(CT_SDL_BACKEND)
     , d_ptr(new CtApplicationSdlPrivate(this))
 #else
     , d_ptr(0)

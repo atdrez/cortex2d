@@ -85,8 +85,6 @@ void MainWindow::paint()
         CT_WARNING("Failed to render poly");
 
     m_program.release();
-
-    swapBuffers();
 }
 
 bool MainWindow::event(CtEvent *event)

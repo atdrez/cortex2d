@@ -129,8 +129,6 @@ void MainWindow::paint()
     CtGL::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     m_program.release();
-
-    swapBuffers();
 }
 
 int main(int argc, char *argv[])

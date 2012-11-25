@@ -10,6 +10,8 @@ namespace CtPrivate {
     template<class P = void>
     struct AbstractCallback0
     {
+        virtual ~AbstractCallback0() {}
+
         virtual void emit() = 0;
         virtual bool match(AbstractCallback0 *cb) = 0;
     };
@@ -44,6 +46,8 @@ namespace CtPrivate {
     template<class P1>
     struct AbstractCallback1
     {
+        virtual ~AbstractCallback1() {}
+
         typedef AbstractCallback1<P1> AbsCb;
 
         virtual void emit(P1 p1) = 0;

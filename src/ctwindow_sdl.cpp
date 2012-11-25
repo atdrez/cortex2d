@@ -87,15 +87,23 @@ bool CtWindowSdlPrivate::makeCurrent()
     return result;
 }
 
-void CtWindowSdlPrivate::updateViewPort()
+bool CtWindowSdlPrivate::prepareGL()
 {
-    if (!window)
-        return;
+    if (!makeCurrent())
+        return false;
 
     CtGL::glViewport(0, 0, width, height);
+
+    CtGL::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    CtGL::glEnable(GL_BLEND);
+
+    CtGL::glClearColor(1.0, 1.0, 1.0, 1.0);
+    CtGL::glClear(GL_COLOR_BUFFER_BIT);
+
+    return true;
 }
 
-void CtWindowSdlPrivate::swapBuffers()
+void CtWindowSdlPrivate::presentGL()
 {
     if (!window)
         return;
@@ -109,4 +117,5 @@ void CtWindowSdlPrivate::updateWindowSize()
         return;
 
     SDL_GetWindowSize(window, &width, &height);
+    render();
 }

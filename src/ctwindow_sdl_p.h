@@ -13,9 +13,9 @@ struct CtWindowSdlPrivate : public CtWindowPrivate
     bool init(const char *title, int width, int height);
     void release();
 
+    bool prepareGL();
+    void presentGL();
     bool makeCurrent();
-    void updateViewPort();
-    void swapBuffers();
 
     void updateWindowSize();
 
