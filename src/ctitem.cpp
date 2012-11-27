@@ -202,6 +202,10 @@ CtMatrix CtSceneItemPrivate::mappedTransformMatrix(CtSceneItem *root)
     modelMatrix.rotate(-(GLfloat)rotation, 0, 0, 1);
     modelMatrix.translate(-ox, -oy, 0);
 
+    CtMatrix m = localMatrix;
+    m.multiply(modelMatrix);
+    modelMatrix.setMatrix(m);
+
     if (parent && (parent != root))
         modelMatrix.multiply(parent->d_ptr->mappedTransformMatrix(root));
 
@@ -605,6 +609,12 @@ void CtSceneItem::setVisible(bool visible)
     itemChanged(VisibilityChange, value);
 }
 
+void CtSceneItem::translate(ctreal x, ctreal y)
+{
+    CT_D(CtSceneItem);
+    d->localMatrix.translate(x, y, 0);
+}
+
 CtRectReal CtSceneItem::boundingRect() const
 {
     CT_D(CtSceneItem);
@@ -729,6 +739,12 @@ CtMatrix CtSceneItem::sceneTransformMatrix() const
 {
     CT_D(CtSceneItem);
     return d->currentSceneTransformMatrix();
+}
+
+void CtSceneItem::setLocalTransform(const CtMatrix &matrix)
+{
+    CT_D(CtSceneItem);
+    d->localMatrix = matrix;
 }
 
 bool CtSceneItem::event(CtEvent *event)

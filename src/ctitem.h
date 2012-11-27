@@ -105,6 +105,10 @@ public:
     CtMatrix transformMatrix() const;
     CtMatrix sceneTransformMatrix() const;
 
+    void setLocalTransform(const CtMatrix &matrix);
+
+    void translate(ctreal x, ctreal y);
+
     void setTransformOrigin(ctreal x, ctreal y);
 
     CtPointReal mapToScene(ctreal x, ctreal y) const;

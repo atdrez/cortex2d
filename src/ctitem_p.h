@@ -65,6 +65,7 @@ struct CtSceneItemPrivate
     bool isFrameBuffer;
     bool pendingDelete;
     CtMatrix fboTransformMatrix;
+    CtMatrix localMatrix;
     CtMatrix localTransformMatrix;
     CtMatrix sceneTransformMatrix;
 
