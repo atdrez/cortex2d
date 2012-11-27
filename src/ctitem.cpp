@@ -81,10 +81,18 @@ void CtSceneItemPrivate::release()
 ctreal CtSceneItemPrivate::relativeOpacity()
 {
     // XXX: optimize
-    if (!parent || opacity == 0.0)
+    if (!parent || opacity == 0.0 || (flags & CtSceneItem::IgnoreAllParentOpacity)) {
         return opacity;
-    else
+    } else if ((flags & CtSceneItem::IgnoreParentOpacity)) {
+        CtSceneItem *topParent = parent ? parent->parent() : 0;
+
+        if (!topParent)
+            return opacity;
+        else
+            return opacity * topParent->opacity();
+    } else {
         return opacity * parent->opacity();
+    }
 }
 
 bool CtSceneItemPrivate::relativeVisible()

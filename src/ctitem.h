@@ -50,6 +50,8 @@ public:
         AcceptsMouseEvent = 0x1,
         AcceptsTouchEvent = 0x2,
         AcceptsDragEvent = 0x4,
+        IgnoreParentOpacity = 0x8,
+        IgnoreAllParentOpacity = 0x10
     };
 
     CtSceneItem(CtSceneItem *parent = 0);
