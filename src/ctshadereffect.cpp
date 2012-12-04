@@ -383,7 +383,10 @@ void CtShaderEffect::applyCustomUniforms()
             CtGL::glUniform1f(u->m_location, u->m.rvalue);
             break;
         case CtShaderUniform::Vec2Type:
-            CtGL::glUniform2f(u->m_location, u->m.vec2.r1, u->m.vec2.r2);
+            CtGL::glUniform2f(u->m_location, u->m.v2f.r1, u->m.v2f.r2);
+            break;
+        case CtShaderUniform::Vec4Type:
+            CtGL::glUniform4f(u->m_location, u->m.v4f.r1, u->m.v4f.r2, u->m.v4f.r3, u->m.v4f.r4);
             break;
         default:
             break;

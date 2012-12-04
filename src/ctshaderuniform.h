@@ -11,7 +11,8 @@ public:
     enum Type {
         IntType,
         FloatType,
-        Vec2Type
+        Vec2Type,
+        Vec4Type
     };
 
     inline CtShaderUniform(const CtString &name, Type type);
@@ -21,7 +22,18 @@ public:
 
     void setValue(int value) { m.ivalue = value; }
     void setValue(ctreal value) { m.rvalue = value; }
-    void setValue(ctreal v1, ctreal v2) { m.vec2.r1 = v1; m.vec2.r2 = v2; }
+
+    void setValue(ctreal v1, ctreal v2) {
+        m.v2f.r1 = v1;
+        m.v2f.r2 = v2;
+    }
+
+    void setValue(ctreal v1, ctreal v2, ctreal v3, ctreal v4) {
+        m.v4f.r1 = v1;
+        m.v4f.r2 = v2;
+        m.v4f.r3 = v3;
+        m.v4f.r4 = v4;
+    }
 
 private:
     union {
@@ -30,7 +42,13 @@ private:
         struct {
             ctreal r1;
             ctreal r2;
-        } vec2;
+        } v2f;
+        struct {
+            ctreal r1;
+            ctreal r2;
+            ctreal r3;
+            ctreal r4;
+        } v4f;
     } m;
 
     Type m_type;
