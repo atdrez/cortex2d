@@ -164,6 +164,9 @@ void CtSceneItemPrivate::recursivePaint(CtRenderer *renderer)
 
 void CtSceneItemPrivate::addItem(CtSceneItem *item)
 {
+    if (children.contains(item))
+        return;
+
     children.remove(item);
     children.push_back(item);
 
@@ -173,10 +176,17 @@ void CtSceneItemPrivate::addItem(CtSceneItem *item)
 
     if (mScene)
         mScene->itemAddedToScene(q);
+
+    CtSceneItem::ChangeValue value;
+    value.itemValue = item;
+    q->itemChanged(CtSceneItem::ChildAdded, value);
 }
 
 void CtSceneItemPrivate::removeItem(CtSceneItem *item)
 {
+    if (!children.contains(item))
+        return;
+
     children.remove(item);
 
     sortDirty = true;
@@ -185,6 +195,10 @@ void CtSceneItemPrivate::removeItem(CtSceneItem *item)
 
     if (mScene)
         mScene->itemRemovedFromScene(q);
+
+    CtSceneItem::ChangeValue value;
+    value.itemValue = item;
+    q->itemChanged(CtSceneItem::ChildRemoved, value);
 }
 
 void CtSceneItemPrivate::setScene(CtSceneView *newScene)
@@ -1210,23 +1224,6 @@ void CtSceneTextureItem::setShaderEffect(CtShaderEffect *effect)
 
 bool CtSceneTextureItem::load(const CtString &filePath)
 {
-    int pos = filePath.rfind(".");
-    CtString ext = pos >= 0 ? filePath.substr(pos) : "";
-
-    if (ext == ".pvr")
-        return load(filePath, Ct::PVRTextureFile);
-    else if (ext == ".dds")
-        return load(filePath, Ct::DDSTextureFile);
-    else if (ext == ".tga")
-        return load(filePath, Ct::TGATextureFile);
-    else if (ext == ".png")
-        return load(filePath, Ct::PNGTextureFile);
-
-    return false;
-}
-
-bool CtSceneTextureItem::load(const CtString &filePath, Ct::TextureFileType type)
-{
     CT_D(CtSceneTextureItem);
 
     if (!d->ownTexture) {
@@ -1234,26 +1231,8 @@ bool CtSceneTextureItem::load(const CtString &filePath, Ct::TextureFileType type
         d->ownTexture = true;
     }
 
-    switch (type) {
-    case Ct::PVRTextureFile:
-        if (!d->texture->loadPVR(filePath))
-            return false;
-        break;
-    case Ct::DDSTextureFile:
-        if (!d->texture->loadDDS(filePath))
-            return false;
-        break;
-    case Ct::TGATextureFile:
-        if (!d->texture->loadTGA(filePath))
-            return false;
-        break;
-    case Ct::PNGTextureFile:
-        if (!d->texture->loadPNG(filePath))
-            return false;
-        break;
-    default:
+    if (!d->texture->load(filePath))
         return false;
-    }
 
     setWidth(d->texture->width());
     setHeight(d->texture->height());

@@ -145,6 +145,28 @@ bool CtTexture::loadDDS(const CtString &fileName)
                  texture.bitsPerPixel == 32, texture.buffer);
 }
 
+bool CtTexture::load(const CtString &fileName)
+{
+    int idx = fileName.lastIndexOf('.');
+
+    if (idx < 0)
+        return false;
+
+    const CtString &ext = fileName.substr(idx + 1);
+
+    if (ext == "dds") {
+        return loadDDS(fileName);
+    } else if (ext == "pvr") {
+        return loadPVR(fileName);
+    } else if (ext == "png") {
+        return loadPNG(fileName);
+    } else if (ext == "tga") {
+        return loadTGA(fileName);
+    }
+
+    return false;
+}
+
 CtAtlasTexture::CtAtlasTexture()
     : CtTexture(true)
 {
@@ -239,14 +261,14 @@ bool CtAtlasTexture::loadAtlas(const CtString &filePath)
     if ((extensions.contains(" GL_OES_texture_compression_S3TC ") ||
          extensions.contains(" GL_EXT_texture_compression_s3tc ")) &&
         CtFile::canOpen(filePath + ".dds", CtFile::ReadOnly)) {
-        ok = loadDDS(filePath + ".dds");
+        ok = load(filePath + ".dds");
     } else if (!skipPVR && extensions.contains(" GL_IMG_texture_compression_pvrtc ") &&
                CtFile::canOpen(filePath + ".pvr", CtFile::ReadOnly)) {
-        ok = loadPVR(filePath + ".pvr");
+        ok = load(filePath + ".pvr");
     } else if (CtFile::canOpen(filePath + ".png", CtFile::ReadOnly)) {
-        ok = loadPNG(filePath + ".png");
+        ok = load(filePath + ".png");
     } else if (CtFile::canOpen(filePath + ".tga", CtFile::ReadOnly)) {
-        ok = loadTGA(filePath + ".tga");
+        ok = load(filePath + ".tga");
     }
 
     if (!ok) {
@@ -259,6 +281,7 @@ bool CtAtlasTexture::loadAtlas(const CtString &filePath)
         return false;
 
     ctuint32 x, y, w, h, xOffset, yOffset;
+
     ctuint32 originalWidth, originalHeight;
 
     setTileCount(totalEntries);
@@ -301,4 +324,75 @@ bool CtAtlasTexture::loadAtlas(const CtString &filePath)
 int CtAtlasTexture::indexOfKey(const CtString &key) const
 {
     return m_keys.value(key, -1);
+}
+
+
+CtTextureCache::CtTextureCache()
+{
+
+}
+
+CtTextureCache::~CtTextureCache()
+{
+
+}
+
+CtTextureCache *CtTextureCache::instance()
+{
+    static CtTextureCache *result = 0;
+
+    if (!result)
+        result = new CtTextureCache();
+
+    return result;
+}
+
+void CtTextureCache::insert(const CtString &key, CtTexture *texture)
+{
+    CtTexture *oldTexture = CtTextureCache::find(key);
+
+    if (oldTexture)
+        delete oldTexture;
+
+    CtTextureCache *d = instance();
+    d->m_map[key] = texture;
+}
+
+CtTexture *CtTextureCache::take(const CtString &key)
+{
+    CtTextureCache *d = instance();
+    CtMap<CtString, CtTexture *>::iterator it = d->m_map.find(key);
+
+    if (it == d->m_map.end())
+        return 0;
+
+    CtTexture *result = it->second;
+    d->m_map.erase(it);
+    return result;
+}
+
+void CtTextureCache::remove(const CtString &key)
+{
+    CtTexture *texture = CtTextureCache::take(key);
+
+    if (texture)
+        delete texture;
+}
+
+CtTexture *CtTextureCache::find(const CtString &key)
+{
+    CtTextureCache *d = instance();
+    CtMap<CtString, CtTexture *>::const_iterator it = d->m_map.find(key);
+    return (it == d->m_map.end()) ? 0 : it->second;
+}
+
+void CtTextureCache::clear()
+{
+    CtTextureCache *d = instance();
+    CtMap<CtString, CtTexture *>::iterator it;
+
+    for (it = d->m_map.begin(); it != d->m_map.end(); it++)
+        delete it->second;
+
+    d->m_map.clear();
 }

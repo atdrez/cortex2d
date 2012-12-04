@@ -29,13 +29,15 @@ public:
     bool reset(int w, int h, bool alpha = true, const GLvoid *data = 0);
 
     void release();
+
+    bool load(const CtString &fileName);
+
+protected:
+    CtTexture(bool isAtlas);
     bool loadTGA(const CtString &fileName);
     bool loadPNG(const CtString &fileName);
     bool loadPVR(const CtString &fileName);
     bool loadDDS(const CtString &fileName);
-
-protected:
-    CtTexture(bool isAtlas);
 
 private:
     bool m_inverted;
@@ -70,6 +72,27 @@ private:
     CtVector<CtRect> m_rects;
     CtVector<CtRect> m_drects;
     CtMap<CtString, int> m_keys;
+};
+
+
+class CtTextureCache
+{
+public:
+    static CtTexture *find(const CtString &key);
+
+    static void insert(const CtString &key, CtTexture *texture);
+    static CtTexture *take(const CtString &key);
+    static void remove(const CtString &key);
+
+    static void clear();
+
+    static CtTextureCache *instance();
+
+private:
+    CtTextureCache();
+    ~CtTextureCache();
+
+    CtMap<CtString, CtTexture *> m_map;
 };
 
 #endif

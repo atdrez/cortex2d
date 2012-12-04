@@ -35,7 +35,9 @@ public:
         VisibilityChange,
         ImplicitWidthChange,
         ImplicitHeightChange,
-        FrozenChange
+        FrozenChange,
+        ChildAdded,
+        ChildRemoved
     };
 
     union ChangeValue {
@@ -215,8 +217,6 @@ public:
     void setTextureAtlasIndex(int index);
 
     bool load(const CtString &filePath);
-
-    bool load(const CtString &filePath, Ct::TextureFileType type);
 
     CtShaderEffect *shaderEffect() const;
     void setShaderEffect(CtShaderEffect *effect);
