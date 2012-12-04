@@ -49,3 +49,10 @@ CtApplicationIOSPrivate *CtApplicationIOSPrivate::instance()
 {
     return ct_app_ios_private;
 }
+
+void CtApplicationIOSPrivate::openURL(const char *url)
+{
+    NSString *nsURL =  [NSString stringWithUTF8String: url];
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString: nsURL]];
+    //[nsURL release];
+}

@@ -307,3 +307,8 @@ void CtApplicationSdlPrivate::processEvent(const SDL_Event &event)
         break;
     }
 }
+
+void CtApplicationSdlPrivate::openURL(const char *url)
+{
+    CT_WARNING("TODO: Application Open URL");
+}

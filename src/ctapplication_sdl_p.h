@@ -17,6 +17,8 @@ struct CtApplicationSdlPrivate : public CtApplicationPrivate
     void quit();
     void requestQuit();
 
+    void openURL(const char *url);
+
     void processEvent(const SDL_Event &event);
     CtWindowSdlPrivate *findWindowById(int winId);
 

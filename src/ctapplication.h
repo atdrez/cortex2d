@@ -20,6 +20,8 @@ public:
 
     static CtApplication *instance();
 
+    static void openURL(const CtString &url);
+
 protected:
     bool event(CtEvent *event);
     virtual void readyEvent(CtEvent *event);

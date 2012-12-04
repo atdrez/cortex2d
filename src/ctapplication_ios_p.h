@@ -16,6 +16,8 @@ struct CtApplicationIOSPrivate : public CtApplicationPrivate
 
     void tick(ctuint ms);
 
+    void openURL(const char *url);
+
     static CtApplicationIOSPrivate *instance();
 
     bool m_quit;

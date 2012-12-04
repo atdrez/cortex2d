@@ -102,3 +102,9 @@ void CtApplication::releaseEvent(CtEvent *event)
 {
 
 }
+
+void CtApplication::openURL(const CtString &url)
+{
+    CtApplication *d = instance();
+    d->d_ptr->openURL(url.c_str());
+}

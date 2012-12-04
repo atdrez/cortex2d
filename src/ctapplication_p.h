@@ -22,6 +22,8 @@ struct CtApplicationPrivate
     void removeWindow(CtWindowPrivate *window);
     static void postEvent(CtWindowPrivate *window, CtEvent *event);
 
+    virtual void openURL(const char *url) = 0;
+
     inline static CtApplicationPrivate *dptr(CtApplication *app) { return app->d_ptr; }
 
     CtApplication *q_ptr;
