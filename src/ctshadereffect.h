@@ -63,6 +63,10 @@ public:
     void drawSolidPoly(const CtMatrix &matrix, GLfloat *vertices, int count,
                        ctreal r, ctreal g, ctreal b, ctreal a, ctreal opacity);
 
+    void drawTexPoly(const CtMatrix &matrix, CtTexture *texture,
+                     GLfloat *vertices, GLfloat *texCoords, int count,
+                     ctreal opacity, int textureAtlasIndex);
+
 protected:
     void applyPosition(const GLfloat *matrix, const GLfloat *vertices);
     void applyTexCoordinates(const GLfloat *coords);
