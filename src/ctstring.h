@@ -31,6 +31,11 @@ public:
 
         return result;
     }
+
+    inline int lastIndexOf(char c) const {
+        size_t idx = find_last_of(c);
+        return (idx >= length()) ? -1 : idx;
+    }
 };
 
 #endif
