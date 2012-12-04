@@ -21,5 +21,6 @@
 #include "ctsoundsample.h"
 #include "ctfile.h"
 #include "ctbuffer.h"
+#include "ctcolor.h"
 #include "ctopenglfunctions.h"
 #include "ctbasicapplication.h"

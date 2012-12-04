@@ -22,6 +22,7 @@ unix {
 
 HEADERS += \
     cortex2d.h \
+    ctcolor.h \
     ctwindow.h \
     ctapplication.h \
     ctbasicapplication.h \
