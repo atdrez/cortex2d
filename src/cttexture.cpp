@@ -63,16 +63,19 @@ void CtTexture::release()
     }
 }
 
-bool CtTexture::reset(int w, int h, bool alpha, const GLvoid *data)
+bool CtTexture::loadFromData(int w, int h, int depth, const GLvoid *data)
 {
     release();
+
+    if (depth != 4 && depth != 3 && depth != 1)
+        return false;
 
     CtGL::glGenTextures(1, &m_textureId);
     CT_CHECK_GL_ERROR(return false);
 
     m_width = w;
     m_height = h;
-    m_format = alpha ? GL_RGBA : GL_RGB;
+    m_format = ((depth == 4) ? GL_RGBA : ((depth == 3) ? GL_RGB : GL_ALPHA));
 
     CtGL::glBindTexture(GL_TEXTURE_2D, m_textureId);
     CT_CHECK_GL_ERROR(return false);
@@ -98,8 +101,8 @@ bool CtTexture::loadTGA(const CtString &fileName)
         return false;
     }
 
-    return reset(texture.width, texture.height,
-                 texture.bitsPerPixel == 32, texture.buffer);
+    return loadFromData(texture.width, texture.height,
+                        texture.bitsPerPixel / 8, texture.buffer);
 }
 
 bool CtTexture::loadPNG(const CtString &fileName)
@@ -111,8 +114,8 @@ bool CtTexture::loadPNG(const CtString &fileName)
         return false;
     }
 
-    bool ok = reset(texture.width, texture.height,
-                    texture.bytesPerPixel == 4, texture.buffer);
+    bool ok = loadFromData(texture.width, texture.height,
+                           texture.bytesPerPixel, texture.buffer);
 
     if (ok)
         m_inverted = false;
@@ -128,8 +131,8 @@ bool CtTexture::loadPVR(const CtString &fileName)
         return false;
     }
 
-    return reset(texture.width, texture.height,
-                 texture.bitsPerPixel == 32, texture.buffer);
+    return loadFromData(texture.width, texture.height,
+                        texture.bitsPerPixel / 8, texture.buffer);
 }
 
 bool CtTexture::loadDDS(const CtString &fileName)
@@ -141,8 +144,8 @@ bool CtTexture::loadDDS(const CtString &fileName)
         return false;
     }
 
-    return reset(texture.width, texture.height,
-                 texture.bitsPerPixel == 32, texture.buffer);
+    return loadFromData(texture.width, texture.height,
+                        texture.bitsPerPixel / 8, texture.buffer);
 }
 
 bool CtTexture::load(const CtString &fileName)

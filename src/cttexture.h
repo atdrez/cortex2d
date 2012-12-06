@@ -26,7 +26,7 @@ public:
     CtString error() const { return m_error; }
     bool isValid() const { return m_textureId != 0; }
 
-    bool reset(int w, int h, bool alpha = true, const GLvoid *data = 0);
+    bool loadFromData(int w, int h, int depth, const GLvoid *data);
 
     void release();
 
