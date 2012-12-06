@@ -81,6 +81,10 @@ public:
     static void glBindRenderbuffer(GLenum target, GLuint renderbuffer);
     static GLenum glCheckFramebufferStatus(GLenum target);
 
+    static void glGenBuffers(GLsizei  n,  GLuint *  buffers);
+
+    static void glBindBuffer(GLenum  target,  GLuint  buffer);
+    static void glBufferData(GLenum  target,  GLsizeiptr  size,  const GLvoid *  data,  GLenum  usage);
     static void glGetIntegerv(GLenum pname, GLint *params);
 
     static void glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
