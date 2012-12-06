@@ -89,8 +89,8 @@ bool MainWindow::init()
 {
     CtApplication *app = CtApplication::instance();
 
-    m_texture1.loadTGA(app->applicationDir() + "/trash.tga");
-    m_texture2.loadTGA(app->applicationDir() + "/umbrella.tga");
+    m_texture1.load(app->applicationDir() + "/trash.tga");
+    m_texture2.load(app->applicationDir() + "/umbrella.tga");
 
     CtSceneItem *root = new CtSceneItem();
 

@@ -8,6 +8,8 @@
 #include "ctmatrix.h"
 #include "cttexture.h"
 #include "ctobject.h"
+#include "ctcolor.h"
+
 
 class CtDragCursor;
 class CtSceneItem;
@@ -18,6 +20,8 @@ class CtShaderEffect;
 class CtSceneImagePrivate;
 class CtSceneTextureItemPrivate;
 class CtRenderer;
+class CtTextureFont;
+
 
 class CtSceneItem : public CtObject
 {
@@ -178,6 +182,28 @@ public:
     ctreal g() const;
     ctreal b() const;
     void setColor(ctreal r, ctreal g, ctreal b);
+
+    CtShaderEffect *shaderEffect() const;
+    void setShaderEffect(CtShaderEffect *effect);
+
+protected:
+    void paint(CtRenderer *renderer);
+};
+
+
+class CtSceneText : public CtSceneItem
+{
+public:
+    CtSceneText(CtSceneItem *parent = 0);
+
+    CtColor color() const;
+    void setColor(const CtColor &color);
+
+    CtString text() const;
+    void setText(const CtString &text);
+
+    CtTextureFont *font() const;
+    void setFont(CtTextureFont *font);
 
     CtShaderEffect *shaderEffect() const;
     void setShaderEffect(CtShaderEffect *effect);

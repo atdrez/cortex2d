@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS = quad ortho items audio fragments framebuffer
+SUBDIRS = quad ortho items audio fragments framebuffer textitems

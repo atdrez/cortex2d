@@ -1,6 +1,10 @@
 #include "ctshadereffect.h"
 #include "ctshaderuniform.h"
 #include "ctopenglfunctions.h"
+#include "ctfont.h"
+#include "ctfont_p.h"
+#include "ctfontmanager_p.h"
+
 
 static const char ct_textureVertexShader[] = " \
     uniform mediump mat4 ct_Matrix; \
@@ -53,6 +57,19 @@ static const char ct_solidFragmentShader[] = " \
     } \
     ";
 
+static const char ct_textFragmentShader[] = " \
+    uniform sampler2D ct_Texture0;            \
+    uniform mediump vec4 ct_Color;            \
+    uniform mediump float ct_Opacity;         \
+    varying mediump vec2 ct_TexCoord0;        \
+                                                                        \
+    void main()                                                         \
+    {                                                                   \
+        mediump float alpha = texture2D(ct_Texture0, ct_TexCoord0).a;   \
+        gl_FragColor = vec4(ct_Color.rgb, alpha) * ct_Opacity;          \
+    }                                                                   \
+    ";
+
 
 static bool ct_updateVertexAttributes(ctreal x, ctreal y, ctreal w, ctreal h,
                                       CtTexture *texture, int atlasIndex, bool vTile, bool hTile,
@@ -81,12 +98,21 @@ CtShaderEffect::CtShaderEffect(Type type)
       m_locPosition(-1),
       m_locTexCoord(-1)
 {
-    if (type == Solid) {
+    switch (type) {
+    case Solid:
         m_vertexShader = ct_solidVertexShader;
         m_fragmentShader = ct_solidFragmentShader;
-    } else {
+        break;
+    case Texture:
         m_vertexShader = ct_textureVertexShader;
         m_fragmentShader = ct_textureFragmentShader;
+        break;
+    case TextureText:
+        m_vertexShader = ct_textureVertexShader;
+        m_fragmentShader = ct_textFragmentShader;
+        break;
+    default:
+        break;
     }
 }
 
@@ -166,6 +192,10 @@ bool CtShaderEffect::init()
     } else if (m_type == Solid) {
         m_locColor = CtGL::glGetUniformLocation(m_program.id(), "ct_Color");
         m_locTexCoord = CtGL::glGetAttribLocation(m_program.id(), "ct_TexCoord");
+    } else if (m_type == TextureText) {
+        m_locColor = CtGL::glGetUniformLocation(m_program.id(), "ct_Color");
+        m_locTexCoord = CtGL::glGetAttribLocation(m_program.id(), "ct_TexCoord");
+        m_locTexture = CtGL::glGetUniformLocation(m_program.id(), "ct_Texture0");
     }
 
     // update custom uniforms
@@ -319,6 +349,47 @@ void CtShaderEffect::drawElements(const CtMatrix &matrix, CtTexture *texture,
         m_program.release();
     }
 }
+
+void CtShaderEffect::drawVboTextTexture(const CtMatrix &matrix, CtTexture *texture,
+                                        GLuint indexBuffer, GLuint vertexBuffer,
+                                        int elementCount, const CtColor &color, ctreal opacity)
+{
+    m_program.bind();
+
+    CtGL::glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+
+    if (m_locMatrix >= 0)
+        CtGL::glUniformMatrix4fv(m_locMatrix, 1, GL_FALSE,
+                                 reinterpret_cast<GLfloat *>(matrix.data()));
+
+    const int vertexStructSize = 4 * sizeof(GLfloat);
+
+    if (m_locPosition >= 0) {
+        CtGL::glVertexAttribPointer(m_locPosition, 2, GL_FLOAT, GL_FALSE, vertexStructSize,
+                                    reinterpret_cast<void *>(0));
+        CtGL::glEnableVertexAttribArray(m_locPosition);
+    }
+
+    if (m_locTexCoord >= 0) {
+        CtGL::glVertexAttribPointer(m_locTexCoord, 2, GL_FLOAT, GL_FALSE, vertexStructSize,
+                                    reinterpret_cast<void *>(2 * sizeof(GLfloat)));
+        CtGL::glEnableVertexAttribArray(m_locTexCoord);
+    }
+
+    applyTexture(texture->id(), false, false);
+    applyColor(color.r(), color.g(), color.b(), color.a(), opacity);
+    applyCustomUniforms();
+
+    CtGL::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    CtGL::glDrawElements(GL_TRIANGLES, elementCount * 6,
+                         GL_UNSIGNED_SHORT, reinterpret_cast<void *>(0));
+
+    CtGL::glBindBuffer(GL_ARRAY_BUFFER, 0);
+    CtGL::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    m_program.release();
+}
+
 
 void CtShaderEffect::applyPosition(const GLfloat *matrix, const GLfloat *vertices)
 {

@@ -79,3 +79,15 @@ bool CtRenderer::drawElements(CtShaderEffect *effect, CtTexture *texture,
     effect->drawElements(m_projectionMatrix, texture, m_opacity, false, false, elements);
     return true;
 }
+
+bool CtRenderer::drawVboTextTexture(CtShaderEffect *effect, CtTexture *texture,
+                                    GLuint indexBuffer, GLuint vertexBuffer,
+                                    int elementCount, const CtColor &color)
+{
+    if (!effect || !effect->init())
+        return false;
+
+    effect->drawVboTextTexture(m_projectionMatrix, texture, indexBuffer, vertexBuffer,
+                               elementCount, color, m_opacity);
+    return true;
+}

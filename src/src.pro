@@ -9,13 +9,14 @@ DEFINES += CT_SDL_BACKEND
 
 unix {
     CONFIG += link_pkgconfig
-    PKGCONFIG += sdl2 libpng
+    PKGCONFIG += sdl2 libpng freetype2
 }
 
 unix {
     PKGCONFIG += openal
     DEFINES += CT_OPENAL_AUDIO
     include(3rdparty/alut/alut.pri)
+    include(3rdparty/freetypegl/freetypegl.pri)
 } else {
     DEFINES += CT_SDL_AUDIO
 }
@@ -49,6 +50,8 @@ HEADERS += \
     ctshaderuniform.h \
     ctanimations.h \
     cteasingcurve.h \
+    ctfont.h \
+    ctfontmanager.h \
     utils/ctfile.h \
     utils/ctbuffer.h \
     utils/cttgaloader.h \
@@ -75,6 +78,8 @@ SOURCES += \
     ctshaderprogram.cpp \
     ctanimations.cpp \
     cteasingcurve.cpp \
+    ctfont.cpp \
+    ctfontmanager.cpp \
     utils/ctfile.cpp \
     utils/ctbuffer.cpp \
     utils/cttgaloader.cpp \

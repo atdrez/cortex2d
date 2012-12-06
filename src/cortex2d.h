@@ -22,5 +22,7 @@
 #include "ctfile.h"
 #include "ctbuffer.h"
 #include "ctcolor.h"
+#include "ctfont.h"
+#include "ctfontmanager.h"
 #include "ctopenglfunctions.h"
 #include "ctbasicapplication.h"

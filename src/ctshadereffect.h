@@ -1,12 +1,14 @@
 #ifndef CTSHADEREFFECT_H
 #define CTSHADEREFFECT_H
 
+#include "ctcolor.h"
 #include "ctmatrix.h"
 #include "cttexture.h"
 #include "ctshaderprogram.h"
 #include <map>
 
 class CtRenderer;
+class CtTextureFont;
 class CtShaderUniform;
 
 class CtShaderEffect
@@ -14,7 +16,8 @@ class CtShaderEffect
 public:
     enum Type {
         Solid,
-        Texture
+        Texture,
+        TextureText
     };
 
     struct Element {
@@ -85,6 +88,10 @@ protected:
                       ctreal opacity,  bool tileVertically, bool tileHorizontally,
                       const CtList<Element> &elements);
 
+    void drawVboTextTexture(const CtMatrix &matrix, CtTexture *texture,
+                            GLuint indexBuffer, GLuint vertexBuffer,
+                            int elementCount, const CtColor &color, ctreal opacity);
+
 private:
     Type m_type;
     bool m_ready;
@@ -101,5 +108,17 @@ private:
 
     friend class CtRenderer;
 };
+
+static inline void ct_setTriangle2Array(GLfloat *v, ctreal x1, ctreal y1, ctreal x2, ctreal y2,
+                                        ctreal s1, ctreal t1, ctreal s2, ctreal t2)
+{
+    v[0] = x1; v[1] = y1; v[2] = s1; v[3] = t1;
+    v[4] = x2; v[5] = y1; v[6] = s2; v[7] = t1;
+    v[8] = x1; v[9] = y2; v[10] = s1; v[11] = t2;
+    v[12] = x1; v[13] = y2; v[14] = s1; v[15] = t2;
+    v[16] = x2; v[17] = y1; v[18] = s2; v[19] = t1;
+    v[20] = x2; v[21] = y2; v[22] = s2; v[23] = t2;
+}
+
 
 #endif

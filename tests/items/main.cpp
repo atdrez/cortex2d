@@ -49,7 +49,7 @@ MainWindow::MainWindow()
 bool MainWindow::init()
 {
     CtApplication *app = CtApplication::instance();
-    m_texture.loadTGA(app->applicationDir() + "/flag.tga");
+    m_texture.load(app->applicationDir() + "/flag.tga");
 
     // create root item
     CtSceneImage *root = new CtSceneImage(&m_texture, 0);

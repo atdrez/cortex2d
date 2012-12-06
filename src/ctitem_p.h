@@ -9,6 +9,8 @@
 #include "ctopenglfunctions.h"
 #include "ctGL.h"
 #include "ctmath.h"
+#include "ctfont.h"
+#include "ctcolor.h"
 
 class CtRenderer;
 
@@ -84,6 +86,25 @@ struct CtSceneRectPrivate : public CtSceneItemPrivate
     ctreal g;
     ctreal b;
 
+    CtShaderEffect *shaderEffect;
+};
+
+struct CtSceneTextPrivate : public CtSceneItemPrivate
+{
+    CtSceneTextPrivate(CtSceneText *q);
+
+    void init(CtSceneItem *parent);
+    void release();
+
+    void releaseBuffers();
+    void recreateBuffers();
+
+    CtColor color;
+    CtString text;
+    int glyphCount;
+    GLuint indexBuffer;
+    GLuint vertexBuffer;
+    CtTextureFont *font;
     CtShaderEffect *shaderEffect;
 };
 

@@ -6,6 +6,9 @@
 #include "ctdragcursor.h"
 #include "ctshadereffect.h"
 #include "3rdparty/tricollision.h"
+#include "freetype-gl.h"
+#include "ctfont_p.h"
+#include "ctfontmanager_p.h"
 
 
 static CtShaderEffect *ct_sharedSolidShaderEffect()
@@ -17,6 +20,12 @@ static CtShaderEffect *ct_sharedSolidShaderEffect()
 static CtShaderEffect *ct_sharedTextureShaderEffect()
 {
     static CtShaderEffect *r = new CtShaderEffect(CtShaderEffect::Texture);
+    return r;
+}
+
+static CtShaderEffect *ct_sharedTextShaderEffect()
+{
+    static CtShaderEffect *r = new CtShaderEffect(CtShaderEffect::TextureText);
     return r;
 }
 
@@ -965,6 +974,181 @@ void CtSceneRect::setShaderEffect(CtShaderEffect *effect)
 }
 
 /////////////////////////////////////////////////
+// CtSceneText
+/////////////////////////////////////////////////
+
+CtSceneTextPrivate::CtSceneTextPrivate(CtSceneText *q)
+    : CtSceneItemPrivate(q),
+      color(0, 0, 0),
+      glyphCount(0),
+      indexBuffer(0),
+      vertexBuffer(0),
+      font(0),
+      shaderEffect(0)
+{
+
+}
+
+void CtSceneTextPrivate::init(CtSceneItem *parent)
+{
+    CtSceneItemPrivate::init(parent);
+    shaderEffect = ct_sharedTextShaderEffect();
+}
+
+void CtSceneTextPrivate::release()
+{
+    CtSceneItemPrivate::release();
+    releaseBuffers();
+}
+
+void CtSceneTextPrivate::releaseBuffers()
+{
+    if (indexBuffer > 0) {
+        glDeleteBuffers(1, &indexBuffer);
+        indexBuffer = 0;
+    }
+
+    if (vertexBuffer > 0) {
+        glDeleteBuffers(1, &vertexBuffer);
+        vertexBuffer = 0;
+    }
+
+    glyphCount = 0;
+}
+
+void CtSceneTextPrivate::recreateBuffers()
+{
+    releaseBuffers();
+
+    const char *str = text.c_str();
+    const int len = strlen(str);
+
+    if (!font || len == 0)
+        return;
+
+    GLfloat vertices[24 * len];
+    unsigned short indexes[6 * len];
+
+    int n = 0;
+    int j = 0;
+    int fx = 0;
+    texture_font_t *f = CtTextureFontPrivate::dd(font)->font;
+
+    for (int i = 0; i < len; i++) {
+        texture_glyph_t *glyph = (texture_glyph_t *)texture_font_get_glyph(f, str[i]);
+
+        if (!glyph)
+            continue;
+
+        const int offset = n * 24;
+        const int x  = glyph->offset_x;
+        const int y  = glyph->offset_y;
+        const int w  = glyph->width;
+        const int h  = glyph->height;
+        const int by = f->ascender;
+
+        ct_setTriangle2Array(vertices + offset,
+                             fx + x, by - y, fx + x + w, by - y + h,
+                             glyph->s0, glyph->t0, glyph->s1, glyph->t1);
+
+        fx += glyph->advance_x;
+
+        // indexes
+        for (int kk = j + 6; j < kk; j++)
+            indexes[j] = j;
+
+        n++;
+    }
+
+    if (n > 0) {
+        CtGL::glGenBuffers(1, &vertexBuffer);
+        CtGL::glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+        CtGL::glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        CtGL::glGenBuffers(1, &indexBuffer);
+        CtGL::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+        CtGL::glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_STATIC_DRAW);
+
+        CtGL::glBindBuffer(GL_ARRAY_BUFFER, 0);
+        CtGL::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
+
+    glyphCount = n;
+}
+
+CtSceneText::CtSceneText(CtSceneItem *parent)
+    : CtSceneItem(new CtSceneTextPrivate(this))
+{
+    CT_D(CtSceneText);
+    d->init(parent);
+}
+
+void CtSceneText::paint(CtRenderer *renderer)
+{
+    CT_D(CtSceneText);
+
+    if (d->shaderEffect && d->glyphCount > 0) {
+        CtAtlasTexture *texture = CtFontManagerPrivate::instance()->atlas;
+        renderer->drawVboTextTexture(d->shaderEffect, texture, d->indexBuffer,
+                                     d->vertexBuffer, d->glyphCount, d->color);
+    }
+}
+
+CtColor CtSceneText::color() const
+{
+    CT_D(CtSceneText);
+    return d->color;
+}
+
+void CtSceneText::setColor(const CtColor &color)
+{
+    CT_D(CtSceneText);
+    d->color = color;
+}
+
+CtString CtSceneText::text() const
+{
+    CT_D(CtSceneText);
+    return d->text;
+}
+
+void CtSceneText::setText(const CtString &text)
+{
+    CT_D(CtSceneText);
+    if (d->text != text) {
+        d->text = text;
+        d->recreateBuffers();
+    }
+}
+
+CtTextureFont *CtSceneText::font() const
+{
+    CT_D(CtSceneText);
+    return d->font;
+}
+
+void CtSceneText::setFont(CtTextureFont *font)
+{
+    CT_D(CtSceneText);
+    if (d->font != font) {
+        d->font = font;
+        d->recreateBuffers();
+    }
+}
+
+CtShaderEffect *CtSceneText::shaderEffect() const
+{
+    CT_D(CtSceneText);
+    return d->shaderEffect;
+}
+
+void CtSceneText::setShaderEffect(CtShaderEffect *effect)
+{
+    CT_D(CtSceneText);
+    d->shaderEffect = effect;
+}
+
+/////////////////////////////////////////////////
 // CtSceneFrameBuffer
 /////////////////////////////////////////////////
 
@@ -1047,7 +1231,7 @@ void CtSceneFrameBufferPrivate::resizeBuffer(int w, int h)
     if (w <= 0 || h <= 0)
         return;
 
-    texture->reset(w, h, true, 0);
+    texture->loadFromData(w, h, 4, 0);
 
     GLint defaultFBO;
     CtGL::glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);

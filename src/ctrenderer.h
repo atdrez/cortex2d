@@ -35,6 +35,10 @@ public:
     bool drawElements(CtShaderEffect *effect, CtTexture *texture,
                       const CtList<CtShaderEffect::Element> &elements);
 
+    bool drawVboTextTexture(CtShaderEffect *effect, CtTexture *texture,
+                            GLuint indexBuffer, GLuint vertexBuffer,
+                            int elementCount, const CtColor &color);
+
 private:
     void begin();
     void end();

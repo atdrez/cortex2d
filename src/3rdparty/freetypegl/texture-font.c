@@ -384,6 +384,8 @@ texture_font_load_glyphs( texture_font_t * self,
         }
 
 
+#ifndef CT_IOS_BACKEND
+// XXX: iOS freetype2 doesn't implement lcd filter
         if( depth == 3 )
         {
             FT_Library_SetLcdFilter( library, FT_LCD_FILTER_LIGHT );
@@ -393,6 +395,8 @@ texture_font_load_glyphs( texture_font_t * self,
                 FT_Library_SetLcdFilterWeights( library, self->lcd_weights );
             }
         }
+#endif
+
         error = FT_Load_Glyph( face, glyph_index, flags );
 
         if( error )
