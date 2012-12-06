@@ -2,7 +2,7 @@
 #define CTOPENGLFUNCTIONS_H
 
 #include "ctglobal.h"
-#include <SDL_opengles2.h>
+#include "ctGL.h"
 
 #ifndef CT_GL_APIENTRY
 #    if defined(APIENTRY)

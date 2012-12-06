@@ -1,6 +1,8 @@
 #ifndef CTCOLOR_H
 #define CTCOLOR_H
 
+#include "ctglobal.h"
+
 class CtColor
 {
 public:
