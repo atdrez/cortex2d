@@ -20,6 +20,14 @@ public:
     inline ctreal b() const { return m_b; }
     inline ctreal a() const { return m_a; }
 
+    static CtColor fromHex(int value) {
+        const ctreal r = ctreal((value >> 16) & 0xFF) / 0xFF;
+        const ctreal g = ctreal((value >> 8) & 0xFF) / 0xFF;
+        const ctreal b = ctreal(value & 0xFF) / 0xFF;
+
+        return CtColor(r, g, b);
+    }
+
 private:
     ctreal m_r;
     ctreal m_g;
