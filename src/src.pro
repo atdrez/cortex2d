@@ -93,6 +93,7 @@ SOURCES += \
 INCLUDEPATH += ./utils
 
 include(audio/audio.pri)
+include(filesystem/filesystem.pri)
 include(../include/include.pri)
 
 target.path = /usr/local/lib

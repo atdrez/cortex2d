@@ -26,3 +26,4 @@
 #include "ctfontmanager.h"
 #include "ctopenglfunctions.h"
 #include "ctbasicapplication.h"
+#include "ctfilemanager.h"
