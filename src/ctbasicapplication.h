@@ -18,12 +18,16 @@ public:
 protected:
     void readyEvent(CtEvent *) {
         m_window = new T();
+        setActiveWindow(m_window);
 
         if (m_window)
             m_window->show();
     }
 
     void releaseEvent(CtEvent *) {
+        if (m_window == activeWindow())
+            setActiveWindow(0);
+
         delete m_window;
         m_window = 0;
     }

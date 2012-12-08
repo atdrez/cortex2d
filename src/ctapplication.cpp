@@ -30,6 +30,7 @@ CtApplication::CtApplication(int argc, char **argv)
 
     ct_application = this;
 
+    d->activeWindow = 0;
     d->init(argc, argv);
 }
 
@@ -107,4 +108,16 @@ void CtApplication::openURL(const CtString &url)
 {
     CtApplication *d = instance();
     d->d_ptr->openURL(url.c_str());
+}
+
+CtWindow *CtApplication::activeWindow() const
+{
+    CtApplication *d = instance();
+    return d->d_ptr->activeWindow;
+}
+
+void CtApplication::setActiveWindow(CtWindow *window)
+{
+    CtApplication *d = instance();
+    d->d_ptr->activeWindow = window;
 }

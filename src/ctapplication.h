@@ -18,6 +18,9 @@ public:
     CtString applicationDir() const;
     CtString applicationPath() const;
 
+    CtWindow *activeWindow() const;
+    void setActiveWindow(CtWindow *window);
+
     static CtApplication *instance();
 
     static void openURL(const CtString &url);

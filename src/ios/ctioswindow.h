@@ -7,7 +7,7 @@
 {
 @public
     CtIOSGLView *glView;
-    CtIOSViewController *viewController;
+    UIViewController *viewController;
 }
 
 - (void) makeCurrent;

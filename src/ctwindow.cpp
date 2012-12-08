@@ -45,6 +45,11 @@ void CtWindowPrivate::advance(ctuint ms)
     q_ptr->advance(ms);
 }
 
+CtWindowPrivate *CtWindowPrivate::dptr(CtWindow *window)
+{
+    return window->d_ptr;
+}
+
 /******************************************************************************
  * CtWindow
  *****************************************************************************/

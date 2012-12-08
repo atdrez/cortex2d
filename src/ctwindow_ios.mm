@@ -96,3 +96,9 @@ void CtWindowIOSPrivate::updateWindowSize()
     width = [w bounds].size.width;
     height = [w bounds].size.height;
 }
+
+UIViewController *ctUIKitGetViewController(CtWindow *window)
+{
+    CtWindowIOSPrivate *d = static_cast<CtWindowIOSPrivate *>(CtWindowPrivate::dptr(window));
+    return d->dw->window->viewController;
+}

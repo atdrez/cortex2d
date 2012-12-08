@@ -29,6 +29,7 @@ struct CtApplicationPrivate
     CtApplication *q_ptr;
     int argc;
     char **argv;
+    CtWindow *activeWindow;
     CtList<CtWindowPrivate *> windows;
 
     friend class CtWindow;

@@ -20,6 +20,8 @@ struct CtWindowPrivate
     virtual void presentGL() = 0;
     virtual bool makeCurrent() = 0;
 
+    static CtWindowPrivate *dptr(CtWindow *window);
+
     CtWindow *q_ptr;
     int width;
     int height;
