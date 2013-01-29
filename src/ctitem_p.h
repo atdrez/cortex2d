@@ -82,10 +82,7 @@ struct CtSceneRectPrivate : public CtSceneItemPrivate
     void init(CtSceneItem *parent);
     void release();
 
-    ctreal r;
-    ctreal g;
-    ctreal b;
-
+    CtColor color;
     CtShaderEffect *shaderEffect;
 };
 

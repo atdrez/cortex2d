@@ -178,10 +178,8 @@ public:
     CtSceneRect(CtSceneItem *parent = 0);
     CtSceneRect(ctreal r, ctreal g, ctreal b, CtSceneItem *parent = 0);
 
-    ctreal r() const;
-    ctreal g() const;
-    ctreal b() const;
-    void setColor(ctreal r, ctreal g, ctreal b);
+    CtColor color() const;
+    void setColor(const CtColor &color);
 
     CtShaderEffect *shaderEffect() const;
     void setShaderEffect(CtShaderEffect *effect);

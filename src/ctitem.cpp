@@ -892,9 +892,6 @@ void CtSceneItem::dragCursorCancelEvent(CtDragDropEvent *event)
 
 CtSceneRectPrivate::CtSceneRectPrivate(CtSceneRect *q)
     : CtSceneItemPrivate(q),
-      r(1),
-      g(1),
-      b(1),
       shaderEffect(0)
 {
 
@@ -924,41 +921,26 @@ CtSceneRect::CtSceneRect(ctreal r, ctreal g, ctreal b, CtSceneItem *parent)
 {
     CT_D(CtSceneRect);
     d->init(parent);
-    d->r = r;
-    d->g = g;
-    d->b = b;
+    d->color = CtColor(r, g, b);
 }
 
 void CtSceneRect::paint(CtRenderer *renderer)
 {
     CT_D(CtSceneRect);
-    renderer->drawSolid(d->shaderEffect, d->width, d->height, d->r, d->g, d->b, 1.0);
+    renderer->drawSolid(d->shaderEffect, d->width, d->height,
+                        d->color.r(), d->color.g(), d->color.b(), d->color.a());
 }
 
-ctreal CtSceneRect::r() const
+CtColor CtSceneRect::color() const
 {
     CT_D(CtSceneRect);
-    return d->r;
+    return d->color;
 }
 
-ctreal CtSceneRect::g() const
+void CtSceneRect::setColor(const CtColor &color)
 {
     CT_D(CtSceneRect);
-    return d->g;
-}
-
-ctreal CtSceneRect::b() const
-{
-    CT_D(CtSceneRect);
-    return d->b;
-}
-
-void CtSceneRect::setColor(ctreal r, ctreal g, ctreal b)
-{
-    CT_D(CtSceneRect);
-    d->r = r;
-    d->g = g;
-    d->b = b;
+    d->color = color;
 }
 
 CtShaderEffect *CtSceneRect::shaderEffect() const

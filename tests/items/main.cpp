@@ -30,13 +30,14 @@ private:
 
 void PulsatingRect::advance(ctuint ms)
 {
+    ctreal r = color().r();
     ctreal step = 0.02;
-    ctreal value = (r() + step > 1.0f) ? 0.0f : (r() + step);
+    ctreal value = (r + step > 1.0f) ? 0.0f : (r + step);
 
     if (m_pressed)
-        setColor(value, 0, 0);
+        setColor(CtColor(value, 0, 0));
     else
-        setColor(value, value, 0);
+        setColor(CtColor(value, value, 0));
 }
 
 
