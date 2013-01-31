@@ -2,6 +2,7 @@
 #define CTMATRIX_H
 
 #include "ctglobal.h"
+#include "ctpoint.h"
 
 class CtMatrix
 {
@@ -24,6 +25,7 @@ public:
     void multiply(const CtMatrix &matrix);
 
     bool invert();
+    CtPointReal map(ctreal x, ctreal y) const;
     void map(ctreal x, ctreal y, ctreal *ox, ctreal *oy) const;
 
 private:

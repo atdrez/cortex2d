@@ -230,6 +230,13 @@ void CtMatrix::multiply(const CtMatrix &matrix)
     setMatrix(tmp);
 }
 
+CtPointReal CtMatrix::map(ctreal x, ctreal y) const
+{
+    ctreal ox, oy;
+    map(x, y, &ox, &oy);
+    return CtPointReal(ox, oy);
+}
+
 void CtMatrix::map(ctreal ix, ctreal iy, ctreal *ox, ctreal *oy) const
 {
     ctreal x = ix * m[0][0] + iy * m[1][0] + m[3][0];
