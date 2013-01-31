@@ -747,6 +747,12 @@ bool CtSceneItem::collidesWith(CtSceneItem *item) const
     return false;
 }
 
+CtPointReal CtSceneItem::transformOrigin() const
+{
+    CT_D(CtSceneItem);
+    return CtPointReal(d->xCenter, d->yCenter);
+}
+
 void CtSceneItem::setTransformOrigin(ctreal x, ctreal y)
 {
     CT_D(CtSceneItem);

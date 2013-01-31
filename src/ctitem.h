@@ -117,6 +117,7 @@ public:
 
     void translate(ctreal x, ctreal y);
 
+    CtPointReal transformOrigin() const;
     void setTransformOrigin(ctreal x, ctreal y);
 
     CtPointReal mapToScene(ctreal x, ctreal y) const;
