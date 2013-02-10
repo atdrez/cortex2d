@@ -145,6 +145,13 @@ struct CtSceneImagePrivate : public CtSceneTextureItemPrivate
     CtSceneImage::FillMode fillMode;
 };
 
+struct CtSceneImagePolyPrivate : public CtSceneImagePrivate
+{
+    CtSceneImagePolyPrivate(CtSceneImagePoly *q);
+
+    CtVector<CtPointReal> vertices;
+};
+
 struct CtSceneFragmentsPrivate : public CtSceneTextureItemPrivate
 {
     CtSceneFragmentsPrivate(CtSceneFragments *q);

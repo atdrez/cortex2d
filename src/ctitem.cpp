@@ -1471,6 +1471,88 @@ void CtSceneImage::paint(CtRenderer *renderer)
 }
 
 /////////////////////////////////////////////////
+// CtSceneImagePoly
+/////////////////////////////////////////////////
+
+CtSceneImagePolyPrivate::CtSceneImagePolyPrivate(CtSceneImagePoly *q)
+    : CtSceneImagePrivate(q)
+{
+
+}
+
+CtSceneImagePoly::CtSceneImagePoly(CtSceneItem *parent)
+    : CtSceneImage(new CtSceneImagePolyPrivate(this))
+{
+    CT_D(CtSceneImagePoly);
+    d->init(parent);
+}
+
+CtSceneImagePoly::CtSceneImagePoly(CtTexture *texture, CtSceneItem *parent)
+    : CtSceneImage(new CtSceneImagePolyPrivate(this))
+{
+    CT_D(CtSceneImagePoly);
+    d->texture = texture;
+    d->init(parent);
+}
+
+void CtSceneImagePoly::paint(CtRenderer *renderer)
+{
+    CT_D(CtSceneImagePoly);
+
+    const int count = d->vertices.size();
+
+    if (!d->texture || count < 3)
+        return;
+
+    if (d->textureAtlasIndex >= 0) {
+        CT_WARNING("CtSceneImagePoly does not support atlas texture yet!");
+        return;
+    }
+
+    const bool vTile = (d->fillMode == CtSceneImagePoly::Tile ||
+                        d->fillMode == CtSceneImagePoly::TileVertically);
+
+    const bool hTile = (d->fillMode == CtSceneImagePoly::Tile ||
+                        d->fillMode == CtSceneImagePoly::TileHorizontally);
+
+    int i = 0;
+    GLfloat *vertices = new GLfloat[count * 2];
+    GLfloat *texCoords = new GLfloat[count * 2];
+
+    const ctreal w = hTile ? d->texture->width() : width();
+    const ctreal h = vTile ? d->texture->height() : height();
+
+    foreach (const CtPointReal &p, d->vertices) {
+        vertices[i] = p.x();
+        vertices[i + 1] = p.y();
+
+        texCoords[i] = p.x() / w;
+        texCoords[i + 1] = p.y() / h;
+
+        i += 2;
+    }
+
+    renderer->drawTexture(d->shaderEffect, d->texture, vertices, texCoords, count,
+                          vTile, hTile);
+
+    delete [] vertices;
+    delete [] texCoords;
+}
+
+CtVector<CtPointReal> CtSceneImagePoly::vertices() const
+{
+    CT_D(CtSceneImagePoly);
+    return d->vertices;
+}
+
+void CtSceneImagePoly::setVertices(const CtVector<CtPointReal> &vertices)
+{
+    CT_D(CtSceneImagePoly);
+    d->vertices = vertices;
+}
+
+
+/////////////////////////////////////////////////
 // CtSceneFragments
 /////////////////////////////////////////////////
 

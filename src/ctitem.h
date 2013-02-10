@@ -274,6 +274,20 @@ protected:
 };
 
 
+class CtSceneImagePoly : public CtSceneImage
+{
+public:
+    CtSceneImagePoly(CtSceneItem *parent = 0);
+    CtSceneImagePoly(CtTexture *texture, CtSceneItem *parent = 0);
+
+    CtVector<CtPointReal> vertices() const;
+    void setVertices(const CtVector<CtPointReal> &vertices);
+
+protected:
+    void paint(CtRenderer *renderer);
+};
+
+
 class CtSceneFragments : public CtSceneTextureItem
 {
 public:

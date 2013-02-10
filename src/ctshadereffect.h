@@ -68,7 +68,7 @@ public:
 
     void drawTexPoly(const CtMatrix &matrix, CtTexture *texture,
                      GLfloat *vertices, GLfloat *texCoords, int count,
-                     ctreal opacity, int textureAtlasIndex);
+                     ctreal opacity, bool vTile, bool hTile);
 
 protected:
     void applyPosition(const GLfloat *matrix, const GLfloat *vertices);

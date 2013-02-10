@@ -260,7 +260,7 @@ void CtShaderEffect::drawSolidPoly(const CtMatrix &matrix, GLfloat *vertices, in
 
 void CtShaderEffect::drawTexPoly(const CtMatrix &matrix, CtTexture *texture,
                                  GLfloat *vertices, GLfloat *texCoords, int count,
-                                 ctreal opacity, int textureAtlasIndex)
+                                 ctreal opacity, bool vTile, bool hTile)
 {
     if (!texture)
         return;
@@ -269,7 +269,7 @@ void CtShaderEffect::drawTexPoly(const CtMatrix &matrix, CtTexture *texture,
 
     applyPosition((GLfloat *)matrix.data(), vertices);
     applyColor(1, 1, 1, 1, opacity);
-    applyTexture(texture->id(), false, false);
+    applyTexture(texture->id(), vTile, hTile);
     applyTexCoordinates(texCoords);
     applyCustomUniforms();
 

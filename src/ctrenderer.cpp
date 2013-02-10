@@ -70,6 +70,18 @@ bool CtRenderer::drawTexture(CtShaderEffect *effect, CtTexture *texture,
     return true;
 }
 
+bool CtRenderer::drawTexture(CtShaderEffect *effect, CtTexture *texture,
+                             GLfloat *vertices, GLfloat *texCoords, int count,
+                             bool vTile, bool hTile)
+{
+    if (!texture || !texture->isValid() || !effect || !effect->init())
+        return false;
+
+    effect->drawTexPoly(m_projectionMatrix, texture, vertices, texCoords, count, m_opacity,
+                        vTile, hTile);
+    return true;
+}
+
 bool CtRenderer::drawElements(CtShaderEffect *effect, CtTexture *texture,
                               const CtList<CtShaderEffect::Element> &elements)
 {

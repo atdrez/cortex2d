@@ -32,6 +32,10 @@ public:
                      ctreal width, ctreal height,
                      bool tileVertically, bool tileHorizontally, int textureAtlasIndex);
 
+    bool drawTexture(CtShaderEffect *effect, CtTexture *texture,
+                     GLfloat *vertices, GLfloat *texCoords, int count,
+                     bool vTile, bool hTile);
+
     bool drawElements(CtShaderEffect *effect, CtTexture *texture,
                       const CtList<CtShaderEffect::Element> &elements);
 
