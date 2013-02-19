@@ -157,11 +157,13 @@ const CtList<CtSceneItem *> &CtSceneItemPrivate::orderedChildren()
 
 void CtSceneItemPrivate::recursivePaint(CtRenderer *renderer)
 {
-    renderer->begin();
-    renderer->m_opacity = relativeOpacity();
-    renderer->m_projectionMatrix = currentViewportProjectionMatrix();
-    q->paint(renderer);
-    renderer->end();
+    if ((flags & CtSceneItem::DoNotPaintContent) == 0) {
+        renderer->begin();
+        renderer->m_opacity = relativeOpacity();
+        renderer->m_projectionMatrix = currentViewportProjectionMatrix();
+        q->paint(renderer);
+        renderer->end();
+    }
 
     const CtList<CtSceneItem *> &lst = orderedChildren();
 
