@@ -25,13 +25,13 @@ inline void CtMap<T, B>::insert(const T &key, const B &value)
 template <typename T, typename B>
 inline B CtMap<T, B>::take(const T &key)
 {
-    typename CtMap<T, B>::iterator it = find(key);
+    typename CtMap<T, B>::iterator it = CtMap<T, B>::find(key);
 
     if (it == CtMap<T, B>::end())
         return B();
 
     const B &result = it->second;
-    erase(it);
+    CtMap<T, B>::erase(it);
 
     return result;
 }
