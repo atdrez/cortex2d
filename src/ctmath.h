@@ -41,6 +41,12 @@ inline T ctFloor(T a)
     return floor(a);
 }
 
+template<typename T>
+inline T ctAbs(T a)
+{
+    return abs(a);
+}
+
 #define ctSqrt(a) sqrt(a)
 
 #endif
