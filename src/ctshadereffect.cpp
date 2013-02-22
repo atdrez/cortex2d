@@ -92,6 +92,7 @@ static inline void ct_setTriangleStripArray(GLfloat *v, ctreal x1, ctreal y1, ct
 CtShaderEffect::CtShaderEffect(Type type)
     : m_type(type),
       m_ready(false),
+      m_locColor(-1),
       m_locMatrix(-1),
       m_locOpacity(-1),
       m_locTexture(-1),

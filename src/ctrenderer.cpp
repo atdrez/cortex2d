@@ -2,6 +2,7 @@
 #include "ctopenglfunctions.h"
 
 CtRenderer::CtRenderer()
+    : m_opacity(1.0)
 {
     CtGL::glGetIntegerv(GL_FRAMEBUFFER_BINDING, &m_defaultFbo);
     m_fbo = m_defaultFbo;
