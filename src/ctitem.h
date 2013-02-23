@@ -337,4 +337,49 @@ protected:
     void paint(CtRenderer *renderer);
 };
 
+
+class CtSceneParticleSystem : public CtSceneTextureItem
+{
+public:
+    class Particle {
+    public:
+        Particle();
+
+        ctreal x() const { return m_x; }
+        void setX(ctreal x) { m_x = x; }
+
+        ctreal y() const { return m_y; }
+        void setY(ctreal y) { m_y = y; }
+
+        ctreal pointSize() const { return m_size; }
+        void setPointSize(ctreal size) { m_size = size; }
+
+        CtColor color() const { return m_color; }
+        void setColor(const CtColor &color) { m_color = color; }
+
+        void *userData() const { return m_userData; }
+        void setUserData(void *data) { m_userData = data; }
+
+    private:
+        ctreal m_x;
+        ctreal m_y;
+        ctreal m_size;
+        CtColor m_color;
+        void *m_userData;
+    };
+
+    CtSceneParticleSystem(CtSceneItem *parent = 0);
+    CtSceneParticleSystem(CtTexture *texture, CtSceneItem *parent = 0);
+
+    CtVector<Particle *> particles() const;
+
+    bool addParticle(Particle *);
+    bool removeParticle(Particle *);
+    void clearParticles();
+
+protected:
+    void paint(CtRenderer *renderer);
+};
+
+
 #endif

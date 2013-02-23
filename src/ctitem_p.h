@@ -161,4 +161,20 @@ struct CtSceneFragmentsPrivate : public CtSceneTextureItemPrivate
     CtList<CtSceneFragments::Fragment *> fragments;
 };
 
+struct CtSceneParticleSystemPrivate : public CtSceneTextureItemPrivate
+{
+    CtSceneParticleSystemPrivate(CtSceneParticleSystem *q);
+
+    void init(CtSceneItem *parent);
+    void release();
+
+    void recreateVertexBuffer();
+
+    GLfloat *vertices;
+    int attrCount;
+    int vertexSize;
+    int vertexCount;
+    CtVector<CtSceneParticleSystem::Particle *> particles;
+};
+
 #endif

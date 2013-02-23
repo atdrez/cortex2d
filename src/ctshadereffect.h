@@ -43,6 +43,8 @@ public:
     CtShaderEffect(CtShaderProgram *program);
     virtual ~CtShaderEffect();
 
+    CtShaderProgram *program() const { return m_program; }
+
     CtString vertexShader() const;
     void setVertexShader(const CtString &shader);
 

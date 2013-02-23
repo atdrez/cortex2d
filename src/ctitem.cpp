@@ -33,6 +33,13 @@ static CtShaderEffect *ct_sharedTextShaderEffect()
     return r;
 }
 
+static CtShaderEffect *ct_sharedParticleShaderEffect()
+{
+    static CtShaderEffect *r
+        = new CtShaderEffect(CtShaderProgram::sharedParticleShaderProgram());
+    return r;
+}
+
 bool CtSceneItemPrivate_sort_compare(CtSceneItem *a, CtSceneItem *b)
 {
     return (!a || !b) ? false : (a->z() < b->z());
@@ -1713,4 +1720,197 @@ void CtSceneFragments::paint(CtRenderer *renderer)
     }
 
     renderer->drawElements(d->shaderEffect, d->texture, elements);
+}
+
+
+/////////////////////////////////////////////////
+// CtSceneParticleSystem
+/////////////////////////////////////////////////
+
+CtSceneParticleSystemPrivate::CtSceneParticleSystemPrivate(CtSceneParticleSystem *q)
+    : CtSceneTextureItemPrivate(q),
+      vertices(0),
+      attrCount(7),
+      vertexSize(7 * sizeof(GLfloat)),
+      vertexCount(0)
+{
+
+}
+
+void CtSceneParticleSystemPrivate::init(CtSceneItem *parent)
+{
+    CtSceneTextureItemPrivate::init(parent);
+    shaderEffect = ct_sharedParticleShaderEffect();
+}
+
+void CtSceneParticleSystemPrivate::release()
+{
+    CtSceneTextureItemPrivate::release();
+
+    foreach (CtSceneParticleSystem::Particle *f, particles)
+        delete f;
+
+    if (vertices) {
+        delete [] vertices;
+        vertices = 0;
+    }
+}
+
+void CtSceneParticleSystemPrivate::recreateVertexBuffer()
+{
+    if (vertices) {
+        delete [] vertices;
+        vertices = 0;
+    }
+
+    vertexCount = particles.size();
+    const size_t size = vertexSize * vertexCount;
+
+    if (size > 0)
+        vertices = new GLfloat[size];
+}
+
+
+CtSceneParticleSystem::Particle::Particle()
+    : m_x(0),
+      m_y(0),
+      m_size(10),
+      m_color(1, 1, 1, 1),
+      m_userData(0)
+{
+
+}
+
+CtSceneParticleSystem::CtSceneParticleSystem(CtSceneItem *parent)
+    : CtSceneTextureItem(new CtSceneParticleSystemPrivate(this))
+{
+    CT_D(CtSceneParticleSystem);
+    d->init(parent);
+}
+
+CtSceneParticleSystem::CtSceneParticleSystem(CtTexture *texture, CtSceneItem *parent)
+    : CtSceneTextureItem(new CtSceneParticleSystemPrivate(this))
+{
+    CT_D(CtSceneParticleSystem);
+    d->texture = texture;
+    d->init(parent);
+}
+
+CtVector<CtSceneParticleSystem::Particle *> CtSceneParticleSystem::particles() const
+{
+    CT_D(CtSceneParticleSystem);
+    return d->particles;
+}
+
+bool CtSceneParticleSystem::addParticle(Particle *particle)
+{
+    CT_D(CtSceneParticleSystem);
+
+    foreach (Particle *p, d->particles) {
+        if (particle == p)
+            return false;
+    }
+
+    d->particles.push_back(particle);
+    d->recreateVertexBuffer();
+    return true;
+}
+
+bool CtSceneParticleSystem::removeParticle(Particle *fragment)
+{
+    CT_D(CtSceneParticleSystem);
+
+    bool found = false;
+    CtVector<Particle *>::iterator it;
+
+    for (it = d->particles.begin(); it != d->particles.end(); it++) {
+        if (*it == fragment) {
+            d->particles.erase(it);
+            delete fragment;
+
+            found = true;
+            break;
+        }
+    }
+
+    if (found)
+        d->recreateVertexBuffer();
+
+    return found;
+}
+
+void CtSceneParticleSystem::clearParticles()
+{
+    CT_D(CtSceneParticleSystem);
+
+    foreach (Particle *p, d->particles)
+        delete p;
+
+    d->particles.clear();
+    d->recreateVertexBuffer();
+}
+
+void CtSceneParticleSystem::paint(CtRenderer *renderer)
+{
+    CT_D(CtSceneParticleSystem);
+
+    CtTexture *texture = d->texture;
+
+    if (!texture || !d->vertices || !d->shaderEffect || !d->shaderEffect->init())
+        return;
+
+    GLfloat *vptr = d->vertices;
+
+    foreach (CtSceneParticleSystem::Particle *p, d->particles) {
+        const CtColor &c = p->color();
+
+        vptr[0] = p->x();
+        vptr[1] = p->y();
+        vptr[2] = p->pointSize();
+        vptr[3] = c.r();
+        vptr[4] = c.g();
+        vptr[5] = c.b();
+        vptr[6] = c.a();
+
+        vptr += d->attrCount;
+    }
+
+    // use program
+    CtShaderProgram *program = d->shaderEffect->program();
+
+    int locMatrix = program->uniformLocation("ct_Matrix");
+    int locOpacity = program->uniformLocation("ct_Opacity");
+    int locPosition = program->attributeLocation("ct_Vertex");
+    int locTexture = program->uniformLocation("ct_Texture0");
+    int locColor = program->attributeLocation("a_color");
+    int locPointSize = program->attributeLocation("a_size");
+
+    program->bind();
+
+    // set matrix and relative opacity
+    program->setUniformValue(locMatrix, renderer->projectionMatrix());
+    program->setUniformValue(locOpacity, renderer->opacity());
+
+    // enable attributes
+    program->enableVertexAttributeArray(locPosition);
+    program->enableVertexAttributeArray(locPointSize);
+    program->enableVertexAttributeArray(locColor);
+
+    GLfloat *vertexPtr = d->vertices;
+    program->setVertexAttributePointer(locPosition, GL_FLOAT, 2, d->vertexSize, vertexPtr);
+    vertexPtr += 2;
+    program->setVertexAttributePointer(locPointSize, GL_FLOAT, 1, d->vertexSize, vertexPtr);
+    vertexPtr += 1;
+    program->setVertexAttributePointer(locColor, GL_FLOAT, 4, d->vertexSize, vertexPtr);
+
+    // apply texture
+    CtGL::glActiveTexture(GL_TEXTURE0);
+    CtGL::glBindTexture(GL_TEXTURE_2D, texture->id());
+    program->setUniformValue(locTexture, int(0));
+    CtGL::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    CtGL::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    CtGL::glDrawArrays(GL_POINTS, 0, d->vertexCount);
+
+    program->release();
 }
