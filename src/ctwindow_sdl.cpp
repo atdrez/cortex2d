@@ -28,13 +28,17 @@ bool CtWindowSdlPrivate::init(const char *title, int width, int height)
 #endif
 
     window = static_cast<SDL_Window *>(SDL_CreateWindow(title, 0, 0, width, height, flags));
-    CT_ASSERT(!window, "Unable to create window");
+
+    if (!window)
+        CT_FATAL("Unable to create SDL window");
 
     SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles2");
     renderer = SDL_CreateRenderer(window, -1, 0);
 
     context = (SDL_GLContext *)SDL_GL_CreateContext(window);
-    CT_ASSERT(!context, "Unable to create window");
+
+    if (!context)
+        CT_FATAL("Unable to create SDL GL context");
 
     updateWindowSize();
 

@@ -27,8 +27,12 @@ CtApplicationSdlPrivate::CtApplicationSdlPrivate(CtApplication *q)
 bool CtApplicationSdlPrivate::init(int argc, char **argv)
 {
     CtApplicationPrivate::init(argc, argv);
-    CT_ASSERT(SDL_Init(SDL_INIT_AUDIO) < 0, "Unable to initialize SDL audio");
-    CT_ASSERT(SDL_Init(SDL_INIT_VIDEO) < 0, "Unable to initialize SDL video");
+
+    if (SDL_Init(SDL_INIT_AUDIO) < 0)
+        CT_FATAL("Unable to initialize SDL audio");
+
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+        CT_FATAL("Unable to initialize SDL video");
 
     return true;
 }

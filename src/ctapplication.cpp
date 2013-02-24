@@ -22,14 +22,14 @@ CtApplication::CtApplication(int argc, char **argv)
     , d_ptr(0)
 #endif
 {
-    CT_D(CtApplication);
-    CT_ASSERT(!d_ptr, "Invalid d-pointer for CtApplication");
+    CT_ASSERT(d_ptr != 0);
 
     if (ct_application)
         CT_FATAL("CtApplication is already created");
 
     ct_application = this;
 
+    CT_D(CtApplication);
     d->activeWindow = 0;
     d->init(argc, argv);
 }

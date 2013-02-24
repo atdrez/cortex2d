@@ -14,15 +14,14 @@ CtObject::~CtObject()
 
 bool CtObject::sendEvent(CtObject *object, CtEvent *event)
 {
-    CT_ASSERT(!object || !event,
-              "Invalid parameter passed to CtObject::sendEvent");
+    CT_ASSERT(object != 0 && event != 0);
 
     return object->event(event);
 }
 
 bool CtObject::event(CtEvent *event)
 {
-    CT_ASSERT(!event, "Invalid parameter passed to CtObject::event");
+    CT_ASSERT(event != 0);
 
     event->setAccepted(false);
     return false;

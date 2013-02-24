@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-
+#include <assert.h>
 #include "ctstring.h"
 
 #define CT_DEBUG_MODE // XXX: remove on release
@@ -101,16 +101,17 @@ typedef uint64_t ctuint64;
         __android_log_print(ANDROID_LOG_VERBOSE, "CT_WARNING", __ct_dbg_msg.str().c_str()); }
 #    endif
 
-#    define CT_ASSERT(e, msg) if (e) { CT_FATAL(msg); }
+#    define CT_ASSERT(e) assert(e);
 
 #    define CT_GL_DEBUG_CHECK() {                                      \
         GLenum _glErr = CtGL::glGetError();                            \
         if (_glErr != GL_NO_ERROR)                                      \
             CT_WARNING("GLError: " << CtGL::getGlErrorMessage(_glErr)); }
 #else
+
 #    define CT_DEBUG(x)
 
-#    define CT_ASSERT(e, msg)
+#    define CT_ASSERT(e)
 
 #    define CT_GL_DEBUG_CHECK()
 #endif

@@ -63,8 +63,9 @@ CtWindow::CtWindow(const char *title, int width, int height)
     : d_ptr(0)
 #endif
 {
+    CT_ASSERT(d_ptr != 0);
+
     CT_D(CtWindow);
-    CT_ASSERT(!d_ptr, "Invalid d-pointer for CtWindow");
     d->init(title, width, height);
 }
 

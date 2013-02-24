@@ -7,7 +7,7 @@ static inline void ct_readType(T *value, ctubyte *d, int i)
     const size_t size = sizeof(T);
     ctubyte *v = reinterpret_cast<ctubyte *>(value);
 
-    CT_ASSERT(size > 8, "Invalid type size");
+    CT_ASSERT(size <= 8);
 
     // XXX: check endianness
     switch (size) {

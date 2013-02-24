@@ -170,7 +170,7 @@ void CtGL::assignFunctions(Func_GetProcAddress f)
 
 #   define CT_GL_FASSIGN(name)                              \
     ct_##name = (Func_##name)f(#name);                      \
-    CT_ASSERT(!ct_##name, "Unable to load " #name " function");
+    if (!ct_##name) CT_FATAL("Unable to load " #name " function");
 
     CT_GL_FASSIGN(glCreateShader);
     CT_GL_FASSIGN(glDeleteShader);
