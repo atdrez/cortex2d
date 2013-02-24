@@ -76,6 +76,7 @@ SOURCES += \
     ctsceneview.cpp \
     ctshadereffect.cpp \
     ctshaderprogram.cpp \
+    ctshaderprogram_shared.cpp \
     ctanimations.cpp \
     cteasingcurve.cpp \
     ctfont.cpp \

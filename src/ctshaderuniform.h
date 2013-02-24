@@ -12,7 +12,9 @@ public:
         IntType,
         FloatType,
         Vec2Type,
-        Vec4Type
+        Vec4Type,
+        Texture1Type,
+        Texture2Type
     };
 
     inline CtShaderUniform(const CtString &name, Type type);

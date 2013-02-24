@@ -14,12 +14,6 @@ class CtShaderUniform;
 class CtShaderEffect
 {
 public:
-    enum Type {
-        Solid,
-        Texture,
-        TextureText
-    };
-
     struct Element {
         ctreal x;
         ctreal y;
@@ -46,7 +40,7 @@ public:
         }
     };
 
-    CtShaderEffect(Type type = Texture);
+    CtShaderEffect(CtShaderProgram *program);
     virtual ~CtShaderEffect();
 
     CtString vertexShader() const;
@@ -71,7 +65,7 @@ public:
                      ctreal opacity, bool vTile, bool hTile);
 
 protected:
-    void applyPosition(const GLfloat *matrix, const GLfloat *vertices);
+    void applyPosition(const CtMatrix &matrix, const GLfloat *vertices);
     void applyTexCoordinates(const GLfloat *coords);
     void applyColor(ctreal r, ctreal g, ctreal b, ctreal a, ctreal opacity);
     void applyTexture(GLint textureId, bool vTile, bool hTile);
@@ -93,11 +87,8 @@ protected:
                             int elementCount, const CtColor &color, ctreal opacity);
 
 private:
-    Type m_type;
     bool m_ready;
-    CtString m_vertexShader;
-    CtString m_fragmentShader;
-    CtShaderProgram m_program;
+    CtShaderProgram *m_program;
     GLint m_locColor;
     GLint m_locMatrix;
     GLint m_locOpacity;

@@ -13,19 +13,23 @@
 
 static CtShaderEffect *ct_sharedSolidShaderEffect()
 {
-    static CtShaderEffect *r = new CtShaderEffect(CtShaderEffect::Solid);
+    static CtShaderEffect *r =
+        new CtShaderEffect(CtShaderProgram::sharedSolidShaderProgram());
+
     return r;
 }
 
 static CtShaderEffect *ct_sharedTextureShaderEffect()
 {
-    static CtShaderEffect *r = new CtShaderEffect(CtShaderEffect::Texture);
+    static CtShaderEffect *r =
+        new CtShaderEffect(CtShaderProgram::sharedTextureShaderProgram());
     return r;
 }
 
 static CtShaderEffect *ct_sharedTextShaderEffect()
 {
-    static CtShaderEffect *r = new CtShaderEffect(CtShaderEffect::TextureText);
+    static CtShaderEffect *r
+        = new CtShaderEffect(CtShaderProgram::sharedTextShaderProgram());
     return r;
 }
 
