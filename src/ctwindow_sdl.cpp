@@ -96,6 +96,7 @@ bool CtWindowSdlPrivate::prepareGL()
 
     CtGL::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     CtGL::glEnable(GL_BLEND);
+    CtGL::glEnable(0x8642); // Enable pointSize
 
     CtGL::glClearColor(1.0, 1.0, 1.0, 1.0);
     CtGL::glClear(GL_COLOR_BUFFER_BIT);

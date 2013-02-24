@@ -146,6 +146,7 @@ struct WindowWrapper {
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
+    glEnable(0x8642); // Enable pointSize
 
     glClearColor(0.5f, 0.4f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
