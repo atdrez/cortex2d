@@ -11,7 +11,7 @@
     [[NSFileManager defaultManager] changeCurrentDirectoryPath: [[NSBundle mainBundle] resourcePath]];
 
     CtApplication *app = CtApplication::instance();
-    CT_ASSERT(!app, "No application initialized");
+    CT_ASSERT(app != 0);
 
     CtEvent ev(CtEvent::ApplicationReady);
     CtObject::sendEvent(app, &ev);
@@ -59,7 +59,7 @@
     // Save data if appropriate. See also applicationDidEnterBackground:.
 
     CtApplication *app = CtApplication::instance();
-    CT_ASSERT(!app, "No application initialized");
+    CT_ASSERT(app != 0);
 
     CtEvent ev(CtEvent::ApplicationRelease);
     CtObject::sendEvent(app, &ev);
