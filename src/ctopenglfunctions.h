@@ -88,6 +88,10 @@ public:
     static void glGetIntegerv(GLenum pname, GLint *params);
 
     static void glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+
+    static void glDeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers);
+    static void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers);
+    static void glDeleteBuffers(GLsizei n,  const GLuint *buffers);
 };
 
 #endif

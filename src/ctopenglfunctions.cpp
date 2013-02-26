@@ -156,7 +156,10 @@ CT_GL_FPTR(void, glFramebufferTexture2D, (GLenum target, GLenum attachment, GLen
 CT_GL_FPTR(void, glGetIntegerv, (GLenum pname, GLint *params))
 CT_GL_FPTR(void, glBindBuffer, (GLenum  target,  GLuint  buffer))
 CT_GL_FPTR(void, glBufferData, (GLenum  target,  GLsizeiptr  size,  const GLvoid *  data,  GLenum  usage))
-CT_GL_FPTR(void, glGenBuffers, (GLsizei  n,  GLuint *  buffers))
+CT_GL_FPTR(void, glGenBuffers, (GLsizei n,  GLuint *buffers))
+CT_GL_FPTR(void, glDeleteBuffers, (GLsizei n, const GLuint *buffers))
+CT_GL_FPTR(void, glDeleteRenderbuffers, (GLsizei n, const GLuint *renderbuffers))
+CT_GL_FPTR(void, glDeleteFramebuffers, (GLsizei n, const GLuint *framebuffers))
 
 #undef CT_GL_FPTR
 
@@ -226,7 +229,9 @@ void CtGL::assignFunctions(Func_GetProcAddress f)
     CT_GL_FASSIGN(glGetIntegerv);
     CT_GL_FASSIGN(glBindBuffer);
     CT_GL_FASSIGN(glBufferData);
-    CT_GL_FASSIGN(glGenBuffers);
+    CT_GL_FASSIGN(glDeleteRenderbuffers);
+    CT_GL_FASSIGN(glDeleteFramebuffers);
+    CT_GL_FASSIGN(glDeleteBuffers);
 
 #   undef CT_GL_FASSIGN
 
@@ -485,6 +490,21 @@ void CtGL::glBindFramebuffer(GLenum target, GLuint framebuffer)
 void CtGL::glBindRenderbuffer(GLenum target, GLuint renderbuffer)
 {
     return ct_glBindRenderbuffer(target, renderbuffer);
+}
+
+void CtGL::glDeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers)
+{
+    return ct_glDeleteRenderbuffers(n, renderbuffers);
+}
+
+void CtGL::glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
+{
+    return ct_glDeleteFramebuffers(n, framebuffers);
+}
+
+void CtGL::glDeleteBuffers(GLsizei n, const GLuint *buffers)
+{
+    return ct_glDeleteBuffers(n, buffers);
 }
 
 GLenum CtGL::glCheckFramebufferStatus(GLenum target)
