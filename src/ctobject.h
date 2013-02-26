@@ -14,7 +14,7 @@ public:
     static bool sendEvent(CtObject *object, CtEvent *event);
 
 public:
-    CtSignal0 destroyed;
+    CtSignal1<CtObject *> destroyed;
 
 protected:
     virtual bool event(CtEvent *event);

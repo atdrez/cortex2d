@@ -9,7 +9,7 @@ CtObject::CtObject(CtObject *parent)
 
 CtObject::~CtObject()
 {
-    destroyed();
+    destroyed(this);
 }
 
 bool CtObject::sendEvent(CtObject *object, CtEvent *event)
