@@ -14,13 +14,10 @@ public:
 
     void setIdentity();
     void setMatrix(const CtMatrix &matrix);
-    void setValue(int row, int col, ctreal value);
 
-    void scale(ctreal sx, ctreal sy, ctreal sz);
-    void translate(ctreal tx, ctreal ty, ctreal tz);
-    void rotate(ctreal angle, ctreal x, ctreal y, ctreal z);
-    void frustum(ctreal left, ctreal right, ctreal bottom, ctreal top, ctreal nearZ, ctreal farZ);
-    void perspective(ctreal fovy, ctreal aspect, ctreal nearZ, ctreal farZ);
+    void scale(ctreal sx, ctreal sy);
+    void translate(ctreal tx, ctreal ty);
+    void rotate(ctreal angle);
     void ortho(ctreal left, ctreal right, ctreal bottom, ctreal top, ctreal nearZ, ctreal farZ);
     void multiply(const CtMatrix &matrix);
 

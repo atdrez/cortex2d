@@ -56,13 +56,7 @@ void CtMatrix::setMatrix(const CtMatrix &matrix)
     memcpy(m, matrix.m, sizeof(matrix.m));
 }
 
-void CtMatrix::setValue(int row, int col, ctreal value)
-{
-    if (row >= 0 && row < 4 && col >= 0 && col < 4)
-        m[col][row] = value;
-}
-
-void CtMatrix::scale(ctreal sx, ctreal sy, ctreal sz)
+void CtMatrix::scale(ctreal sx, ctreal sy)
 {
     m[0][0] *= sx;
     m[0][1] *= sx;
@@ -73,23 +67,22 @@ void CtMatrix::scale(ctreal sx, ctreal sy, ctreal sz)
     m[1][1] *= sy;
     m[1][2] *= sy;
     m[1][3] *= sy;
-
-    m[2][0] *= sz;
-    m[2][1] *= sz;
-    m[2][2] *= sz;
-    m[2][3] *= sz;
 }
 
-void CtMatrix::translate(ctreal tx, ctreal ty, ctreal tz)
+void CtMatrix::translate(ctreal tx, ctreal ty)
 {
-    m[3][0] += (m[0][0] * tx + m[1][0] * ty + m[2][0] * tz);
-    m[3][1] += (m[0][1] * tx + m[1][1] * ty + m[2][1] * tz);
-    m[3][2] += (m[0][2] * tx + m[1][2] * ty + m[2][2] * tz);
-    m[3][3] += (m[0][3] * tx + m[1][3] * ty + m[2][3] * tz);
+    m[3][0] += (m[0][0] * tx + m[1][0] * ty);
+    m[3][1] += (m[0][1] * tx + m[1][1] * ty);
+    m[3][2] += (m[0][2] * tx + m[1][2] * ty);
+    m[3][3] += (m[0][3] * tx + m[1][3] * ty);
 }
 
-void CtMatrix::rotate(ctreal angle, ctreal x, ctreal y, ctreal z)
+void CtMatrix::rotate(ctreal angle)
 {
+    ctreal x = 0;
+    ctreal y = 0;
+    ctreal z = 1;
+
     ctreal sinAngle, cosAngle;
     ctreal mag = sqrtf(x * x + y * y + z * z);
 
@@ -139,45 +132,6 @@ void CtMatrix::rotate(ctreal angle, ctreal x, ctreal y, ctreal z)
       rotMat.multiply(*this);
       setMatrix(rotMat);
    }
-}
-
-void CtMatrix::frustum(ctreal left, ctreal right, ctreal bottom, ctreal top, ctreal nearZ, ctreal farZ)
-{
-    ctreal       deltaX = right - left;
-    ctreal       deltaY = top - bottom;
-    ctreal       deltaZ = farZ - nearZ;
-    CtMatrix    frust;
-
-    if ((nearZ <= 0.0f) || (farZ <= 0.0f) ||
-        (deltaX <= 0.0f) || (deltaY <= 0.0f) || (deltaZ <= 0.0f) )
-        return;
-
-    frust.m[0][0] = 2.0f * nearZ / deltaX;
-    frust.m[0][1] = frust.m[0][2] = frust.m[0][3] = 0.0f;
-
-    frust.m[1][1] = 2.0f * nearZ / deltaY;
-    frust.m[1][0] = frust.m[1][2] = frust.m[1][3] = 0.0f;
-
-    frust.m[2][0] = (right + left) / deltaX;
-    frust.m[2][1] = (top + bottom) / deltaY;
-    frust.m[2][2] = -(nearZ + farZ) / deltaZ;
-    frust.m[2][3] = -1.0f;
-
-    frust.m[3][2] = -2.0f * nearZ * farZ / deltaZ;
-    frust.m[3][0] = frust.m[3][1] = frust.m[3][3] = 0.0f;
-
-    frust.multiply(*this);
-    setMatrix(frust);
-}
-
-void CtMatrix::perspective(ctreal fovy, ctreal aspect, ctreal nearZ, ctreal farZ)
-{
-   ctreal frustumW, frustumH;
-
-   frustumH = tanf( fovy / 360.0f * CT_PI) * nearZ;
-   frustumW = frustumH * aspect;
-
-   frustum(-frustumW, frustumW, -frustumH, frustumH, nearZ, farZ);
 }
 
 void CtMatrix::ortho(ctreal left, ctreal right, ctreal bottom, ctreal top, ctreal nearZ, ctreal farZ)

@@ -232,12 +232,12 @@ CtMatrix CtSceneItemPrivate::mappedTransformMatrix(CtSceneItem *root)
     const ctreal ry = ctRound(y);
 
     CtMatrix modelMatrix;
-    modelMatrix.translate(rx, ry, 0);
+    modelMatrix.translate(rx, ry);
 
-    modelMatrix.translate(ox, oy, 0);
-    modelMatrix.scale(xScale, yScale, 1);
-    modelMatrix.rotate(-(GLfloat)rotation, 0, 0, 1);
-    modelMatrix.translate(-ox, -oy, 0);
+    modelMatrix.translate(ox, oy);
+    modelMatrix.scale(xScale, yScale);
+    modelMatrix.rotate(-(GLfloat)rotation);
+    modelMatrix.translate(-ox, -oy);
 
     CtMatrix m = localMatrix;
     m.multiply(modelMatrix);
@@ -649,7 +649,7 @@ void CtSceneItem::setVisible(bool visible)
 void CtSceneItem::translate(ctreal x, ctreal y)
 {
     CT_D(CtSceneItem);
-    d->localMatrix.translate(x, y, 0);
+    d->localMatrix.translate(x, y);
 }
 
 CtRectReal CtSceneItem::boundingRect() const
