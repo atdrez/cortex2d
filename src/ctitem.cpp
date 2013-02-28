@@ -287,24 +287,24 @@ CtMatrix CtSceneItemPrivate::currentLocalTransformMatrix()
     return localTransformMatrix;
 }
 
-CtMatrix CtSceneItemPrivate::currentViewportProjectionMatrix()
+CtMatrix4x4 CtSceneItemPrivate::currentViewportProjectionMatrix()
 {
     CtSceneView *sc = q->scene();
     CtSceneFrameBuffer *fb = frameBufferItem();
 
     checkTransformMatrix();
 
-    CtMatrix result;
+    CtMatrix4x4 result;
 
     if (sc) {
         if (!fb || !fb->isValidBuffer())
-            result = sceneTransformMatrix;
+            result = sceneTransformMatrix.toMatrix4x4();
         else
-            result = fboTransformMatrix;
+            result = fboTransformMatrix.toMatrix4x4();
 
-        CtMatrix orthoMatrix;
-        orthoMatrix.ortho(0, sc->width(), sc->height(), 0, 1, -1);
-        result.multiply(orthoMatrix);
+        CtMatrix4x4 ortho;
+        ortho.ortho(0, sc->width(), sc->height(), 0, 1, -1);
+        result.multiply(ortho);
     }
 
     return result;

@@ -36,7 +36,7 @@ struct CtSceneItemPrivate
 
     CtMatrix currentLocalTransformMatrix();
     CtMatrix currentSceneTransformMatrix();
-    CtMatrix currentViewportProjectionMatrix();
+    CtMatrix4x4 currentViewportProjectionMatrix();
 
     void fillItems(CtList<CtSceneItem *> &lst);
     virtual void recursivePaint(CtRenderer *state);

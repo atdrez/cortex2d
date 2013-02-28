@@ -54,35 +54,35 @@ public:
 
     bool init();
 
-    void drawPoly(const CtMatrix &matrix, GLfloat *vertices, int count,
+    void drawPoly(const CtMatrix4x4 &matrix, GLfloat *vertices, int count,
                   ctreal r, ctreal g, ctreal b, ctreal a, ctreal opacity);
 
-    void drawSolidPoly(const CtMatrix &matrix, GLfloat *vertices, int count,
+    void drawSolidPoly(const CtMatrix4x4 &matrix, GLfloat *vertices, int count,
                        ctreal r, ctreal g, ctreal b, ctreal a, ctreal opacity);
 
-    void drawTexPoly(const CtMatrix &matrix, CtTexture *texture,
+    void drawTexPoly(const CtMatrix4x4 &matrix, CtTexture *texture,
                      GLfloat *vertices, GLfloat *texCoords, int count,
                      ctreal opacity, bool vTile, bool hTile);
 
 protected:
-    void applyPosition(const CtMatrix &matrix, const GLfloat *vertices);
+    void applyPosition(const CtMatrix4x4 &matrix, const GLfloat *vertices);
     void applyTexCoordinates(const GLfloat *coords);
     void applyColor(ctreal r, ctreal g, ctreal b, ctreal a, ctreal opacity);
     void applyTexture(GLint textureId, bool vTile, bool hTile);
     void applyCustomUniforms();
 
-    void drawSolid(const CtMatrix &matrix, ctreal width, ctreal height,
+    void drawSolid(const CtMatrix4x4 &matrix, ctreal width, ctreal height,
                    ctreal r, ctreal g, ctreal b, ctreal a, ctreal opacity);
 
-    void drawTexture(const CtMatrix &matrix, CtTexture *texture,
+    void drawTexture(const CtMatrix4x4 &matrix, CtTexture *texture,
                      ctreal width, ctreal height, ctreal opacity,
                      bool tileVertically, bool tileHorizontally, int textureAtlasIndex);
 
-    void drawElements(const CtMatrix &matrix, CtTexture *texture,
+    void drawElements(const CtMatrix4x4 &matrix, CtTexture *texture,
                       ctreal opacity,  bool tileVertically, bool tileHorizontally,
                       const CtList<Element> &elements);
 
-    void drawVboTextTexture(const CtMatrix &matrix, CtTexture *texture,
+    void drawVboTextTexture(const CtMatrix4x4 &matrix, CtTexture *texture,
                             GLuint indexBuffer, GLuint vertexBuffer,
                             int elementCount, const CtColor &color, ctreal opacity);
 

@@ -333,9 +333,8 @@ void CtShaderProgram::setUniformValue(int location, GLfloat v0, GLfloat v1, GLfl
         CtGL::glUniform4f(location, v0, v1, v2, v3);
 }
 
-void CtShaderProgram::setUniformValue(int location, const CtMatrix &matrix)
+void CtShaderProgram::setUniformValue(int location, const CtMatrix4x4 &matrix)
 {
     if (location >= 0)
-        CtGL::glUniformMatrix4fv(location, 1, GL_FALSE,
-                                 reinterpret_cast<GLfloat *>(matrix.data()));
+        CtGL::glUniformMatrix4fv(location, 1, GL_FALSE, (GLfloat *)matrix.constData());
 }

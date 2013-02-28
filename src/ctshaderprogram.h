@@ -49,7 +49,7 @@ public:
     void setUniformValue(int location, GLfloat v0, GLfloat v1, GLfloat v2);
     void setUniformValue(int location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
 
-    void setUniformValue(int location, const CtMatrix &matrix);
+    void setUniformValue(int location, const CtMatrix4x4 &matrix);
 
     static CtShaderProgram *sharedSolidShaderProgram();
     static CtShaderProgram *sharedTextureShaderProgram();

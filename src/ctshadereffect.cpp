@@ -79,7 +79,7 @@ bool CtShaderEffect::init()
     return true;
 }
 
-void CtShaderEffect::drawSolid(const CtMatrix &matrix, ctreal dw, ctreal dh,
+void CtShaderEffect::drawSolid(const CtMatrix4x4 &matrix, ctreal dw, ctreal dh,
                                ctreal r, ctreal g, ctreal b, ctreal a, ctreal opacity)
 {
     m_program->bind();
@@ -101,7 +101,7 @@ void CtShaderEffect::drawSolid(const CtMatrix &matrix, ctreal dw, ctreal dh,
     m_program->release();
 }
 
-void CtShaderEffect::drawPoly(const CtMatrix &matrix, GLfloat *vertices, int count,
+void CtShaderEffect::drawPoly(const CtMatrix4x4 &matrix, GLfloat *vertices, int count,
                               ctreal r, ctreal g, ctreal b, ctreal a, ctreal opacity)
 {
     m_program->bind();
@@ -115,7 +115,7 @@ void CtShaderEffect::drawPoly(const CtMatrix &matrix, GLfloat *vertices, int cou
     m_program->release();
 }
 
-void CtShaderEffect::drawSolidPoly(const CtMatrix &matrix, GLfloat *vertices, int count,
+void CtShaderEffect::drawSolidPoly(const CtMatrix4x4 &matrix, GLfloat *vertices, int count,
                                    ctreal r, ctreal g, ctreal b, ctreal a, ctreal opacity)
 {
     m_program->bind();
@@ -129,7 +129,7 @@ void CtShaderEffect::drawSolidPoly(const CtMatrix &matrix, GLfloat *vertices, in
     m_program->release();
 }
 
-void CtShaderEffect::drawTexPoly(const CtMatrix &matrix, CtTexture *texture,
+void CtShaderEffect::drawTexPoly(const CtMatrix4x4 &matrix, CtTexture *texture,
                                  GLfloat *vertices, GLfloat *texCoords, int count,
                                  ctreal opacity, bool vTile, bool hTile)
 {
@@ -149,7 +149,7 @@ void CtShaderEffect::drawTexPoly(const CtMatrix &matrix, CtTexture *texture,
     m_program->release();
 }
 
-void CtShaderEffect::drawTexture(const CtMatrix &matrix, CtTexture *texture,
+void CtShaderEffect::drawTexture(const CtMatrix4x4 &matrix, CtTexture *texture,
                                  ctreal width, ctreal height, ctreal opacity,
                                  bool vTile, bool hTile, int textureAtlasIndex)
 {
@@ -176,7 +176,7 @@ void CtShaderEffect::drawTexture(const CtMatrix &matrix, CtTexture *texture,
     }
 }
 
-void CtShaderEffect::drawElements(const CtMatrix &matrix, CtTexture *texture,
+void CtShaderEffect::drawElements(const CtMatrix4x4 &matrix, CtTexture *texture,
                                   ctreal opacity, bool vTile, bool hTile,
                                   const CtList<Element> &elements)
 {
@@ -221,7 +221,7 @@ void CtShaderEffect::drawElements(const CtMatrix &matrix, CtTexture *texture,
     }
 }
 
-void CtShaderEffect::drawVboTextTexture(const CtMatrix &matrix, CtTexture *texture,
+void CtShaderEffect::drawVboTextTexture(const CtMatrix4x4 &matrix, CtTexture *texture,
                                         GLuint indexBuffer, GLuint vertexBuffer,
                                         int elementCount, const CtColor &color, ctreal opacity)
 {
@@ -260,7 +260,7 @@ void CtShaderEffect::drawVboTextTexture(const CtMatrix &matrix, CtTexture *textu
 }
 
 
-void CtShaderEffect::applyPosition(const CtMatrix &matrix, const GLfloat *vertices)
+void CtShaderEffect::applyPosition(const CtMatrix4x4 &matrix, const GLfloat *vertices)
 {
     // XXX: HANDLE Z-ORDER
     m_program->setUniformValue(m_locMatrix, matrix);

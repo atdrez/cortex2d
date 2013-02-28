@@ -20,7 +20,7 @@ public:
 
     ctreal opacity() const { return m_opacity; }
 
-    CtMatrix projectionMatrix() const { return m_projectionMatrix; }
+    CtMatrix4x4 projectionMatrix() const { return m_projectionMatrix; }
 
     bool drawSolid(CtShaderEffect *effect, ctreal width, ctreal height,
                    ctreal r, ctreal g, ctreal b, ctreal a);
@@ -54,7 +54,7 @@ private:
     GLint m_defaultFbo;
     ctreal m_opacity;
     CtList<GLuint> m_buffers;
-    CtMatrix m_projectionMatrix;
+    CtMatrix4x4 m_projectionMatrix;
 };
 
 #endif
