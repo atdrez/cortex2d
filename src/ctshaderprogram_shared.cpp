@@ -1,5 +1,10 @@
 #include "ctshaderprogram.h"
 
+#if !defined(CT_IPHONE) && !defined(CT_ANDROID)
+#define GLSL_VERSION "#version 120\n"
+#else
+#define GLSL_VERSION
+#endif
 
 static const char ct_solidVertexShader[] = " \
     uniform mediump mat4 ct_Matrix;          \
@@ -98,9 +103,9 @@ static const char ct_particleVertexShader[] = "   \
     }                                                        \
    ";
 
-static const char ct_particleFragmentShader[] = " \
-    #version 120\n                                \
-    uniform sampler2D ct_Texture0;                \
+static const char ct_particleFragmentShader[] =
+    GLSL_VERSION
+ "  uniform sampler2D ct_Texture0;                \
     uniform mediump float ct_Opacity;             \
     varying mediump vec4 v_color;                 \
                                                   \
