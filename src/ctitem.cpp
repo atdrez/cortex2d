@@ -33,6 +33,13 @@ static CtShaderEffect *ct_sharedTextShaderEffect()
     return r;
 }
 
+static CtShaderEffect *ct_sharedFragmentShaderEffect()
+{
+    static CtShaderEffect *r
+        = new CtShaderEffect(CtShaderProgram::sharedFragmentShaderProgram());
+    return r;
+}
+
 static CtShaderEffect *ct_sharedParticleShaderEffect()
 {
     static CtShaderEffect *r
@@ -1575,6 +1582,12 @@ CtSceneFragmentsPrivate::CtSceneFragmentsPrivate(CtSceneFragments *q)
 
 }
 
+void CtSceneFragmentsPrivate::init(CtSceneItem *parent)
+{
+    CtSceneTextureItemPrivate::init(parent);
+    shaderEffect = ct_sharedFragmentShaderEffect();
+}
+
 void CtSceneFragmentsPrivate::release()
 {
     CtSceneTextureItemPrivate::release();
@@ -1589,6 +1602,7 @@ CtSceneFragments::Fragment::Fragment()
       m_y(0),
       m_width(0),
       m_height(0),
+      m_opacity(1.0),
       m_atlasIndex(-1),
       m_userData(0)
 {
@@ -1715,6 +1729,7 @@ void CtSceneFragments::paint(CtRenderer *renderer)
         e.y = f->y();
         e.width = f->width();
         e.height = f->height();
+        e.opacity = f->opacity();
         e.textureAtlasIndex = f->atlasIndex();
         elements.push_back(e);
     }

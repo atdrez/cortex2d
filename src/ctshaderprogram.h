@@ -54,6 +54,7 @@ public:
     static CtShaderProgram *sharedSolidShaderProgram();
     static CtShaderProgram *sharedTextureShaderProgram();
     static CtShaderProgram *sharedTextShaderProgram();
+    static CtShaderProgram *sharedFragmentShaderProgram();
     static CtShaderProgram *sharedParticleShaderProgram();
 
 private:

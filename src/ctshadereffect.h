@@ -19,6 +19,7 @@ public:
         ctreal y;
         ctreal width;
         ctreal height;
+        ctreal opacity;
         int textureAtlasIndex;
 
         Element()
@@ -26,6 +27,7 @@ public:
               y(0),
               width(0),
               height(0),
+              opacity(1.0),
               textureAtlasIndex(-1)
         {
         }
@@ -35,6 +37,7 @@ public:
               y(e.y),
               width(e.width),
               height(e.height),
+              opacity(e.opacity),
               textureAtlasIndex(e.textureAtlasIndex)
         {
         }

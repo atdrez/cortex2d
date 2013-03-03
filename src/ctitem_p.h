@@ -156,6 +156,7 @@ struct CtSceneFragmentsPrivate : public CtSceneTextureItemPrivate
 {
     CtSceneFragmentsPrivate(CtSceneFragments *q);
 
+    void init(CtSceneItem *parent);
     void release();
 
     CtList<CtSceneFragments::Fragment *> fragments;

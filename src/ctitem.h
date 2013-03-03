@@ -311,6 +311,9 @@ public:
         int atlasIndex() const { return m_atlasIndex; }
         void setAtlasIndex(int index);
 
+        ctreal opacity() const { return m_opacity; }
+        void setOpacity(ctreal opacity) { m_opacity = opacity; }
+
         void *userData() const { return m_userData; }
         void setUserData(void *data);
 
@@ -319,6 +322,7 @@ public:
         ctreal m_y;
         ctreal m_width;
         ctreal m_height;
+        ctreal m_opacity;
         int m_atlasIndex;
         void *m_userData;
     };

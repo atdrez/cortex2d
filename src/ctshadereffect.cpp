@@ -185,6 +185,7 @@ void CtShaderEffect::drawElements(const CtMatrix4x4 &matrix, CtTexture *texture,
     if (!texture || count == 0)
         return;
 
+    GLfloat vopacity[count * 6];
     GLfloat vertices[12 * count];
     GLfloat texCoords[12 * count];
     unsigned short indexes[count * 6];
@@ -202,6 +203,15 @@ void CtShaderEffect::drawElements(const CtMatrix4x4 &matrix, CtTexture *texture,
             // indexes
             for (int w = j + 6; j < w; j++)
                 indexes[j] = j;
+
+            const int bo = n * 6;
+            vopacity[bo + 0] = e.opacity;
+            vopacity[bo + 1] = e.opacity;
+            vopacity[bo + 2] = e.opacity;
+            vopacity[bo + 3] = e.opacity;
+            vopacity[bo + 4] = e.opacity;
+            vopacity[bo + 5] = e.opacity;
+
             n++;
         }
     }
@@ -209,11 +219,17 @@ void CtShaderEffect::drawElements(const CtMatrix4x4 &matrix, CtTexture *texture,
     if (n > 0) {
         m_program->bind();
 
+        int locFragOpacity = m_program->attributeLocation("a_opacity");
+
+        m_program->enableVertexAttributeArray(locFragOpacity);
+        m_program->setVertexAttributePointer(locFragOpacity, 1, vopacity);
+
         applyPosition(matrix, vertices);
         applyColor(1, 1, 1, 1, opacity);
         applyTexture(texture->id(), vTile, hTile);
         applyTexCoordinates(texCoords);
         applyCustomUniforms();
+
 
         CtGL::glDrawElements(GL_TRIANGLES, n * 6, GL_UNSIGNED_SHORT, indexes);
 

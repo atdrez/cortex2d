@@ -53,6 +53,34 @@ static const char ct_textureFragmentShader[] = " \
     }                                                                 \
     ";
 
+static const char ct_fragmentVertexShader[] = " \
+    uniform mediump mat4 ct_Matrix;            \
+    attribute mediump vec2 ct_Vertex;          \
+    attribute mediump vec2 ct_TexCoord;        \
+    attribute mediump float a_opacity;         \
+    varying mediump vec2 ct_TexCoord0;         \
+    varying mediump float v_opacity;           \
+                                               \
+    void main()                                \
+    {                                          \
+        v_opacity = a_opacity;                               \
+        ct_TexCoord0 = ct_TexCoord;                          \
+        gl_Position = ct_Matrix * vec4(ct_Vertex, 1.0, 1.0); \
+    }                                                        \
+   ";
+
+static const char ct_fragmentFragmentShader[] = " \
+    uniform sampler2D ct_Texture0;               \
+    uniform mediump float ct_Opacity;            \
+    varying mediump vec2 ct_TexCoord0;           \
+    varying mediump float v_opacity;             \
+                                                 \
+    void main()                                                       \
+    {                                                                 \
+        gl_FragColor = texture2D(ct_Texture0, ct_TexCoord0);          \
+        gl_FragColor.a *= ct_Opacity * v_opacity;                     \
+    }                                                                 \
+    ";
 
 static const char ct_particleVertexShader[] = "   \
     uniform mediump mat4 ct_Matrix;               \
@@ -130,6 +158,18 @@ CtShaderProgram *CtShaderProgram::sharedTextShaderProgram()
     if (!result) {
         result = new CtShaderProgram();
         result->link(ct_textureVertexShader, ct_textFragmentShader);
+    }
+
+    return result;
+}
+
+CtShaderProgram *CtShaderProgram::sharedFragmentShaderProgram()
+{
+    static CtShaderProgram *result = 0;
+
+    if (!result) {
+        result = new CtShaderProgram();
+        result->link(ct_fragmentVertexShader, ct_fragmentFragmentShader);
     }
 
     return result;
