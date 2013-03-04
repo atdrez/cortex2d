@@ -509,6 +509,8 @@ ctreal CtSceneItem::opacity() const
 void CtSceneItem::setOpacity(ctreal opacity)
 {
     CT_D(CtSceneItem);
+    opacity = ctClamp<ctreal>(0, opacity, 1);
+
     if (d->opacity == opacity)
         return;
 
@@ -1040,26 +1042,27 @@ void CtSceneTextPrivate::recreateBuffers()
     int n = 0;
     int j = 0;
     int fx = 0;
-    texture_font_t *f = CtTextureFontPrivate::dd(font)->font;
+
+    CtTextureFontPrivate *dfont = CtTextureFontPrivate::dd(font);
 
     for (int i = 0; i < len; i++) {
-        texture_glyph_t *glyph = (texture_glyph_t *)texture_font_get_glyph(f, str[i]);
+        CtGlyph *glyph = dfont->glyphs.value((wchar_t)str[i], 0);
 
         if (!glyph)
             continue;
 
         const int offset = n * 24;
-        const int x  = glyph->offset_x;
-        const int y  = glyph->offset_y;
+        const int x  = glyph->xOffset;
+        const int y  = glyph->yOffset;
         const int w  = glyph->width;
         const int h  = glyph->height;
-        const int by = f->ascender;
+        const int by = dfont->ascender;
 
         ct_setTriangle2Array(vertices + offset,
                              fx + x, by - y, fx + x + w, by - y + h,
                              glyph->s0, glyph->t0, glyph->s1, glyph->t1);
 
-        fx += glyph->advance_x;
+        fx += glyph->xAdvance;
 
         // indexes
         for (int kk = j + 6; j < kk; j++)
@@ -1095,11 +1098,16 @@ void CtSceneText::paint(CtRenderer *renderer)
 {
     CT_D(CtSceneText);
 
-    if (d->shaderEffect && d->glyphCount > 0) {
-        CtAtlasTexture *texture = CtFontManagerPrivate::instance()->atlas;
-        renderer->drawVboTextTexture(d->shaderEffect, texture, d->indexBuffer,
-                                     d->vertexBuffer, d->glyphCount, d->color);
-    }
+    if (!d->font || !d->shaderEffect || d->glyphCount <= 0)
+        return;
+
+    CtTextureFontPrivate *dfont = CtTextureFontPrivate::dd(d->font);
+
+    if (!dfont || !dfont->atlas)
+        return;
+
+    renderer->drawVboTextTexture(d->shaderEffect, dfont->atlas, d->indexBuffer,
+                                 d->vertexBuffer, d->glyphCount, d->color);
 }
 
 CtColor CtSceneText::color() const

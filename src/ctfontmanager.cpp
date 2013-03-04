@@ -7,15 +7,12 @@
 
 CtFontManagerPrivate::CtFontManagerPrivate()
 {
-    atlas = new CtAtlasTexture();
-    // XXX
-    atlasMap = texture_atlas_new(1024, 1024, 1);
+
 }
 
 CtFontManagerPrivate::~CtFontManagerPrivate()
 {
-    texture_atlas_delete(atlasMap);
-    delete atlas;
+
 }
 
 CtFontManagerPrivate *CtFontManagerPrivate::instance()
@@ -39,6 +36,25 @@ CtFontManager::~CtFontManager()
 
 }
 
+bool CtFontManager::registerBMFont(const CtString &key, const CtString &fileName)
+{
+    CtFontManagerPrivate *d = CtFontManagerPrivate::instance();
+
+    CtTextureFont *font = d->fontHash.value(key, 0);
+
+    if (font)
+        return false;
+
+    font = CtTextureFont::loadBMFont(fileName);
+
+    if (!font) {
+        return false;
+    } else {
+        d->fontHash[key] = font;
+        return true;
+    }
+}
+
 bool CtFontManager::registerFont(const CtString &key, const CtString &fileName, int size)
 {
     CtFontManagerPrivate *d = CtFontManagerPrivate::instance();
@@ -48,11 +64,9 @@ bool CtFontManager::registerFont(const CtString &key, const CtString &fileName, 
     if (font)
         return false;
 
-    font = new CtTextureFont();
-    bool ok = font->d->load(d->atlas, d->atlasMap, fileName.c_str(), size);
+    font = CtTextureFont::loadTTF(fileName, size);
 
-    if (!ok) {
-        delete font;
+    if (!font) {
         return false;
     } else {
         d->fontHash[key] = font;

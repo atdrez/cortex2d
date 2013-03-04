@@ -14,8 +14,6 @@ struct CtFontManagerPrivate
 
     static CtFontManagerPrivate *instance();
 
-    CtAtlasTexture *atlas;
-    texture_atlas_t *atlasMap;
     CtMap<CtString, CtTextureFont *> fontHash;
 };
 

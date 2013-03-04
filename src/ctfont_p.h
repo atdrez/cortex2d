@@ -2,8 +2,25 @@
 #define CTFONT_P_H
 
 #include "freetype-gl.h"
+#include "ctmap.h"
 
 class CtAtlasTexture;
+
+struct CtGlyph
+{
+    float s0;
+    float t0;
+    float s1;
+    float t1;
+    size_t width;
+    size_t height;
+    int xOffset;
+    int yOffset;
+    float xAdvance;
+    float yAdvance;
+    wchar_t charcode;
+    CtMap<wchar_t, float> kernings;
+};
 
 class CtTextureFontPrivate
 {
@@ -11,12 +28,19 @@ public:
     CtTextureFontPrivate();
     ~CtTextureFontPrivate();
 
-    bool load(CtAtlasTexture *atlas, texture_atlas_t *atlasMap,
-              const char *fileName, int size);
+    void release();
+    bool loadTTF(const CtString &path, int size);
+    bool loadBMFont(const CtString &fileName);
 
     static CtTextureFontPrivate *dd(CtTextureFont *q) { return q->d; }
 
-    texture_font_t *font;
+    float fontSize;
+    float fontHeight;
+    float ascender;
+    float descender;
+    CtString fileName;
+    CtAtlasTexture *atlas;
+    CtMap<wchar_t, CtGlyph *> glyphs;
 };
 
 #endif

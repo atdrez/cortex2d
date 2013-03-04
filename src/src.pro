@@ -58,6 +58,7 @@ HEADERS += \
     utils/ctpngloader.h \
     utils/ctpvrloader.h \
     utils/ctddsloader.h \
+    utils/bmfontparser.h \
     3rdparty/tricollision.h \
     ctopenglfunctions.h
 
@@ -87,6 +88,7 @@ SOURCES += \
     utils/ctpngloader.cpp \
     utils/ctpvrloader.cpp \
     utils/ctddsloader.cpp \
+    utils/bmfontparser.c \
     3rdparty/tricollision.cpp \
     ctopenglfunctions.cpp
 

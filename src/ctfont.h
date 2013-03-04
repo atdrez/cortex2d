@@ -12,6 +12,9 @@ public:
     CtString fileName() const;
     int fontSize() const;
 
+    static CtTextureFont *loadBMFont(const CtString &fileName);
+    static CtTextureFont *loadTTF(const CtString &fileName, int size);
+
 private:
     CtTextureFont();
     ~CtTextureFont();
