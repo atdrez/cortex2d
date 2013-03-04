@@ -25,6 +25,7 @@ HEADERS += \
     cortex2d.h \
     ctcolor.h \
     ctwindow.h \
+    ctscreen.h \
     ctapplication.h \
     ctbasicapplication.h \
     ctevents.h \
@@ -63,6 +64,7 @@ HEADERS += \
     ctopenglfunctions.h
 
 SOURCES += \
+    ctscreen_sdl.cpp \
     ctwindow.cpp \
     ctwindow_sdl.cpp \
     ctapplication.cpp \
