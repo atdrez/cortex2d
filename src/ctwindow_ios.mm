@@ -5,6 +5,7 @@
 #include "ctioswindow.h"
 #include "ctiosglview.h"
 #import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
 
 struct CtIOSWindowWrapper
 {
@@ -93,12 +94,33 @@ void CtWindowIOSPrivate::updateWindowSize()
     if (!w)
         return;
 
-    width = [w bounds].size.width;
-    height = [w bounds].size.height;
+    CtIOSGLView *view = w->glView;
+
+    width = [w bounds].size.width * view.contentScaleFactor;
+    height = [w bounds].size.height * view.contentScaleFactor;
 }
 
 UIViewController *ctUIKitGetViewController(CtWindow *window)
 {
     CtWindowIOSPrivate *d = static_cast<CtWindowIOSPrivate *>(CtWindowPrivate::dptr(window));
     return d->dw->window->viewController;
+}
+
+void CtWindowIOSPrivate::setContentScaleFactor(float value)
+{
+    CtIOSWindow *w = dw->window;
+
+    if (!w)
+        return;
+
+    CtIOSGLView *view = w->glView;
+
+    if (view.contentScaleFactor == value)
+        return;
+
+    view.contentScaleFactor = value;
+    view.layer.contentsScale = value;
+    [view setNeedsLayout];
+
+    updateWindowSize();
 }

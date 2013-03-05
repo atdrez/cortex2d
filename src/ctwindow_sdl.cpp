@@ -124,3 +124,8 @@ void CtWindowSdlPrivate::updateWindowSize()
     SDL_GetWindowSize(window, &width, &height);
     render();
 }
+
+void CtWindowSdlPrivate::setContentScaleFactor(float)
+{
+    CT_WARNING("SDL backend doesn't support scale factor");
+}

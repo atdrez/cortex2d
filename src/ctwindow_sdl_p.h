@@ -19,6 +19,8 @@ struct CtWindowSdlPrivate : public CtWindowPrivate
 
     void updateWindowSize();
 
+    void setContentScaleFactor(float value);
+
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_GLContext context;

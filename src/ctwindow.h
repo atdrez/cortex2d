@@ -22,6 +22,8 @@ public:
     int width() const;
     int height() const;
 
+    void setScaleFactor(float value);
+
     bool isMinimized() const;
 
     void show();

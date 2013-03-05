@@ -207,8 +207,8 @@ struct WindowWrapper {
     for (UITouch *touch in touches) {
         CGPoint p = [touch locationInView:self];
         CGPoint lp = [touch previousLocationInView:self];
-        int x = p.x;
-        int y = p.y;
+        int x = p.x * self.contentScaleFactor;
+        int y = p.y * self.contentScaleFactor;
 
         int tid = 0;
         int fx = x;

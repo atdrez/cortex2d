@@ -175,3 +175,9 @@ void CtWindow::paint()
 {
 
 }
+
+void CtWindow::setScaleFactor(float value)
+{
+    CT_D(CtWindow);
+    d->setContentScaleFactor(value);
+}

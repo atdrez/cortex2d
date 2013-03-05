@@ -20,6 +20,8 @@ struct CtWindowIOSPrivate : public CtWindowPrivate
 
     void updateWindowSize();
 
+    void setContentScaleFactor(float value);
+
     struct CtIOSWindowWrapper *dw;
 };
 
