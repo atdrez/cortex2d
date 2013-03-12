@@ -78,18 +78,27 @@ CtString CtApplication::applicationPath() const
 
 bool CtApplication::event(CtEvent *event)
 {
+    CT_D(CtApplication);
+
     event->setAccepted(true);
 
     switch (event->type()) {
     case CtEvent::ApplicationReady:
         readyEvent(event);
         break;
-    case CtEvent::ApplicationRelease:
+    case CtEvent::ApplicationAboutToQuit:
         releaseEvent(event);
+        break;
+    case CtEvent::ApplicationActivated:
+    case CtEvent::ApplicationDeactivated:
+    case CtEvent::ApplicationAboutToResign:
+    case CtEvent::ApplicationAboutToActivate:
         break;
     default:
         return CtObject::event(event);
     }
+
+    d->postEventToAllWindows(event);
 
     return event->isAccepted();
 }

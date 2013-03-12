@@ -90,7 +90,7 @@ int CtApplicationSdlPrivate::exec()
             SDL_Delay(16 - renderTime);
     }
 
-    CtEvent ev(CtEvent::ApplicationRelease);
+    CtEvent ev(CtEvent::ApplicationAboutToQuit);
     CtObject::sendEvent(q_ptr, &ev);
 
     quit();

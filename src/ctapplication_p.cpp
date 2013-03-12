@@ -53,3 +53,9 @@ void CtApplicationPrivate::quit()
         window->release();
     }
 }
+
+void CtApplicationPrivate::postEventToAllWindows(CtEvent *event)
+{
+    foreach (CtWindowPrivate *window, windows)
+        postEvent(window, event);
+}

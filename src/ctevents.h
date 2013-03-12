@@ -29,7 +29,11 @@ public:
         WindowMinimize,
         WindowRestore,
         ApplicationReady,
-        ApplicationRelease,
+        ApplicationAboutToQuit,
+        ApplicationActivated,
+        ApplicationDeactivated,
+        ApplicationAboutToResign,
+        ApplicationAboutToActivate,
         Custom = 0x80
     };
 
