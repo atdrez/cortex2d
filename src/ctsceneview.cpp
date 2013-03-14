@@ -271,7 +271,7 @@ bool CtSceneViewData::deliverTouchBegin(CtTouchEvent *event)
 {
     CtTouchPointList points = event->touchPoints();
 
-    if (points.empty())
+    if (points.isEmpty())
         return false;
 
     checkSortedItems();
@@ -337,7 +337,7 @@ CtTouchPointList CtSceneViewData::mapTouchPoints(CtSceneItem *item, const CtTouc
         const CtPoint &p1 = matrix.map(p.x(), p.y());
         const CtPoint &p2 = matrix.map(p.initialX(), p.initialY());
 
-        result.push_back(CtTouchPoint(p.id(), p1.x(), p1.y(), p2.x(), p2.y(), p.pressure(), p.isPressed()));
+        result.append(CtTouchPoint(p.id(), p1.x(), p1.y(), p2.x(), p2.y(), p.pressure(), p.isPressed()));
     }
 
     return result;

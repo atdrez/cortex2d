@@ -44,14 +44,14 @@ CtShaderEffect::~CtShaderEffect()
 
 void CtShaderEffect::addUniform(CtShaderUniform *uniform)
 {
-    m_uniforms.remove(uniform);
-    m_uniforms.push_back(uniform);
+    m_uniforms.removeAll(uniform);
+    m_uniforms.append(uniform);
     m_ready = false;
 }
 
 void CtShaderEffect::removeUniform(CtShaderUniform *uniform)
 {
-    m_uniforms.remove(uniform);
+    m_uniforms.removeAll(uniform);
     m_ready = false;
 }
 

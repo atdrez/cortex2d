@@ -22,17 +22,17 @@ void CtRenderer::end()
 void CtRenderer::bindBuffer(GLuint id)
 {
     m_fbo = id;
-    m_buffers.push_back(id);
+    m_buffers.append(id);
 }
 
 void CtRenderer::releaseBuffer()
 {
-    if (m_buffers.empty())
+    if (m_buffers.isEmpty())
         return;
 
-    m_buffers.pop_back();
+    m_buffers.removeLast();
 
-    if (m_buffers.empty())
+    if (m_buffers.isEmpty())
         m_fbo = m_defaultFbo;
     else
         m_fbo = m_buffers.back();

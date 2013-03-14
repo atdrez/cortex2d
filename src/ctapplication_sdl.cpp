@@ -68,7 +68,7 @@ int CtApplicationSdlPrivate::exec()
         if (m_quit)
             break;
 
-        if (windows.empty())
+        if (windows.isEmpty())
             break;
 
         Uint32 currentTick = SDL_GetTicks();
@@ -222,7 +222,7 @@ void CtApplicationSdlPrivate::processEvent(const SDL_Event &event)
 
                 CtTouchPoint point(finger->id, fx, fy, firstPress.x(), firstPress.y(),
                                    finger->pressure, finger->down);
-                points.push_back(point);
+                points.append(point);
 
                 if (finger->down)
                     nonePressed = false;

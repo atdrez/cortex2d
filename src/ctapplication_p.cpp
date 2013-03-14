@@ -38,17 +38,17 @@ void CtApplicationPrivate::postEvent(CtWindowPrivate *window, CtEvent *event)
 
 void CtApplicationPrivate::addWindow(CtWindowPrivate *window)
 {
-    windows.push_back(window);
+    windows.append(window);
 }
 
 void CtApplicationPrivate::removeWindow(CtWindowPrivate *window)
 {
-    windows.remove(window);
+    windows.removeAll(window);
 }
 
 void CtApplicationPrivate::quit()
 {
-    while (!windows.empty()) {
+    while (!windows.isEmpty()) {
         CtWindowPrivate *window = windows.front();
         window->release();
     }

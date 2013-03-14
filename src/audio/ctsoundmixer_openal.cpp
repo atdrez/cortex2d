@@ -60,10 +60,10 @@ void CtSoundMixerOpenALPrivate::setActive(bool active)
 
 void CtSoundMixerOpenALPrivate::addSample(CtSoundSample *sample)
 {
-    sampleList.push_back(sample);
+    sampleList.append(sample);
 }
 
 void CtSoundMixerOpenALPrivate::removeSample(CtSoundSample *sample)
 {
-    sampleList.remove(sample);
+    sampleList.removeAll(sample);
 }

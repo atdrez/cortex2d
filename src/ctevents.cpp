@@ -115,7 +115,7 @@ CtTouchEvent::CtTouchEvent(Type type, int id, const CtTouchPoint &p)
     :  CtEvent(type),
        m_id(id)
 {
-    m_points.push_back(p);
+    m_points.append(p);
 }
 
 CtTouchEvent::CtTouchEvent(Type type, int id, const CtTouchPointList &points)

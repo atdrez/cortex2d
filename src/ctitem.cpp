@@ -153,7 +153,7 @@ CtSceneFrameBuffer *CtSceneItemPrivate::frameBufferItem()
 
 void CtSceneItemPrivate::fillItems(CtList<CtSceneItem *> &lst)
 {
-    lst.push_back(q);
+    lst.append(q);
 
     const CtList<CtSceneItem *> &items = orderedChildren();
 
@@ -196,8 +196,8 @@ void CtSceneItemPrivate::addItem(CtSceneItem *item)
     if (children.contains(item))
         return;
 
-    children.remove(item);
-    children.push_back(item);
+    children.removeAll(item);
+    children.append(item);
 
     sortDirty = true;
 
@@ -216,7 +216,7 @@ void CtSceneItemPrivate::removeItem(CtSceneItem *item)
     if (!children.contains(item))
         return;
 
-    children.remove(item);
+    children.removeAll(item);
 
     sortDirty = true;
 
@@ -1682,7 +1682,7 @@ bool CtSceneFragments::insertFragment(int index, Fragment *fragment)
     }
 
     if (index < 0 || index >= d->fragments.size()) {
-        d->fragments.push_back(fragment);
+        d->fragments.append(fragment);
     } else {
         CtList<Fragment *>::iterator it;
         it = d->fragments.begin();
@@ -1701,7 +1701,7 @@ bool CtSceneFragments::removeFragment(Fragment *fragment)
 
     for (it = d->fragments.begin(); it != d->fragments.end(); it++) {
         if (*it == fragment) {
-            d->fragments.erase(it);
+            d->fragments.remove(it);
             delete fragment;
             return true;
         }
@@ -1727,7 +1727,7 @@ void CtSceneFragments::paint(CtRenderer *renderer)
         e.height = f->height();
         e.opacity = f->opacity();
         e.textureAtlasIndex = f->atlasIndex();
-        elements.push_back(e);
+        elements.append(e);
     }
 
     renderer->drawElements(d->shaderEffect, d->texture, elements);
