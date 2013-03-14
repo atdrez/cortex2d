@@ -1822,7 +1822,7 @@ bool CtSceneParticleSystem::addParticle(Particle *particle)
             return false;
     }
 
-    d->particles.push_back(particle);
+    d->particles.append(particle);
     d->recreateVertexBuffer();
     return true;
 }
@@ -1836,7 +1836,7 @@ bool CtSceneParticleSystem::removeParticle(Particle *fragment)
 
     for (it = d->particles.begin(); it != d->particles.end(); it++) {
         if (*it == fragment) {
-            d->particles.erase(it);
+            d->particles.remove(it);
             delete fragment;
 
             found = true;
