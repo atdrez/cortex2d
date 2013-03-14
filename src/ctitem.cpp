@@ -668,10 +668,10 @@ void CtSceneItem::translate(ctreal x, ctreal y)
     d->localMatrix.translate(x, y);
 }
 
-CtRectReal CtSceneItem::boundingRect() const
+CtRect CtSceneItem::boundingRect() const
 {
     CT_D(CtSceneItem);
-    return CtRectReal(0, 0, d->width, d->height);
+    return CtRect(0, 0, d->width, d->height);
 }
 
 bool CtSceneItem::setDragCursor(CtDragCursor *drag)
@@ -710,8 +710,8 @@ bool CtSceneItem::collidesWith(CtSceneItem *item) const
         return false;
 
     // bounding rects
-    const CtRectReal &rA = boundingRect();
-    const CtRectReal &rB = item->boundingRect();
+    const CtRect &rA = boundingRect();
+    const CtRect &rB = item->boundingRect();
 
     // matrix transforms
     const CtMatrix &mA = sceneTransformMatrix();

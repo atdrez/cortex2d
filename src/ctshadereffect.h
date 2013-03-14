@@ -1,6 +1,7 @@
 #ifndef CTSHADEREFFECT_H
 #define CTSHADEREFFECT_H
 
+#include "ctlist.h"
 #include "ctcolor.h"
 #include "ctmatrix.h"
 #include "cttexture.h"

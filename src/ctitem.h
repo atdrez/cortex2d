@@ -136,7 +136,7 @@ public:
 
     void deleteLater();
 
-    virtual CtRectReal boundingRect() const;
+    virtual CtRect boundingRect() const;
 
     bool collidesWith(CtSceneItem *item) const;
 

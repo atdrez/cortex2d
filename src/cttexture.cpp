@@ -317,8 +317,9 @@ bool CtAtlasTexture::loadAtlas(const CtString &filePath)
             return false;
 
         m_keys[texKey] = i;
-        setSourceRectAt(i, CtRect(x, y, w, h));
-        setViewportRectAt(i, CtRect(-xOffset, -yOffset, originalWidth, originalHeight));
+        setSourceRectAt(i, CtRect(ctreal(x), ctreal(y), ctreal(w), ctreal(h)));
+        setViewportRectAt(i, CtRect(-ctreal(xOffset), -ctreal(yOffset),
+                                    ctreal(originalWidth), ctreal(originalHeight)));
     }
 
     return true;
