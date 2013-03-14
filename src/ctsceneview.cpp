@@ -79,17 +79,16 @@ void CtSceneViewData::updateDragCursor(CtSceneItem *source)
         if (!item->isVisible() || !(item->flags() & CtSceneItem::AcceptsDragEvent))
             continue;
 
-        ctreal mx, my;
         const CtMatrix &matrix = item->transformMatrix();
-        matrix.map(x, y, &mx, &my);
+        const CtPoint &p1 = matrix.map(x, y);
 
-        if (!item->contains(mx, my))
+        if (!item->contains(p1.x(), p1.y()))
             continue;
 
         bool isNew = (dragGrabber != item);
         CtDragDropEvent ev(isNew ? CtEvent::DragEnter : CtEvent::DragMove,
                            drag->sourceItem(), item, drag->draggedItem(),
-                           drag->mime(), op, mx, my, x, y);
+                           drag->mime(), op, p1.x(), p1.y(), x, y);
 
         if (!isNew) {
             item->event(&ev);
@@ -107,12 +106,11 @@ void CtSceneViewData::updateDragCursor(CtSceneItem *source)
 
     // leave old grabber
     if (dragGrabber && currentGrabber != dragGrabber) {
-        ctreal mx, my;
         const CtMatrix &matrix = dragGrabber->transformMatrix();
-        matrix.map(x, y, &mx, &my);
+        const CtPoint &p1 = matrix.map(x, y);
 
         CtDragDropEvent ev(CtEvent::DragLeave, drag->sourceItem(), dragGrabber,
-                           drag->draggedItem(), drag->mime(), op, mx, my, x, y);
+                           drag->draggedItem(), drag->mime(), op, p1.x(), p1.y(), x, y);
         dragGrabber->event(&ev);
     }
 
@@ -124,32 +122,32 @@ void CtSceneViewData::releaseDragCursor(CtSceneItem *source, bool canceled)
     if (!drag || !drag->sourceItem() || drag->sourceItem() != source)
         return;
 
-    ctreal mx = 0, my = 0;
+    CtPoint p1;
     const ctreal x = drag->x();
     const ctreal y = drag->y();
     const CtDragDropEvent::Operation op = (CtDragDropEvent::Operation)(drag->operation());
 
     if (dragGrabber)
-        dragGrabber->transformMatrix().map(x, y, &mx, &my);
+        p1 = dragGrabber->transformMatrix().map(x, y);
 
     if (!dragGrabber || canceled) {
         if (dragGrabber) {
             CtDragDropEvent ev(CtEvent::DragLeave, drag->sourceItem(), dragGrabber,
-                               drag->draggedItem(), drag->mime(), op, mx, my, x, y);
+                               drag->draggedItem(), drag->mime(), op, p1.x(), p1.y(), x, y);
             dragGrabber->event(&ev);
         }
 
         CtDragDropEvent evc(CtEvent::DragCursorCancel, drag->sourceItem(), dragGrabber,
-                            drag->draggedItem(), drag->mime(), op, mx, my, x, y);
+                            drag->draggedItem(), drag->mime(), op, p1.x(), p1.y(), x, y);
         drag->sourceItem()->event(&evc);
     } else {
         CtDragDropEvent ev(CtEvent::Drop, drag->sourceItem(), dragGrabber,
-                           drag->draggedItem(), drag->mime(), op, mx, my, x, y);
+                           drag->draggedItem(), drag->mime(), op, p1.x(), p1.y(), x, y);
         bool ok = dragGrabber->event(&ev);
 
         CtDragDropEvent evc(ok ? CtEvent::DragCursorDrop : CtEvent::DragCursorCancel,
                             drag->sourceItem(), dragGrabber, drag->draggedItem(),
-                            drag->mime(), op, mx, my, x, y);
+                            drag->mime(), op, p1.x(), p1.y(), x, y);
         drag->sourceItem()->event(&evc);
     }
 
@@ -159,7 +157,6 @@ void CtSceneViewData::releaseDragCursor(CtSceneItem *source, bool canceled)
 
 bool CtSceneViewData::deliverMousePress(CtMouseEvent *event)
 {
-    ctreal mx, my, ix, iy;
     ctreal x = event->x();
     ctreal y = event->y();
 
@@ -179,12 +176,12 @@ bool CtSceneViewData::deliverMousePress(CtMouseEvent *event)
 #endif
 
         const CtMatrix &matrix = item->transformMatrix();
-        matrix.map(x, y, &mx, &my);
-        matrix.map(event->initialX(), event->initialY(), &ix, &iy);
+        const CtPoint &p1 = matrix.map(x, y);
+        const CtPoint &p2 = matrix.map(event->initialX(), event->initialY());
 
-        if (item->contains(mx, my)) {
+        if (item->contains(p1.x(), p1.y())) {
 #ifdef CT_SIMULATE_TOUCH
-            CtTouchPoint p(1, mx, my, ix, iy, 1.0, true);
+            CtTouchPoint p(1, p1.x(), p1.y(), p2.x(), p2.y(), 1.0, true);
             CtTouchEvent evt(CtEvent::TouchBegin, 1, p);
 
             if (item->event(&evt)) {
@@ -193,7 +190,7 @@ bool CtSceneViewData::deliverMousePress(CtMouseEvent *event)
             }
 #endif
             CtMouseEvent ev(event->type(), event->button(),
-                            mx, my, x, y, ix, iy);
+                            p1.x(), p1.y(), x, y, p2.x(), p2.y());
             if (item->event(&ev)) {
                 mouseGrabber = item;
                 return true;
@@ -215,15 +212,13 @@ bool CtSceneViewData::deliverMouseMove(CtMouseEvent *event)
     if (!grabber)
         return false;
 
-    ctreal mx, my, ix, iy;
-
     const CtMatrix &m = grabber->transformMatrix();
-    m.map(event->x(), event->y(), &mx, &my);
-    m.map(event->initialX(), event->initialY(), &ix, &iy);
+    const CtPoint &p1 = m.map(event->x(), event->y());
+    const CtPoint &p2 = m.map(event->initialX(), event->initialY());
 
 #ifdef CT_SIMULATE_TOUCH
     if (grabber == touchGrabber) {
-        CtTouchPoint p(1, mx, my, ix, iy, 1.0, true);
+        CtTouchPoint p(1, p1.x(), p1.y(), p2.x(), p2.y(), 1.0, true);
         CtTouchEvent evt(CtEvent::TouchUpdate, 1, p);
         bool result = grabber->event(&evt);
         updateDragCursor(grabber);
@@ -231,8 +226,8 @@ bool CtSceneViewData::deliverMouseMove(CtMouseEvent *event)
     }
 #endif
 
-    CtMouseEvent ev(event->type(), event->button(), mx, my,
-                    event->x(), event->y(), ix, iy);
+    CtMouseEvent ev(event->type(), event->button(), p1.x(), p1.y(),
+                    event->x(), event->y(), p2.x(), p2.y());
     bool result = grabber->event(&ev);
     updateDragCursor(grabber);
     return result;
@@ -249,15 +244,13 @@ bool CtSceneViewData::deliverMouseRelease(CtMouseEvent *event)
     if (!grabber)
         return false;
 
-    ctreal mx, my, ix, iy;
-
     const CtMatrix &m = grabber->transformMatrix();
-    m.map(event->x(), event->y(), &mx, &my);
-    m.map(event->initialX(), event->initialY(), &ix, &iy);
+    const CtPoint &p1 = m.map(event->x(), event->y());
+    const CtPoint &p2 = m.map(event->initialX(), event->initialY());
 
 #ifdef CT_SIMULATE_TOUCH
     if (grabber == touchGrabber) {
-        CtTouchPoint p(1, mx, my, ix, iy, 1.0, false);
+        CtTouchPoint p(1, p1.x(), p1.y(), p2.x(), p2.y(), 1.0, false);
         CtTouchEvent evt(CtEvent::TouchEnd, 1, p);
         bool ok = grabber->event(&evt);
         releaseDragCursor(grabber, false);
@@ -266,8 +259,8 @@ bool CtSceneViewData::deliverMouseRelease(CtMouseEvent *event)
     }
 #endif
 
-    CtMouseEvent ev(event->type(), event->button(), mx, my,
-                    event->x(), event->y(), ix, iy);
+    CtMouseEvent ev(event->type(), event->button(), p1.x(), p1.y(),
+                    event->x(), event->y(), p2.x(), p2.y());
     bool ok = mouseGrabber->event(&ev);
     releaseDragCursor(grabber, false);
     mouseGrabber = 0;
@@ -341,13 +334,10 @@ CtTouchPointList CtSceneViewData::mapTouchPoints(CtSceneItem *item, const CtTouc
     CtMatrix matrix = item->transformMatrix();
 
     foreach (const CtTouchPoint &p, points) {
-        ctreal mx, my;
-        matrix.map(p.x(), p.y(), &mx, &my);
+        const CtPoint &p1 = matrix.map(p.x(), p.y());
+        const CtPoint &p2 = matrix.map(p.initialX(), p.initialY());
 
-        ctreal ix, iy;
-        matrix.map(p.initialX(), p.initialY(), &ix, &iy);
-
-        result.push_back(CtTouchPoint(p.id(), mx, my, ix, iy, p.pressure(), p.isPressed()));
+        result.push_back(CtTouchPoint(p.id(), p1.x(), p1.y(), p2.x(), p2.y(), p.pressure(), p.isPressed()));
     }
 
     return result;

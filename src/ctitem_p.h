@@ -149,7 +149,7 @@ struct CtSceneImagePolyPrivate : public CtSceneImagePrivate
 {
     CtSceneImagePolyPrivate(CtSceneImagePoly *q);
 
-    CtVector<CtPointReal> vertices;
+    CtVector<CtPoint> vertices;
 };
 
 struct CtSceneFragmentsPrivate : public CtSceneTextureItemPrivate

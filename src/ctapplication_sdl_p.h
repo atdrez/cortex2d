@@ -25,8 +25,8 @@ struct CtApplicationSdlPrivate : public CtApplicationPrivate
     bool m_quit;
     bool m_ready;
     int m_touchId;
-    CtMap<int, CtPointReal> m_touchPoints;
-    CtPointReal mousePressPos;
+    CtMap<int, CtPoint> m_touchPoints;
+    CtPoint mousePressPos;
     Ct::MouseButton mouseButton;
 };
 

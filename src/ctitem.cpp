@@ -683,43 +683,31 @@ bool CtSceneItem::setDragCursor(CtDragCursor *drag)
     return !itemScene ? false : itemScene->setDragCursor(drag);
 }
 
-CtPointReal CtSceneItem::mapToScene(ctreal x, ctreal y) const
+CtPoint CtSceneItem::mapToScene(ctreal x, ctreal y) const
 {
-    ctreal sx, sy;
-    sceneTransformMatrix().map(x, y, &sx, &sy);
-    return CtPointReal(sx, sy);
+    return sceneTransformMatrix().map(x, y);
 }
 
-CtPointReal CtSceneItem::mapToItem(CtSceneItem *item, ctreal x, ctreal y) const
+CtPoint CtSceneItem::mapToItem(CtSceneItem *item, ctreal x, ctreal y) const
 {
     if (!item)
-        return CtPointReal();
+        return CtPoint();
 
-    ctreal sx, sy, rx, ry;
-    sceneTransformMatrix().map(x, y, &sx, &sy);
-    item->transformMatrix().map(sx, sy, &rx, &ry);
-    return CtPointReal(rx, ry);
+    return item->transformMatrix().map(sceneTransformMatrix().map(x, y));
 }
 
-CtPointReal CtSceneItem::mapFromItem(CtSceneItem *item, ctreal x, ctreal y) const
+CtPoint CtSceneItem::mapFromItem(CtSceneItem *item, ctreal x, ctreal y) const
 {
     if (!item)
-        return CtPointReal();
+        return CtPoint();
 
-    ctreal sx, sy, rx, ry;
-    item->sceneTransformMatrix().map(x, y, &sx, &sy);
-    transformMatrix().map(sx, sy, &rx, &ry);
-
-    return CtPointReal(rx, ry);
+    return transformMatrix().map(item->sceneTransformMatrix().map(x, y));
 }
 
 bool CtSceneItem::collidesWith(CtSceneItem *item) const
 {
     if (!item)
         return false;
-
-    ctreal ap1x, ap1y, ap2x, ap2y, ap3x, ap3y, ap4x, ap4y;
-    ctreal bp1x, bp1y, bp2x, bp2y, bp3x, bp3y, bp4x, bp4y;
 
     // bounding rects
     const CtRectReal &rA = boundingRect();
@@ -730,35 +718,35 @@ bool CtSceneItem::collidesWith(CtSceneItem *item) const
     const CtMatrix &mB = item->sceneTransformMatrix();
 
     // map top-left
-    mA.map(rA.x(), rA.y(), &ap1x, &ap1y);
-    mB.map(rB.x(), rB.y(), &bp1x, &bp1y);
+    const CtPoint &a1 = mA.map(rA.x(), rA.y());
+    const CtPoint &b1 = mB.map(rB.x(), rB.y());
 
     // map bottom-right
-    mA.map(rA.x() + rA.width(), rA.y() + rA.height(), &ap3x, &ap3y);
-    mB.map(rB.x() + rB.width(), rB.y() + rB.height(), &bp3x, &bp3y);
+    const CtPoint &a3 = mA.map(rA.x() + rA.width(), rA.y() + rA.height());
+    const CtPoint &b3 = mB.map(rB.x() + rB.width(), rB.y() + rB.height());
 
     // check simple collisions (no rotation)
     if (rotation() == 0 && item->rotation() == 0) {
-        return !(ctMin(ap1x, ap3x) > ctMax(bp1x, bp3x) ||
-                 ctMin(ap1y, ap3y) > ctMax(bp1y, bp3y) ||
-                 ctMax(ap1x, ap3x) < ctMin(bp1x, bp3x) ||
-                 ctMax(ap1y, ap3y) < ctMin(bp1y, bp3y));
+        return !(ctMin(a1.x(), a3.x()) > ctMax(b1.x(), b3.x()) ||
+                 ctMin(a1.y(), a3.y()) > ctMax(b1.y(), b3.y()) ||
+                 ctMax(a1.x(), a3.x()) < ctMin(b1.x(), b3.x()) ||
+                 ctMax(a1.y(), a3.y()) < ctMin(b1.y(), b3.y()));
     }
 
     // map top-right
-    mA.map(rA.x() + rA.width(), rA.y(), &ap2x, &ap2y);
-    mB.map(rB.x() + rB.width(), rB.y(), &bp2x, &bp2y);
+    const CtPoint &a2 = mA.map(rA.x() + rA.width(), rA.y());
+    const CtPoint &b2 = mB.map(rB.x() + rB.width(), rB.y());
 
     // map bottom-left
-    mA.map(rA.x(), rA.y() + rA.height(), &ap4x, &ap4y);
-    mB.map(rB.x(), rB.y() + rB.height(), &bp4x, &bp4y);
+    const CtPoint &a4 = mA.map(rA.x(), rA.y() + rA.height());
+    const CtPoint &b4 = mB.map(rB.x(), rB.y() + rB.height());
 
     // create triangles
-    const float V[][3] = {{ap1x, ap1y, 0}, {ap2x, ap2y, 0}, {ap3x, ap3y, 0},
-                          {ap1x, ap1y, 0}, {ap3x, ap3y, 0}, {ap4x, ap4y, 0}};
+    const float V[][3] = {{a1.x(), a1.y(), 0}, {a2.x(), a2.y(), 0}, {a3.x(), a3.y(), 0},
+                          {a1.x(), a1.y(), 0}, {a3.x(), a3.y(), 0}, {a4.x(), a4.y(), 0}};
 
-    const float U[][3] = {{bp1x, bp1y, 0}, {bp2x, bp2y, 0}, {bp3x, bp3y, 0},
-                           {bp1x, bp1y, 0}, {bp3x, bp3y, 0}, {bp4x, bp4y, 0}};
+    const float U[][3] = {{b1.x(), b1.y(), 0}, {b2.x(), b2.y(), 0}, {b3.x(), b3.y(), 0},
+                           {b1.x(), b1.y(), 0}, {b3.x(), b3.y(), 0}, {b4.x(), b4.y(), 0}};
 
     // check collisions
     if (tri_tri_intersect(V[0], V[1], V[2], U[0], U[1], U[2])) return true;
@@ -769,10 +757,10 @@ bool CtSceneItem::collidesWith(CtSceneItem *item) const
     return false;
 }
 
-CtPointReal CtSceneItem::transformOrigin() const
+CtPoint CtSceneItem::transformOrigin() const
 {
     CT_D(CtSceneItem);
-    return CtPointReal(d->xCenter, d->yCenter);
+    return CtPoint(d->xCenter, d->yCenter);
 }
 
 void CtSceneItem::setTransformOrigin(ctreal x, ctreal y)
@@ -1550,7 +1538,7 @@ void CtSceneImagePoly::paint(CtRenderer *renderer)
     const ctreal w = hTile ? d->texture->width() : width();
     const ctreal h = vTile ? d->texture->height() : height();
 
-    foreach (const CtPointReal &p, d->vertices) {
+    foreach (const CtPoint &p, d->vertices) {
         vertices[i] = p.x();
         vertices[i + 1] = p.y();
 
@@ -1567,13 +1555,13 @@ void CtSceneImagePoly::paint(CtRenderer *renderer)
     delete [] texCoords;
 }
 
-CtVector<CtPointReal> CtSceneImagePoly::vertices() const
+CtVector<CtPoint> CtSceneImagePoly::vertices() const
 {
     CT_D(CtSceneImagePoly);
     return d->vertices;
 }
 
-void CtSceneImagePoly::setVertices(const CtVector<CtPointReal> &vertices)
+void CtSceneImagePoly::setVertices(const CtVector<CtPoint> &vertices)
 {
     CT_D(CtSceneImagePoly);
     d->vertices = vertices;

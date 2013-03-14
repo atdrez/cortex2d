@@ -3,98 +3,48 @@
 
 #include "ctglobal.h"
 
+
 class CtPoint
 {
 public:
     inline CtPoint();
-    inline CtPoint(const CtPoint &r);
-    inline CtPoint(int x, int y);
+    inline CtPoint(ctreal x, ctreal y);
+    inline CtPoint(const CtPoint &point);
 
-    inline int x() const { return m_x; }
-    inline int y() const { return m_y; }
-    inline bool isValid() const { return m_valid; }
-
-private:
-    int m_x;
-    int m_y;
-    bool m_valid;
-};
-
-
-class CtPointReal
-{
-public:
-    inline CtPointReal();
-    inline CtPointReal(const CtPointReal &r);
-    inline CtPointReal(int x, int y);
-    inline CtPointReal(ctreal x, ctreal y);
-
-    inline ctreal x() const { return m_x; }
-    inline ctreal y() const { return m_y; }
-    inline bool isValid() const { return m_valid; }
+    inline ctreal x() const { return mX; }
+    inline ctreal y() const { return mY; }
+    inline bool isValid() const { return mIsValid; }
 
 private:
-    ctreal m_x;
-    ctreal m_y;
-    bool m_valid;
+    ctreal mX;
+    ctreal mY;
+    bool mIsValid : 1;
 };
 
 
 CtPoint::CtPoint()
-    : m_x(0),
-      m_y(0),
-      m_valid(false)
+    : mX(0),
+      mY(0),
+      mIsValid(false)
 {
 
 }
 
-CtPoint::CtPoint(const CtPoint &r)
-  : m_x(r.m_x),
-    m_y(r.m_y),
-    m_valid(r.m_valid)
+CtPoint::CtPoint(ctreal x, ctreal y)
+    : mX(x),
+      mY(y),
+      mIsValid(true)
 {
 
 }
 
-CtPoint::CtPoint(int x, int y)
-    : m_x(x),
-      m_y(y),
-      m_valid(true)
+CtPoint::CtPoint(const CtPoint &point)
+    : mX(point.mX),
+      mY(point.mY),
+      mIsValid(point.mIsValid)
 {
 
 }
 
-
-CtPointReal::CtPointReal()
-    : m_x(0),
-      m_y(0),
-      m_valid(false)
-{
-
-}
-
-CtPointReal::CtPointReal(const CtPointReal &r)
-  : m_x(r.m_x),
-    m_y(r.m_y),
-    m_valid(r.m_valid)
-{
-
-}
-
-CtPointReal::CtPointReal(int x, int y)
-    : m_x(x),
-      m_y(y),
-      m_valid(true)
-{
-
-}
-
-CtPointReal::CtPointReal(ctreal x, ctreal y)
-    : m_x(x),
-      m_y(y),
-      m_valid(true)
-{
-
-}
 
 #endif

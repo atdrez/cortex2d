@@ -118,13 +118,13 @@ public:
 
     void translate(ctreal x, ctreal y);
 
-    CtPointReal transformOrigin() const;
+    CtPoint transformOrigin() const;
     void setTransformOrigin(ctreal x, ctreal y);
 
-    CtPointReal mapToScene(ctreal x, ctreal y) const;
+    CtPoint mapToScene(ctreal x, ctreal y) const;
 
-    CtPointReal mapToItem(CtSceneItem *item, ctreal x, ctreal y) const;
-    CtPointReal mapFromItem(CtSceneItem *item, ctreal x, ctreal y) const;
+    CtPoint mapToItem(CtSceneItem *item, ctreal x, ctreal y) const;
+    CtPoint mapFromItem(CtSceneItem *item, ctreal x, ctreal y) const;
 
     CtSceneView *scene() const;
     CtSceneItem *parent() const;
@@ -281,8 +281,8 @@ public:
     CtSceneImagePoly(CtSceneItem *parent = 0);
     CtSceneImagePoly(CtTexture *texture, CtSceneItem *parent = 0);
 
-    CtVector<CtPointReal> vertices() const;
-    void setVertices(const CtVector<CtPointReal> &vertices);
+    CtVector<CtPoint> vertices() const;
+    void setVertices(const CtVector<CtPoint> &vertices);
 
 protected:
     void paint(CtRenderer *renderer);

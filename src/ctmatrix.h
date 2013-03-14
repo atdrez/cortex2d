@@ -21,18 +21,19 @@ public:
     void multiply(const CtMatrix &matrix);
 
     bool invert();
-    CtPointReal map(ctreal x, ctreal y) const;
-    void map(ctreal x, ctreal y, ctreal *ox, ctreal *oy) const;
+
+    CtPoint map(ctreal x, ctreal y) const;
+    CtPoint map(const CtPoint &point) const { return map(point.x(), point.y()); }
 
     CtMatrix4x4 toMatrix4x4() const;
 
 private:
-    ctreal m_v11;
-    ctreal m_v12;
-    ctreal m_v21;
-    ctreal m_v22;
-    ctreal m_dx;
-    ctreal m_dy;
+    ctreal mV11;
+    ctreal mV12;
+    ctreal mV21;
+    ctreal mV22;
+    ctreal mDx;
+    ctreal mDy;
 };
 
 
@@ -45,10 +46,10 @@ public:
 
     void setIdentity();
 
-    ctreal *data() { return &m_data[0][0]; }
+    ctreal *data() { return &mData[0][0]; }
 
     const ctreal *constData() const {
-        return const_cast<const ctreal *const>(&m_data[0][0]);
+        return const_cast<const ctreal *const>(&mData[0][0]);
     }
 
     void multiply(const CtMatrix4x4 &matrix);
@@ -57,7 +58,7 @@ public:
                ctreal top, ctreal nearZ, ctreal farZ);
 
 private:
-    ctreal m_data[4][4];
+    ctreal mData[4][4];
 };
 
 

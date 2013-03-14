@@ -15,36 +15,36 @@ CtMatrix::CtMatrix(const CtMatrix &matrix)
 
 void CtMatrix::setIdentity()
 {
-    m_v11 = 1;
-    m_v12 = 0;
-    m_v21 = 0;
-    m_v22 = 1;
-    m_dx = 0;
-    m_dy = 0;
+    mV11 = 1;
+    mV12 = 0;
+    mV21 = 0;
+    mV22 = 1;
+    mDx = 0;
+    mDy = 0;
 }
 
 void CtMatrix::setMatrix(const CtMatrix &matrix)
 {
-    m_v11 = matrix.m_v11;
-    m_v12 = matrix.m_v12;
-    m_v21 = matrix.m_v21;
-    m_v22 = matrix.m_v22;
-    m_dx = matrix.m_dx;
-    m_dy = matrix.m_dy;
+    mV11 = matrix.mV11;
+    mV12 = matrix.mV12;
+    mV21 = matrix.mV21;
+    mV22 = matrix.mV22;
+    mDx = matrix.mDx;
+    mDy = matrix.mDy;
 }
 
 void CtMatrix::scale(ctreal sx, ctreal sy)
 {
-    m_v11 *= sx;
-    m_v12 *= sx;
-    m_v21 *= sy;
-    m_v22 *= sy;
+    mV11 *= sx;
+    mV12 *= sx;
+    mV21 *= sy;
+    mV22 *= sy;
 }
 
 void CtMatrix::translate(ctreal tx, ctreal ty)
 {
-    m_dx += tx * m_v11 + ty * m_v21;
-    m_dy += ty * m_v22 + tx * m_v12;
+    mDx += tx * mV11 + ty * mV21;
+    mDy += ty * mV22 + tx * mV12;
 }
 
 void CtMatrix::rotate(ctreal angle)
@@ -52,72 +52,67 @@ void CtMatrix::rotate(ctreal angle)
     if (angle == 0)
         return;
 
-    const ctreal d11 = m_v11;
-    const ctreal d12 = m_v12;
-    const ctreal d21 = m_v21;
-    const ctreal d22 = m_v22;
+    const ctreal d11 = mV11;
+    const ctreal d12 = mV12;
+    const ctreal d21 = mV21;
+    const ctreal d22 = mV22;
     const ctreal sina = sin(-angle * M_PI / 180.0);
     const ctreal cosa = cos(-angle * M_PI / 180.0);
 
-    m_v11 = d11 * cosa + d21 * sina;
-    m_v12 = d12 * cosa + d22 * sina;
-    m_v21 = -d11 * sina + d21 * cosa;
-    m_v22 = -d12 * sina + d22 * cosa;
+    mV11 = d11 * cosa + d21 * sina;
+    mV12 = d12 * cosa + d22 * sina;
+    mV21 = -d11 * sina + d21 * cosa;
+    mV22 = -d12 * sina + d22 * cosa;
 }
 
 void CtMatrix::multiply(const CtMatrix &matrix)
 {
-    const ctreal d11 = m_v11;
-    const ctreal d12 = m_v12;
-    const ctreal d21 = m_v21;
-    const ctreal d22 = m_v22;
-    const ctreal dx = m_dx;
-    const ctreal dy = m_dy;
+    const ctreal d11 = mV11;
+    const ctreal d12 = mV12;
+    const ctreal d21 = mV21;
+    const ctreal d22 = mV22;
+    const ctreal dx = mDx;
+    const ctreal dy = mDy;
 
-    m_v11 = d11 * matrix.m_v11 + d12 * matrix.m_v21;
-    m_v12 = d11 * matrix.m_v12 + d12 * matrix.m_v22;
-    m_v21 = d21 * matrix.m_v11 + d22 * matrix.m_v21;
-    m_v22 = d21 * matrix.m_v12 + d22 * matrix.m_v22;
-    m_dx = dx * matrix.m_v11 + dy * matrix.m_v21 + matrix.m_dx;
-    m_dy = dx * matrix.m_v12 + dy * matrix.m_v22 + matrix.m_dy;
+    mV11 = d11 * matrix.mV11 + d12 * matrix.mV21;
+    mV12 = d11 * matrix.mV12 + d12 * matrix.mV22;
+    mV21 = d21 * matrix.mV11 + d22 * matrix.mV21;
+    mV22 = d21 * matrix.mV12 + d22 * matrix.mV22;
+    mDx = dx * matrix.mV11 + dy * matrix.mV21 + matrix.mDx;
+    mDy = dx * matrix.mV12 + dy * matrix.mV22 + matrix.mDy;
 }
 
-CtPointReal CtMatrix::map(ctreal x, ctreal y) const
+CtPoint CtMatrix::map(ctreal ix, ctreal iy) const
 {
-    ctreal ox, oy;
-    map(x, y, &ox, &oy);
-    return CtPointReal(ox, oy);
-}
+    ctreal ox = ix * mV11 + iy * mV21 + mDx;
+    ctreal oy = ix * mV12 + iy * mV22 + mDy;
 
-void CtMatrix::map(ctreal ix, ctreal iy, ctreal *ox, ctreal *oy) const
-{
-    *ox = ix * m_v11 + iy * m_v21 + m_dx;
-    *oy = ix * m_v12 + iy * m_v22 + m_dy;
+    return CtPoint(ox, oy);
 }
 
 bool CtMatrix::invert()
 {
-    const ctreal det = (m_v11 * m_v22 - m_v12 * m_v21);
+    const ctreal det = (mV11 * mV22 - mV12 * mV21);
 
     if (det == 0) {
         setIdentity();
         return false;
     }
 
-    const ctreal d11 = m_v11;
-    const ctreal d12 = m_v12;
-    const ctreal d21 = m_v21;
-    const ctreal d22 = m_v22;
-    const ctreal dx = m_dx;
-    const ctreal dy = m_dy;
+    const ctreal d11 = mV11;
+    const ctreal d12 = mV12;
+    const ctreal d21 = mV21;
+    const ctreal d22 = mV22;
+    const ctreal dx = mDx;
+    const ctreal dy = mDy;
     const ctreal inv = 1.0 / det;
 
-    m_v11 = d22 * inv;
-    m_v12 = -d12 * inv;
-    m_v21 = -d21 * inv;
-    m_v22 = d11 * inv;
-    m_dx = (d21 * dy - d22 * dx) * inv;
-    m_dy = (d12 * dx - d11 * dy) * inv;
+    mV11 = d22 * inv;
+    mV12 = -d12 * inv;
+    mV21 = -d21 * inv;
+    mV22 = d11 * inv;
+    mDx = (d21 * dy - d22 * dx) * inv;
+    mDy = (d12 * dx - d11 * dy) * inv;
 
     return true;
 }
@@ -130,12 +125,12 @@ CtMatrix4x4 CtMatrix::toMatrix4x4() const
 
     ctreal *d = result.data();
 
-    CT_M4X4PTR(d, 0, 0) = m_v11;
-    CT_M4X4PTR(d, 0, 1) = -m_v21;
-    CT_M4X4PTR(d, 1, 0) = -m_v12;
-    CT_M4X4PTR(d, 1, 1) = m_v22;
-    CT_M4X4PTR(d, 3, 0) = m_dx;
-    CT_M4X4PTR(d, 3, 1) = m_dy;
+    CT_M4X4PTR(d, 0, 0) = mV11;
+    CT_M4X4PTR(d, 0, 1) = -mV21;
+    CT_M4X4PTR(d, 1, 0) = -mV12;
+    CT_M4X4PTR(d, 1, 1) = mV22;
+    CT_M4X4PTR(d, 3, 0) = mDx;
+    CT_M4X4PTR(d, 3, 1) = mDy;
     CT_M4X4PTR(d, 2, 2) = 1;
     CT_M4X4PTR(d, 3, 3) = 1;
 
@@ -151,7 +146,7 @@ CtMatrix4x4::CtMatrix4x4()
 
 CtMatrix4x4::CtMatrix4x4(const CtMatrix4x4 &matrix)
 {
-    memcpy(m_data, matrix.m_data, sizeof(matrix.m_data));
+    memcpy(mData, matrix.mData, sizeof(matrix.mData));
 }
 
 CtMatrix4x4::~CtMatrix4x4()
@@ -161,37 +156,37 @@ CtMatrix4x4::~CtMatrix4x4()
 
 void CtMatrix4x4::setIdentity()
 {
-    memset(m_data, 0x0, sizeof(m_data));
-    m_data[0][0] = 1.0;
-    m_data[1][1] = 1.0;
-    m_data[2][2] = 1.0;
-    m_data[3][3] = 1.0;
+    memset(mData, 0x0, sizeof(mData));
+    mData[0][0] = 1.0;
+    mData[1][1] = 1.0;
+    mData[2][2] = 1.0;
+    mData[3][3] = 1.0;
 }
 
 void CtMatrix4x4::multiply(const CtMatrix4x4 &matrix)
 {
     CtMatrix4x4 copy = *this;
 
-    const ctreal *const p = reinterpret_cast<const ctreal *const>(copy.m_data);
-    const ctreal *const m = reinterpret_cast<const ctreal *const>(matrix.m_data);
+    const ctreal *const p = reinterpret_cast<const ctreal *const>(copy.mData);
+    const ctreal *const m = reinterpret_cast<const ctreal *const>(matrix.mData);
 
 #define CT_M4X4_MUL_LOOP_UNROLL(i) {                                    \
-        m_data[i][0] = (CT_M4X4PTR(p, i, 0) * CT_M4X4PTR(m, 0, 0)) +    \
+        mData[i][0] = (CT_M4X4PTR(p, i, 0) * CT_M4X4PTR(m, 0, 0)) +    \
             (CT_M4X4PTR(p, i, 1) * CT_M4X4PTR(m, 1, 0)) +               \
             (CT_M4X4PTR(p, i, 2) * CT_M4X4PTR(m, 2, 0)) +               \
             (CT_M4X4PTR(p, i, 3) * CT_M4X4PTR(m, 3, 0));                \
                                                                         \
-        m_data[i][1] = (CT_M4X4PTR(p, i, 0) * CT_M4X4PTR(m, 0, 1)) +    \
+        mData[i][1] = (CT_M4X4PTR(p, i, 0) * CT_M4X4PTR(m, 0, 1)) +    \
             (CT_M4X4PTR(p, i, 1) * CT_M4X4PTR(m, 1, 1)) +               \
             (CT_M4X4PTR(p, i, 2) * CT_M4X4PTR(m, 2, 1)) +               \
             (CT_M4X4PTR(p, i, 3) * CT_M4X4PTR(m, 3, 1));                \
                                                                         \
-        m_data[i][2] = (CT_M4X4PTR(p, i, 0) * CT_M4X4PTR(m, 0, 2)) +    \
+        mData[i][2] = (CT_M4X4PTR(p, i, 0) * CT_M4X4PTR(m, 0, 2)) +    \
             (CT_M4X4PTR(p, i, 1) * CT_M4X4PTR(m, 1, 2)) +               \
             (CT_M4X4PTR(p, i, 2) * CT_M4X4PTR(m, 2, 2)) +               \
             (CT_M4X4PTR(p, i, 3) * CT_M4X4PTR(m, 3, 2));                \
                                                                         \
-        m_data[i][3] = (CT_M4X4PTR(p, i, 0) * CT_M4X4PTR(m, 0, 3)) +    \
+        mData[i][3] = (CT_M4X4PTR(p, i, 0) * CT_M4X4PTR(m, 0, 3)) +    \
             (CT_M4X4PTR(p, i, 1) * CT_M4X4PTR(m, 1, 3)) +               \
             (CT_M4X4PTR(p, i, 2) * CT_M4X4PTR(m, 2, 3)) +               \
             (CT_M4X4PTR(p, i, 3) * CT_M4X4PTR(m, 3, 3));                \
@@ -215,13 +210,13 @@ bool CtMatrix4x4::ortho(ctreal left, ctreal right, ctreal bottom,
     if ((deltaX == 0.0f) || (deltaY == 0.0f) || (deltaZ == 0.0f))
         return false;
 
-    m_data[0][0] = 2.0f / deltaX;
-    m_data[1][1] = 2.0f / deltaY;
-    m_data[2][2] = -2.0f / deltaZ;
-    m_data[3][0] = -(right + left) / deltaX;
-    m_data[3][1] = -(top + bottom) / deltaY;
-    m_data[3][2] = -(nearZ + farZ) / deltaZ;
-    m_data[3][3] = 1;
+    mData[0][0] = 2.0f / deltaX;
+    mData[1][1] = 2.0f / deltaY;
+    mData[2][2] = -2.0f / deltaZ;
+    mData[3][0] = -(right + left) / deltaX;
+    mData[3][1] = -(top + bottom) / deltaY;
+    mData[3][2] = -(nearZ + farZ) / deltaZ;
+    mData[3][3] = 1;
 
     return true;
 }
