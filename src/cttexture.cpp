@@ -371,7 +371,7 @@ CtTexture *CtTextureCache::take(const CtString &key)
         return 0;
 
     CtTexture *result = it->second;
-    d->m_map.erase(it);
+    d->m_map.remove(it);
     return result;
 }
 

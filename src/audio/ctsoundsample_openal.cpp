@@ -44,7 +44,7 @@ static void ct_releaseALBuffer(const CtString &path)
     } else {
         ALuint buffer = entry.first;
         alDeleteBuffers(1, &buffer);
-        ct_openalBuffers.erase(path);
+        ct_openalBuffers.remove(path);
     }
 }
 
