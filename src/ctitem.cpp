@@ -956,7 +956,7 @@ void CtSceneRect::paint(CtRenderer *renderer)
 {
     CT_D(CtSceneRect);
     renderer->drawSolid(d->shaderEffect, d->width, d->height,
-                        d->color.r(), d->color.g(), d->color.b(), d->color.a());
+                        d->color.red(), d->color.green(), d->color.blue(), d->color.alpha());
 }
 
 CtColor CtSceneRect::color() const
@@ -1890,10 +1890,10 @@ void CtSceneParticleSystem::paint(CtRenderer *renderer)
         vptr[0] = p->x();
         vptr[1] = p->y();
         vptr[2] = p->pointSize();
-        vptr[3] = c.r();
-        vptr[4] = c.g();
-        vptr[5] = c.b();
-        vptr[6] = c.a();
+        vptr[3] = c.red();
+        vptr[4] = c.green();
+        vptr[5] = c.blue();
+        vptr[6] = c.alpha();
 
         vptr += d->attrCount;
     }

@@ -7,32 +7,34 @@ class CtColor
 {
 public:
     CtColor()
-        : m_r(1), m_g(1), m_b(1), m_a(1) {}
+        : mRed(1), mGreen(1), mBlue(1), mAlpha(1) {}
 
-    CtColor(ctreal r, ctreal g, ctreal b, ctreal a = 1)
-        : m_r(r), m_g(g), m_b(b), m_a(a) {}
+    CtColor(ctreal red, ctreal green, ctreal blue, ctreal alpha = 1)
+        : mRed(red), mGreen(green), mBlue(blue), mAlpha(alpha) {}
 
     CtColor(const CtColor &c)
-        : m_r(c.m_r), m_g(c.m_g), m_b(c.m_b), m_a(c.m_a) {}
+        : mRed(c.mRed), mGreen(c.mGreen), mBlue(c.mBlue), mAlpha(c.mAlpha) {}
 
-    inline ctreal r() const { return m_r; }
-    inline ctreal g() const { return m_g; }
-    inline ctreal b() const { return m_b; }
-    inline ctreal a() const { return m_a; }
+    inline ctreal red() const { return mRed; }
+    inline ctreal green() const { return mGreen; }
+    inline ctreal blue() const { return mBlue; }
+    inline ctreal alpha() const { return mAlpha; }
 
-    static CtColor fromHex(int value) {
-        const ctreal r = ctreal((value >> 16) & 0xFF) / 0xFF;
-        const ctreal g = ctreal((value >> 8) & 0xFF) / 0xFF;
-        const ctreal b = ctreal(value & 0xFF) / 0xFF;
-
-        return CtColor(r, g, b);
-    }
+    inline static CtColor fromHex(int value);
 
 private:
-    ctreal m_r;
-    ctreal m_g;
-    ctreal m_b;
-    ctreal m_a;
+    ctreal mRed;
+    ctreal mGreen;
+    ctreal mBlue;
+    ctreal mAlpha;
 };
+
+
+CtColor CtColor::fromHex(int value)
+{
+    return CtColor(((value >> 16) & 0xFF) / 255.0f,
+                   ((value >> 8) & 0xFF) / 255.0f,
+                   (value & 0xFF) / 255.0f);
+}
 
 #endif

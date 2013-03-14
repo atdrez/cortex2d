@@ -262,7 +262,7 @@ void CtShaderEffect::drawVboTextTexture(const CtMatrix4x4 &matrix, CtTexture *te
     }
 
     applyTexture(texture->id(), false, false);
-    applyColor(color.r(), color.g(), color.b(), color.a(), opacity);
+    applyColor(color.red(), color.green(), color.blue(), color.alpha(), opacity);
     applyCustomUniforms();
 
     CtGL::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
