@@ -43,8 +43,8 @@ bool CtFileManager::exists(const CtString &path) const
 
 bool CtFileManager::copy(const CtString &srcPath, const CtString &destPath)
 {
-    std::ifstream input(srcPath.c_str(), std::fstream::binary);
-    std::ofstream output(destPath.c_str(), std::fstream::binary);
+    std::ifstream input(srcPath.data(), std::fstream::binary);
+    std::ofstream output(destPath.data(), std::fstream::binary);
     output << input.rdbuf();
     input.close();
     output.close();
@@ -52,7 +52,7 @@ bool CtFileManager::copy(const CtString &srcPath, const CtString &destPath)
 
 CtString CtFileManager::concatPath(const CtString &path, const CtString &subPath) const
 {
-    if (path.empty())
+    if (path.isEmpty())
         return subPath;
 
     if (path.at(path.length() - 1) == '/')

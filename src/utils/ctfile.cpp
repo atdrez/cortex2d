@@ -26,26 +26,26 @@ bool CtFile::open(OpenMode mode)
 #ifndef CT_FILE_RW
     switch (mode) {
     case ReadOnly:
-        m_in.fp = fopen(m_path.c_str(), "r");
+        m_in.fp = fopen(m_path.data(), "r");
         break;
     case WriteOnly:
-        m_in.fp = fopen(m_path.c_str(), "w");
+        m_in.fp = fopen(m_path.data(), "w");
         break;
     default:
-        m_in.fp = fopen(m_path.c_str(), "rw");
+        m_in.fp = fopen(m_path.data(), "rw");
         break;
     }
     return m_in.fp;
 #else
     switch (mode) {
     case ReadOnly:
-        m_in.rw = SDL_RWFromFile(m_path.c_str(), "r");
+        m_in.rw = SDL_RWFromFile(m_path.data(), "r");
         break;
     case WriteOnly:
-        m_in.rw = SDL_RWFromFile(m_path.c_str(), "w");
+        m_in.rw = SDL_RWFromFile(m_path.data(), "w");
         break;
     default:
-        m_in.rw = SDL_RWFromFile(m_path.c_str(), "rw");
+        m_in.rw = SDL_RWFromFile(m_path.data(), "rw");
         break;
     }
     return m_in.rw;

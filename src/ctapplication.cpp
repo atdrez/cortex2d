@@ -54,14 +54,14 @@ void CtApplication::quit()
 CtString CtApplication::applicationDir() const
 {
     CtString result = applicationPath();
-    int idx = result.find_last_of("/");
+    int idx = result.lastIndexOf('/');
 
     if (idx < 0) {
         return CtString("");
     } else if (idx == 0) {
         return CtString("/");
     } else {
-        result.erase(idx, result.length());
+        result.remove(idx, result.length());
         return result;
     }
 }
@@ -116,7 +116,7 @@ void CtApplication::releaseEvent(CtEvent *event)
 void CtApplication::openURL(const CtString &url)
 {
     CtApplication *d = instance();
-    d->d_ptr->openURL(url.c_str());
+    d->d_ptr->openURL(url.data());
 }
 
 CtWindow *CtApplication::activeWindow() const

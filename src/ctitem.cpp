@@ -1018,7 +1018,7 @@ void CtSceneTextPrivate::recreateBuffers()
 {
     releaseBuffers();
 
-    const char *str = text.c_str();
+    const char *str = text.data();
     const int len = strlen(str);
 
     if (!font || len == 0)

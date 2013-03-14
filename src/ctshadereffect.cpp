@@ -72,7 +72,7 @@ bool CtShaderEffect::init()
 
     // update custom uniforms
     foreach (CtShaderUniform *uniform, m_uniforms) {
-        uniform->m_location = m_program->uniformLocation(uniform->m_name.c_str());
+        uniform->m_location = m_program->uniformLocation(uniform->m_name.data());
     }
 
     m_ready = true;

@@ -11,14 +11,14 @@
 CtString ct_dirPath(const CtString &path)
 {
     CtString r = path;
-    int idx = r.find_last_of("/");
+    int idx = r.lastIndexOf('/');
 
     if (idx < 0) {
         return CtString("");
     } else if (idx == 0) {
         return CtString("/");
     } else {
-        r.erase(idx, r.length());
+        r.remove(idx, r.length());
         return r;
     }
 }
@@ -96,7 +96,7 @@ bool CtTexture::loadTGA(const CtString &fileName)
 {
     CtTGATexture texture;
 
-    if (!texture.loadFromFile((char *)fileName.c_str())) {
+    if (!texture.loadFromFile((char *)fileName.data())) {
         m_error = texture.errorMessage;
         return false;
     }
@@ -109,7 +109,7 @@ bool CtTexture::loadPNG(const CtString &fileName)
 {
     CtPNGTexture texture;
 
-    if (!texture.loadFromFile((char *)fileName.c_str())) {
+    if (!texture.loadFromFile((char *)fileName.data())) {
         m_error = texture.errorMessage;
         return false;
     }
@@ -126,7 +126,7 @@ bool CtTexture::loadPNG(const CtString &fileName)
 bool CtTexture::loadPVR(const CtString &fileName)
 {
     CtPVRTexture texture;
-    if (!texture.loadFromFile((char *)fileName.c_str())) {
+    if (!texture.loadFromFile((char *)fileName.data())) {
         m_error = texture.errorMessage;
         return false;
     }
@@ -138,7 +138,7 @@ bool CtTexture::loadPVR(const CtString &fileName)
 bool CtTexture::loadDDS(const CtString &fileName)
 {
     CtDDSTexture texture;
-    if (!texture.loadFromFile((char *)fileName.c_str())) {
+    if (!texture.loadFromFile((char *)fileName.data())) {
         m_error = texture.errorMessage;
         CT_DEBUG(m_error);
         return false;

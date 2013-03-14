@@ -6,7 +6,7 @@ static CtMap<CtString, ALBufferEntry> ct_openalBuffers;
 
 static ALuint ct_createALBuffer(const CtString &path)
 {
-    if (path.empty())
+    if (path.isEmpty())
         return 0;
 
     ALBufferEntry entry = ct_openalBuffers.value(path, ALBufferEntry(0, 0));
@@ -17,7 +17,7 @@ static ALuint ct_createALBuffer(const CtString &path)
         return entry.first;
     }
 
-    ALuint buffer = alutCreateBufferFromFile(path.c_str());
+    ALuint buffer = alutCreateBufferFromFile(path.data());
 
     if (!buffer) {
         CT_WARNING("Unable to load sound file: " << path);
@@ -30,7 +30,7 @@ static ALuint ct_createALBuffer(const CtString &path)
 
 static void ct_releaseALBuffer(const CtString &path)
 {
-    if (path.empty())
+    if (path.isEmpty())
         return;
 
     ALBufferEntry entry = ct_openalBuffers.value(path, ALBufferEntry(0, 0));
@@ -69,7 +69,7 @@ CtSoundSampleOpenALPrivate::~CtSoundSampleOpenALPrivate()
 
 bool CtSoundSampleOpenALPrivate::loadWav(const CtString &path)
 {
-    if (path.empty())
+    if (path.isEmpty())
         return false;
 
     if (filePath == path)

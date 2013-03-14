@@ -63,7 +63,7 @@ bool CtTextureFontPrivate::loadTTF(const CtString &path, int size)
 
     CT_ASSERT(textureMap != 0);
 
-    texture_font_t *font = texture_font_new(textureMap, path.c_str(), size);
+    texture_font_t *font = texture_font_new(textureMap, path.data(), size);
 
     if (!font)
         return false;

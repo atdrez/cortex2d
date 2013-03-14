@@ -106,7 +106,7 @@ bool CtShaderProgram::loadVertexShader(const CtString &source)
     if (d->vertexShader)
         CtGL::glDeleteShader(d->vertexShader);
 
-    d->vertexShader = d->loadShader(GL_VERTEX_SHADER, shaderSource.c_str());
+    d->vertexShader = d->loadShader(GL_VERTEX_SHADER, shaderSource.data());
     return (d->vertexShader != 0);
 }
 
@@ -122,7 +122,7 @@ bool CtShaderProgram::loadFragmentShader(const CtString &source)
     if (d->fragmentShader)
         CtGL::glDeleteShader(d->fragmentShader);
 
-    d->fragmentShader = d->loadShader(GL_FRAGMENT_SHADER, shaderSource.c_str());
+    d->fragmentShader = d->loadShader(GL_FRAGMENT_SHADER, shaderSource.data());
     return (d->fragmentShader != 0);
 }
 

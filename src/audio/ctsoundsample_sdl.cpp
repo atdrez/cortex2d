@@ -37,9 +37,9 @@ bool CtSoundSampleSdlPrivate::loadWav(const CtString &path)
     currentLoop = 0;
 
 #ifndef CT_ANDROID
-    loaded = SDL_LoadWAV(path.c_str(), &audioSpec, &buffer, &bufferLength) != 0;
+    loaded = SDL_LoadWAV(path.data(), &audioSpec, &buffer, &bufferLength) != 0;
 #else
-    SDL_RWops *rw = SDL_RWFromFile(path.c_str(), "r");
+    SDL_RWops *rw = SDL_RWFromFile(path.data(), "r");
 
     if (!rw) {
         loaded = false;
