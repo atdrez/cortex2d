@@ -1,7 +1,7 @@
 #include "cttexture.h"
 #include <string.h>
+#include "ctfile.h"
 #include "ctopenglfunctions.h"
-#include "utils/ctfile.h"
 #include "utils/cttgaloader.h"
 #include "utils/ctpngloader.h"
 #include "utils/ctpvrloader.h"
