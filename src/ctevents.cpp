@@ -15,8 +15,8 @@ void CtEvent::setAccepted(bool accepted)
     m_accepted = accepted;
 }
 
-CtDragDropEvent::CtDragDropEvent(Type type, CtSceneItem *sourceItem, CtSceneItem *targetItem,
-                                 CtSceneItem *draggedItem, const CtString &mime,
+CtDragDropEvent::CtDragDropEvent(Type type, CtSprite *sourceItem, CtSprite *targetItem,
+                                 CtSprite *draggedItem, const CtString &mime,
                                  Operation operation, ctreal x, ctreal y,
                                  ctreal sceneX, ctreal sceneY)
     : CtEvent(type),

@@ -7,7 +7,6 @@
 #include "ctGL.h"
 
 class CtWindow;
-class CtSceneItem;
 class CtWindowPrivate;
 class CtApplicationPrivate;
 

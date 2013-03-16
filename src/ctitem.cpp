@@ -45,13 +45,13 @@ static CtShaderEffect *ct_sharedParticleShaderEffect()
     return r;
 }
 
-bool CtSceneItemPrivate_sort_compare(CtSceneItem *a, CtSceneItem *b)
+bool CtSpritePrivate_sort_compare(CtSprite *a, CtSprite *b)
 {
     return (!a || !b) ? false : (a->z() < b->z());
 }
 
 
-CtSceneItemPrivate::CtSceneItemPrivate(CtSceneItem *q)
+CtSpritePrivate::CtSpritePrivate(CtSprite *q)
     : q(q),
       x(0),
       y(0),
@@ -72,44 +72,44 @@ CtSceneItemPrivate::CtSceneItemPrivate(CtSceneItem *q)
       yCenter(0),
       sortDirty(false),
       transformDirty(true),
-      flags(CtSceneItem::NoFlag),
+      flags(CtSprite::NoFlag),
       isFrameBuffer(false),
       pendingDelete(false)
 {
 
 }
 
-CtSceneItemPrivate::~CtSceneItemPrivate()
+CtSpritePrivate::~CtSpritePrivate()
 {
 
 }
 
-void CtSceneItemPrivate::init(CtSceneItem *p)
+void CtSpritePrivate::init(CtSprite *p)
 {
     parent = p;
     if (parent)
         parent->d_ptr->addItem(q);
 }
 
-void CtSceneItemPrivate::release()
+void CtSpritePrivate::release()
 {
     if (parent)
         parent->d_ptr->removeItem(q);
 
     // delete children
-    CtList<CtSceneItem *> oldChildren = children;
+    CtList<CtSprite *> oldChildren = children;
 
-    foreach (CtSceneItem *item, oldChildren)
+    foreach (CtSprite *item, oldChildren)
         delete item;
 }
 
-ctreal CtSceneItemPrivate::relativeOpacity()
+ctreal CtSpritePrivate::relativeOpacity()
 {
     // XXX: optimize
-    if (!parent || opacity == 0.0 || (flags & CtSceneItem::IgnoreAllParentOpacity)) {
+    if (!parent || opacity == 0.0 || (flags & CtSprite::IgnoreAllParentOpacity)) {
         return opacity;
-    } else if ((flags & CtSceneItem::IgnoreParentOpacity)) {
-        CtSceneItem *topParent = parent ? parent->parent() : 0;
+    } else if ((flags & CtSprite::IgnoreParentOpacity)) {
+        CtSprite *topParent = parent ? parent->parent() : 0;
 
         if (!topParent)
             return opacity;
@@ -120,7 +120,7 @@ ctreal CtSceneItemPrivate::relativeOpacity()
     }
 }
 
-bool CtSceneItemPrivate::relativeVisible()
+bool CtSpritePrivate::relativeVisible()
 {
     // XXX: optimize
     if (!parent)
@@ -129,7 +129,7 @@ bool CtSceneItemPrivate::relativeVisible()
         return visible && parent->isVisible();
 }
 
-bool CtSceneItemPrivate::relativeFrozen()
+bool CtSpritePrivate::relativeFrozen()
 {
     // XXX: optimize
     if (!parent)
@@ -138,7 +138,7 @@ bool CtSceneItemPrivate::relativeFrozen()
         return isFrozen || parent->isFrozen();
 }
 
-CtSceneFrameBuffer *CtSceneItemPrivate::frameBufferItem()
+CtSceneFrameBuffer *CtSpritePrivate::frameBufferItem()
 {
     // XXX: optimize
     if (!parent)
@@ -149,31 +149,31 @@ CtSceneFrameBuffer *CtSceneItemPrivate::frameBufferItem()
         return parent->d_ptr->frameBufferItem();
 }
 
-void CtSceneItemPrivate::fillItems(CtList<CtSceneItem *> &lst)
+void CtSpritePrivate::fillItems(CtList<CtSprite *> &lst)
 {
     lst.append(q);
 
-    const CtList<CtSceneItem *> &items = orderedChildren();
+    const CtList<CtSprite *> &items = orderedChildren();
 
-    foreach (CtSceneItem *item, items)
+    foreach (CtSprite *item, items)
         item->d_ptr->fillItems(lst);
 }
 
-const CtList<CtSceneItem *> &CtSceneItemPrivate::orderedChildren()
+const CtList<CtSprite *> &CtSpritePrivate::orderedChildren()
 {
     if (!sortDirty)
         return sortedChildren;
 
     sortDirty = false;
     sortedChildren = children;
-    sortedChildren.sort(CtSceneItemPrivate_sort_compare);
+    sortedChildren.sort(CtSpritePrivate_sort_compare);
 
     return sortedChildren;
 }
 
-void CtSceneItemPrivate::recursivePaint(CtRenderer *renderer)
+void CtSpritePrivate::recursivePaint(CtRenderer *renderer)
 {
-    if ((flags & CtSceneItem::DoNotPaintContent) == 0) {
+    if ((flags & CtSprite::DoNotPaintContent) == 0) {
         renderer->begin();
         renderer->m_opacity = relativeOpacity();
         renderer->m_projectionMatrix = currentViewportProjectionMatrix();
@@ -181,15 +181,15 @@ void CtSceneItemPrivate::recursivePaint(CtRenderer *renderer)
         renderer->end();
     }
 
-    const CtList<CtSceneItem *> &lst = orderedChildren();
+    const CtList<CtSprite *> &lst = orderedChildren();
 
-    foreach (CtSceneItem *item, lst) {
+    foreach (CtSprite *item, lst) {
         if (item->isVisible())
             item->d_ptr->recursivePaint(renderer);
     }
 }
 
-void CtSceneItemPrivate::addItem(CtSceneItem *item)
+void CtSpritePrivate::addItem(CtSprite *item)
 {
     if (children.contains(item))
         return;
@@ -204,12 +204,12 @@ void CtSceneItemPrivate::addItem(CtSceneItem *item)
     if (mScene)
         mScene->itemAddedToScene(q);
 
-    CtSceneItem::ChangeValue value;
+    CtSprite::ChangeValue value;
     value.itemValue = item;
-    q->itemChanged(CtSceneItem::ChildAdded, value);
+    q->itemChanged(CtSprite::ChildAdded, value);
 }
 
-void CtSceneItemPrivate::removeItem(CtSceneItem *item)
+void CtSpritePrivate::removeItem(CtSprite *item)
 {
     if (!children.contains(item))
         return;
@@ -223,18 +223,18 @@ void CtSceneItemPrivate::removeItem(CtSceneItem *item)
     if (mScene)
         mScene->itemRemovedFromScene(q);
 
-    CtSceneItem::ChangeValue value;
+    CtSprite::ChangeValue value;
     value.itemValue = item;
-    q->itemChanged(CtSceneItem::ChildRemoved, value);
+    q->itemChanged(CtSprite::ChildRemoved, value);
 }
 
-void CtSceneItemPrivate::setScene(CtSceneView *newScene)
+void CtSpritePrivate::setScene(CtSceneView *newScene)
 {
     scene = newScene;
     // update cache
 }
 
-CtMatrix CtSceneItemPrivate::mappedTransformMatrix(CtSceneItem *root)
+CtMatrix CtSpritePrivate::mappedTransformMatrix(CtSprite *root)
 {
     const ctreal ox = ctRound(xCenter);
     const ctreal oy = ctRound(yCenter);
@@ -267,7 +267,7 @@ CtMatrix CtSceneItemPrivate::mappedTransformMatrix(CtSceneItem *root)
     return modelMatrix;
 }
 
-void CtSceneItemPrivate::checkTransformMatrix()
+void CtSpritePrivate::checkTransformMatrix()
 {
     if (!transformDirty)
         return;
@@ -287,19 +287,19 @@ void CtSceneItemPrivate::checkTransformMatrix()
     //transformDirty = true; // XXX: enable for optimization
 }
 
-CtMatrix CtSceneItemPrivate::currentSceneTransformMatrix()
+CtMatrix CtSpritePrivate::currentSceneTransformMatrix()
 {
     checkTransformMatrix();
     return sceneTransformMatrix;
 }
 
-CtMatrix CtSceneItemPrivate::currentLocalTransformMatrix()
+CtMatrix CtSpritePrivate::currentLocalTransformMatrix()
 {
     checkTransformMatrix();
     return localTransformMatrix;
 }
 
-CtMatrix4x4 CtSceneItemPrivate::currentViewportProjectionMatrix()
+CtMatrix4x4 CtSpritePrivate::currentViewportProjectionMatrix()
 {
     CtSceneView *sc = q->scene();
     CtSceneFrameBuffer *fb = frameBufferItem();
@@ -322,51 +322,51 @@ CtMatrix4x4 CtSceneItemPrivate::currentViewportProjectionMatrix()
     return result;
 }
 
-CtSceneItem::CtSceneItem(CtSceneItem *parent)
+CtSprite::CtSprite(CtSprite *parent)
     : CtObject(parent),
-      d_ptr(new CtSceneItemPrivate(this))
+      d_ptr(new CtSpritePrivate(this))
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     d->init(parent);
 }
 
-CtSceneItem::CtSceneItem(CtSceneItemPrivate *dd)
+CtSprite::CtSprite(CtSpritePrivate *dd)
     : d_ptr(dd)
 {
 
 }
 
-CtSceneItem::~CtSceneItem()
+CtSprite::~CtSprite()
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     d->release();
     delete d;
 }
 
-CtSceneView *CtSceneItem::scene() const
+CtSceneView *CtSprite::scene() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     if (d->parent)
         return d->parent->scene();
     else
         return d->scene;
 }
 
-CtSceneItem *CtSceneItem::parent() const
+CtSprite *CtSprite::parent() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->parent;
 }
 
-ctreal CtSceneItem::x() const
+ctreal CtSprite::x() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->x;
 }
 
-void CtSceneItem::setX(ctreal x)
+void CtSprite::setX(ctreal x)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     if (d->x == x)
         return;
 
@@ -377,15 +377,15 @@ void CtSceneItem::setX(ctreal x)
     itemChanged(XChange, value);
 }
 
-ctreal CtSceneItem::y() const
+ctreal CtSprite::y() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->y;
 }
 
-void CtSceneItem::setY(ctreal y)
+void CtSprite::setY(ctreal y)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     if (d->y == y)
         return;
 
@@ -396,15 +396,15 @@ void CtSceneItem::setY(ctreal y)
     itemChanged(YChange, value);
 }
 
-ctreal CtSceneItem::z() const
+ctreal CtSprite::z() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->z;
 }
 
-void CtSceneItem::setZ(ctreal z)
+void CtSprite::setZ(ctreal z)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     if (d->z == z)
         return;
 
@@ -415,15 +415,15 @@ void CtSceneItem::setZ(ctreal z)
     itemChanged(ZChange, value);
 }
 
-ctreal CtSceneItem::rotation() const
+ctreal CtSprite::rotation() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->rotation;
 }
 
-void CtSceneItem::setRotation(ctreal rotation)
+void CtSprite::setRotation(ctreal rotation)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     if (d->rotation == rotation)
         return;
 
@@ -434,15 +434,15 @@ void CtSceneItem::setRotation(ctreal rotation)
     itemChanged(RotationChange, value);
 }
 
-bool CtSceneItem::isFrozen() const
+bool CtSprite::isFrozen() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->relativeFrozen();
 }
 
-void CtSceneItem::setFrozen(bool frozen)
+void CtSprite::setFrozen(bool frozen)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     if (d->isFrozen == frozen)
         return;
 
@@ -454,15 +454,15 @@ void CtSceneItem::setFrozen(bool frozen)
     itemChanged(FrozenChange, value);
 }
 
-ctreal CtSceneItem::xScale() const
+ctreal CtSprite::xScale() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->xScale;
 }
 
-void CtSceneItem::setXScale(ctreal scale)
+void CtSprite::setXScale(ctreal scale)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     if (d->xScale == scale)
         return;
 
@@ -473,15 +473,15 @@ void CtSceneItem::setXScale(ctreal scale)
     itemChanged(XScaleChange, value);
 }
 
-ctreal CtSceneItem::yScale() const
+ctreal CtSprite::yScale() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->yScale;
 }
 
-void CtSceneItem::setYScale(ctreal scale)
+void CtSprite::setYScale(ctreal scale)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     if (d->yScale == scale)
         return;
 
@@ -492,21 +492,21 @@ void CtSceneItem::setYScale(ctreal scale)
     itemChanged(YScaleChange, value);
 }
 
-void CtSceneItem::scale(ctreal xScale, ctreal yScale)
+void CtSprite::scale(ctreal xScale, ctreal yScale)
 {
     setXScale(xScale);
     setYScale(yScale);
 }
 
-ctreal CtSceneItem::opacity() const
+ctreal CtSprite::opacity() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->relativeOpacity();
 }
 
-void CtSceneItem::setOpacity(ctreal opacity)
+void CtSprite::setOpacity(ctreal opacity)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     opacity = ctClamp<ctreal>(0, opacity, 1);
 
     if (d->opacity == opacity)
@@ -519,15 +519,15 @@ void CtSceneItem::setOpacity(ctreal opacity)
     itemChanged(OpacityChange, value);
 }
 
-int CtSceneItem::flags() const
+int CtSprite::flags() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->flags;
 }
 
-void CtSceneItem::setFlag(Flag flag, bool enabled)
+void CtSprite::setFlag(Flag flag, bool enabled)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     if (enabled) {
         d->flags |= flag;
     } else {
@@ -536,21 +536,21 @@ void CtSceneItem::setFlag(Flag flag, bool enabled)
     }
 }
 
-void CtSceneItem::deleteLater()
+void CtSprite::deleteLater()
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     d->pendingDelete = true;
 }
 
-ctreal CtSceneItem::width() const
+ctreal CtSprite::width() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->width;
 }
 
-void CtSceneItem::setWidth(ctreal width)
+void CtSprite::setWidth(ctreal width)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     if (d->width == width)
         return;
 
@@ -561,15 +561,15 @@ void CtSceneItem::setWidth(ctreal width)
     itemChanged(WidthChange, value);
 }
 
-ctreal CtSceneItem::height() const
+ctreal CtSprite::height() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->height;
 }
 
-void CtSceneItem::setHeight(ctreal height)
+void CtSprite::setHeight(ctreal height)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     if (d->height == height)
         return;
 
@@ -580,15 +580,15 @@ void CtSceneItem::setHeight(ctreal height)
     itemChanged(HeightChange, value);
 }
 
-ctreal CtSceneItem::implicitWidth() const
+ctreal CtSprite::implicitWidth() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->implicitWidth;
 }
 
-void CtSceneItem::setImplicitWidth(ctreal width)
+void CtSprite::setImplicitWidth(ctreal width)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     if (d->implicitWidth == width)
         return;
 
@@ -599,15 +599,15 @@ void CtSceneItem::setImplicitWidth(ctreal width)
     itemChanged(ImplicitWidthChange, value);
 }
 
-ctreal CtSceneItem::implicitHeight() const
+ctreal CtSprite::implicitHeight() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->implicitHeight;
 }
 
-void CtSceneItem::setImplicitHeight(ctreal height)
+void CtSprite::setImplicitHeight(ctreal height)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     if (d->implicitHeight == height)
         return;
 
@@ -618,37 +618,37 @@ void CtSceneItem::setImplicitHeight(ctreal height)
     itemChanged(ImplicitHeightChange, value);
 }
 
-void CtSceneItem::resize(ctreal width, ctreal height)
+void CtSprite::resize(ctreal width, ctreal height)
 {
     setWidth(width);
     setHeight(height);
 }
 
-bool CtSceneItem::contains(ctreal x, ctreal y)
+bool CtSprite::contains(ctreal x, ctreal y)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return (x >= 0 && y >= 0 && x < d->width && y < d->height);
 }
 
-void CtSceneItem::paint(CtRenderer *renderer)
+void CtSprite::paint(CtRenderer *renderer)
 {
     CT_UNUSED(renderer);
 }
 
-void CtSceneItem::advance(ctuint ms)
+void CtSprite::advance(ctuint ms)
 {
     CT_UNUSED(ms);
 }
 
-bool CtSceneItem::isVisible() const
+bool CtSprite::isVisible() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->relativeVisible();
 }
 
-void CtSceneItem::setVisible(bool visible)
+void CtSprite::setVisible(bool visible)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     if (d->visible == visible)
         return;
 
@@ -660,19 +660,19 @@ void CtSceneItem::setVisible(bool visible)
     itemChanged(VisibilityChange, value);
 }
 
-void CtSceneItem::translate(ctreal x, ctreal y)
+void CtSprite::translate(ctreal x, ctreal y)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     d->localMatrix.translate(x, y);
 }
 
-CtRect CtSceneItem::boundingRect() const
+CtRect CtSprite::boundingRect() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return CtRect(0, 0, d->width, d->height);
 }
 
-bool CtSceneItem::setDragCursor(CtDragCursor *drag)
+bool CtSprite::setDragCursor(CtDragCursor *drag)
 {
     if (!drag || drag->sourceItem() != this)
         return false;
@@ -681,12 +681,12 @@ bool CtSceneItem::setDragCursor(CtDragCursor *drag)
     return !itemScene ? false : itemScene->setDragCursor(drag);
 }
 
-CtPoint CtSceneItem::mapToScene(ctreal x, ctreal y) const
+CtPoint CtSprite::mapToScene(ctreal x, ctreal y) const
 {
     return sceneTransformMatrix().map(x, y);
 }
 
-CtPoint CtSceneItem::mapToItem(CtSceneItem *item, ctreal x, ctreal y) const
+CtPoint CtSprite::mapToItem(CtSprite *item, ctreal x, ctreal y) const
 {
     if (!item)
         return CtPoint();
@@ -694,7 +694,7 @@ CtPoint CtSceneItem::mapToItem(CtSceneItem *item, ctreal x, ctreal y) const
     return item->transformMatrix().map(sceneTransformMatrix().map(x, y));
 }
 
-CtPoint CtSceneItem::mapFromItem(CtSceneItem *item, ctreal x, ctreal y) const
+CtPoint CtSprite::mapFromItem(CtSprite *item, ctreal x, ctreal y) const
 {
     if (!item)
         return CtPoint();
@@ -702,7 +702,7 @@ CtPoint CtSceneItem::mapFromItem(CtSceneItem *item, ctreal x, ctreal y) const
     return transformMatrix().map(item->sceneTransformMatrix().map(x, y));
 }
 
-bool CtSceneItem::collidesWith(CtSceneItem *item) const
+bool CtSprite::collidesWith(CtSprite *item) const
 {
     if (!item)
         return false;
@@ -755,44 +755,44 @@ bool CtSceneItem::collidesWith(CtSceneItem *item) const
     return false;
 }
 
-CtPoint CtSceneItem::transformOrigin() const
+CtPoint CtSprite::transformOrigin() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return CtPoint(d->xCenter, d->yCenter);
 }
 
-void CtSceneItem::setTransformOrigin(ctreal x, ctreal y)
+void CtSprite::setTransformOrigin(ctreal x, ctreal y)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     d->xCenter = x;
     d->yCenter = y;
 }
 
-CtList<CtSceneItem *> CtSceneItem::children() const
+CtList<CtSprite *> CtSprite::children() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->children;
 }
 
-CtMatrix CtSceneItem::transformMatrix() const
+CtMatrix CtSprite::transformMatrix() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->currentLocalTransformMatrix();
 }
 
-CtMatrix CtSceneItem::sceneTransformMatrix() const
+CtMatrix CtSprite::sceneTransformMatrix() const
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     return d->currentSceneTransformMatrix();
 }
 
-void CtSceneItem::setLocalTransform(const CtMatrix &matrix)
+void CtSprite::setLocalTransform(const CtMatrix &matrix)
 {
-    CT_D(CtSceneItem);
+    CT_D(CtSprite);
     d->localMatrix = matrix;
 }
 
-bool CtSceneItem::event(CtEvent *event)
+bool CtSprite::event(CtEvent *event)
 {
     event->setAccepted(true);
 
@@ -840,62 +840,62 @@ bool CtSceneItem::event(CtEvent *event)
     return event->isAccepted();
 }
 
-void CtSceneItem::mousePressEvent(CtMouseEvent *event)
+void CtSprite::mousePressEvent(CtMouseEvent *event)
 {
     event->setAccepted(false);
 }
 
-void CtSceneItem::mouseMoveEvent(CtMouseEvent *event)
+void CtSprite::mouseMoveEvent(CtMouseEvent *event)
 {
     event->setAccepted(false);
 }
 
-void CtSceneItem::mouseReleaseEvent(CtMouseEvent *event)
+void CtSprite::mouseReleaseEvent(CtMouseEvent *event)
 {
     event->setAccepted(false);
 }
 
-void CtSceneItem::touchBeginEvent(CtTouchEvent *event)
+void CtSprite::touchBeginEvent(CtTouchEvent *event)
 {
     event->setAccepted(false);
 }
 
-void CtSceneItem::touchUpdateEvent(CtTouchEvent *event)
+void CtSprite::touchUpdateEvent(CtTouchEvent *event)
 {
     event->setAccepted(false);
 }
 
-void CtSceneItem::touchEndEvent(CtTouchEvent *event)
+void CtSprite::touchEndEvent(CtTouchEvent *event)
 {
     event->setAccepted(false);
 }
 
-void CtSceneItem::dragEnterEvent(CtDragDropEvent *event)
+void CtSprite::dragEnterEvent(CtDragDropEvent *event)
 {
     event->setAccepted(false);
 }
 
-void CtSceneItem::dragMoveEvent(CtDragDropEvent *event)
+void CtSprite::dragMoveEvent(CtDragDropEvent *event)
 {
     event->setAccepted(false);
 }
 
-void CtSceneItem::dragLeaveEvent(CtDragDropEvent *event)
+void CtSprite::dragLeaveEvent(CtDragDropEvent *event)
 {
     event->setAccepted(false);
 }
 
-void CtSceneItem::dropEvent(CtDragDropEvent *event)
+void CtSprite::dropEvent(CtDragDropEvent *event)
 {
     event->setAccepted(false);
 }
 
-void CtSceneItem::dragCursorDropEvent(CtDragDropEvent *event)
+void CtSprite::dragCursorDropEvent(CtDragDropEvent *event)
 {
     event->setAccepted(false);
 }
 
-void CtSceneItem::dragCursorCancelEvent(CtDragDropEvent *event)
+void CtSprite::dragCursorCancelEvent(CtDragDropEvent *event)
 {
     event->setAccepted(false);
 }
@@ -905,33 +905,33 @@ void CtSceneItem::dragCursorCancelEvent(CtDragDropEvent *event)
 /////////////////////////////////////////////////
 
 CtSceneRectPrivate::CtSceneRectPrivate(CtSceneRect *q)
-    : CtSceneItemPrivate(q),
+    : CtSpritePrivate(q),
       shaderEffect(0)
 {
 
 }
 
-void CtSceneRectPrivate::init(CtSceneItem *parent)
+void CtSceneRectPrivate::init(CtSprite *parent)
 {
-    CtSceneItemPrivate::init(parent);
+    CtSpritePrivate::init(parent);
     shaderEffect = ct_sharedSolidShaderEffect();
 }
 
 void CtSceneRectPrivate::release()
 {
-    CtSceneItemPrivate::release();
+    CtSpritePrivate::release();
 }
 
 
-CtSceneRect::CtSceneRect(CtSceneItem *parent)
-    : CtSceneItem(new CtSceneRectPrivate(this))
+CtSceneRect::CtSceneRect(CtSprite *parent)
+    : CtSprite(new CtSceneRectPrivate(this))
 {
     CT_D(CtSceneRect);
     d->init(parent);
 }
 
-CtSceneRect::CtSceneRect(ctreal r, ctreal g, ctreal b, CtSceneItem *parent)
-    : CtSceneItem(new CtSceneRectPrivate(this))
+CtSceneRect::CtSceneRect(ctreal r, ctreal g, ctreal b, CtSprite *parent)
+    : CtSprite(new CtSceneRectPrivate(this))
 {
     CT_D(CtSceneRect);
     d->init(parent);
@@ -974,7 +974,7 @@ void CtSceneRect::setShaderEffect(CtShaderEffect *effect)
 /////////////////////////////////////////////////
 
 CtSceneTextPrivate::CtSceneTextPrivate(CtSceneText *q)
-    : CtSceneItemPrivate(q),
+    : CtSpritePrivate(q),
       color(0, 0, 0),
       glyphCount(0),
       indexBuffer(0),
@@ -985,15 +985,15 @@ CtSceneTextPrivate::CtSceneTextPrivate(CtSceneText *q)
 
 }
 
-void CtSceneTextPrivate::init(CtSceneItem *parent)
+void CtSceneTextPrivate::init(CtSprite *parent)
 {
-    CtSceneItemPrivate::init(parent);
+    CtSpritePrivate::init(parent);
     shaderEffect = ct_sharedTextShaderEffect();
 }
 
 void CtSceneTextPrivate::release()
 {
-    CtSceneItemPrivate::release();
+    CtSpritePrivate::release();
     releaseBuffers();
 }
 
@@ -1071,8 +1071,8 @@ void CtSceneTextPrivate::recreateBuffers()
     glyphCount = n;
 }
 
-CtSceneText::CtSceneText(CtSceneItem *parent)
-    : CtSceneItem(new CtSceneTextPrivate(this))
+CtSceneText::CtSceneText(CtSprite *parent)
+    : CtSprite(new CtSceneTextPrivate(this))
 {
     CT_D(CtSceneText);
     d->init(parent);
@@ -1151,7 +1151,7 @@ void CtSceneText::setShaderEffect(CtShaderEffect *effect)
 /////////////////////////////////////////////////
 
 CtSceneFrameBufferPrivate::CtSceneFrameBufferPrivate(CtSceneFrameBuffer *q)
-    : CtSceneItemPrivate(q),
+    : CtSpritePrivate(q),
       bufferWidth(0),
       bufferHeight(0),
       framebuffer(0),
@@ -1162,9 +1162,9 @@ CtSceneFrameBufferPrivate::CtSceneFrameBufferPrivate(CtSceneFrameBuffer *q)
     isFrameBuffer = true;
 }
 
-void CtSceneFrameBufferPrivate::init(CtSceneItem *parent)
+void CtSceneFrameBufferPrivate::init(CtSprite *parent)
 {
-    CtSceneItemPrivate::init(parent);
+    CtSpritePrivate::init(parent);
 
     shaderEffect = ct_sharedTextureShaderEffect();
     texture = new CtTexture();
@@ -1172,7 +1172,7 @@ void CtSceneFrameBufferPrivate::init(CtSceneItem *parent)
 
 void CtSceneFrameBufferPrivate::release()
 {
-    CtSceneItemPrivate::release();
+    CtSpritePrivate::release();
     delete texture;
 }
 
@@ -1180,15 +1180,15 @@ void CtSceneFrameBufferPrivate::recursivePaint(CtRenderer *renderer)
 {
     if (!texture->isValid()) {
         // invalid framebuffer
-        CtSceneItemPrivate::recursivePaint(renderer);
+        CtSpritePrivate::recursivePaint(renderer);
         return;
     }
 
     renderer->bindBuffer(framebuffer);
 
-    const CtList<CtSceneItem *> &lst = orderedChildren();
+    const CtList<CtSprite *> &lst = orderedChildren();
 
-    foreach (CtSceneItem *item, lst) {
+    foreach (CtSprite *item, lst) {
         if (item->isVisible())
             item->d_ptr->recursivePaint(renderer);
     }
@@ -1264,8 +1264,8 @@ void CtSceneFrameBufferPrivate::resizeBuffer(int w, int h)
 }
 
 
-CtSceneFrameBuffer::CtSceneFrameBuffer(CtSceneItem *parent)
-    : CtSceneItem(new CtSceneFrameBufferPrivate(this))
+CtSceneFrameBuffer::CtSceneFrameBuffer(CtSprite *parent)
+    : CtSprite(new CtSceneFrameBufferPrivate(this))
 {
     CT_D(CtSceneFrameBuffer);
     d->init(parent);
@@ -1306,7 +1306,7 @@ void CtSceneFrameBuffer::setBufferSize(int width, int height)
 /////////////////////////////////////////////////
 
 CtSceneTextureItemPrivate::CtSceneTextureItemPrivate(CtSceneTextureItem *q)
-    : CtSceneItemPrivate(q),
+    : CtSpritePrivate(q),
       textureAtlasIndex(-1),
       ownTexture(false),
       texture(0),
@@ -1315,9 +1315,9 @@ CtSceneTextureItemPrivate::CtSceneTextureItemPrivate(CtSceneTextureItem *q)
 
 }
 
-void CtSceneTextureItemPrivate::init(CtSceneItem *parent)
+void CtSceneTextureItemPrivate::init(CtSprite *parent)
 {
-    CtSceneItemPrivate::init(parent);
+    CtSpritePrivate::init(parent);
 
     if (texture) {
         q->setWidth(texture->width());
@@ -1334,19 +1334,19 @@ void CtSceneTextureItemPrivate::release()
         texture = 0;
     }
 
-    CtSceneItemPrivate::release();
+    CtSpritePrivate::release();
 }
 
 
-CtSceneTextureItem::CtSceneTextureItem(CtSceneItem *parent)
-    : CtSceneItem(new CtSceneTextureItemPrivate(this))
+CtSceneTextureItem::CtSceneTextureItem(CtSprite *parent)
+    : CtSprite(new CtSceneTextureItemPrivate(this))
 {
     CT_D(CtSceneTextureItem);
     d->init(parent);
 }
 
-CtSceneTextureItem::CtSceneTextureItem(CtTexture *texture, CtSceneItem *parent)
-    : CtSceneItem(new CtSceneTextureItemPrivate(this))
+CtSceneTextureItem::CtSceneTextureItem(CtTexture *texture, CtSprite *parent)
+    : CtSprite(new CtSceneTextureItemPrivate(this))
 {
     CT_D(CtSceneTextureItem);
     d->texture = texture;
@@ -1354,7 +1354,7 @@ CtSceneTextureItem::CtSceneTextureItem(CtTexture *texture, CtSceneItem *parent)
 }
 
 CtSceneTextureItem::CtSceneTextureItem(CtSceneTextureItemPrivate *dd)
-    : CtSceneItem(dd)
+    : CtSprite(dd)
 {
 
 }
@@ -1433,14 +1433,14 @@ CtSceneImagePrivate::CtSceneImagePrivate(CtSceneImage *q)
 
 }
 
-CtSceneImage::CtSceneImage(CtSceneItem *parent)
+CtSceneImage::CtSceneImage(CtSprite *parent)
     : CtSceneTextureItem(new CtSceneImagePrivate(this))
 {
     CT_D(CtSceneImage);
     d->init(parent);
 }
 
-CtSceneImage::CtSceneImage(CtTexture *texture, CtSceneItem *parent)
+CtSceneImage::CtSceneImage(CtTexture *texture, CtSprite *parent)
     : CtSceneTextureItem(new CtSceneImagePrivate(this))
 {
     CT_D(CtSceneImage);
@@ -1490,14 +1490,14 @@ CtSceneImagePolyPrivate::CtSceneImagePolyPrivate(CtSceneImagePoly *q)
 
 }
 
-CtSceneImagePoly::CtSceneImagePoly(CtSceneItem *parent)
+CtSceneImagePoly::CtSceneImagePoly(CtSprite *parent)
     : CtSceneImage(new CtSceneImagePolyPrivate(this))
 {
     CT_D(CtSceneImagePoly);
     d->init(parent);
 }
 
-CtSceneImagePoly::CtSceneImagePoly(CtTexture *texture, CtSceneItem *parent)
+CtSceneImagePoly::CtSceneImagePoly(CtTexture *texture, CtSprite *parent)
     : CtSceneImage(new CtSceneImagePolyPrivate(this))
 {
     CT_D(CtSceneImagePoly);
@@ -1572,7 +1572,7 @@ CtSceneFragmentsPrivate::CtSceneFragmentsPrivate(CtSceneFragments *q)
 
 }
 
-void CtSceneFragmentsPrivate::init(CtSceneItem *parent)
+void CtSceneFragmentsPrivate::init(CtSprite *parent)
 {
     CtSceneTextureItemPrivate::init(parent);
     shaderEffect = ct_sharedFragmentShaderEffect();
@@ -1630,14 +1630,14 @@ void CtSceneFragments::Fragment::setUserData(void *data)
 }
 
 
-CtSceneFragments::CtSceneFragments(CtSceneItem *parent)
+CtSceneFragments::CtSceneFragments(CtSprite *parent)
     : CtSceneTextureItem(new CtSceneFragmentsPrivate(this))
 {
     CT_D(CtSceneFragments);
     d->init(parent);
 }
 
-CtSceneFragments::CtSceneFragments(CtTexture *texture, CtSceneItem *parent)
+CtSceneFragments::CtSceneFragments(CtTexture *texture, CtSprite *parent)
     : CtSceneTextureItem(new CtSceneFragmentsPrivate(this))
 {
     CT_D(CtSceneFragments);
@@ -1742,7 +1742,7 @@ CtSceneParticleSystemPrivate::CtSceneParticleSystemPrivate(CtSceneParticleSystem
 
 }
 
-void CtSceneParticleSystemPrivate::init(CtSceneItem *parent)
+void CtSceneParticleSystemPrivate::init(CtSprite *parent)
 {
     CtSceneTextureItemPrivate::init(parent);
     shaderEffect = ct_sharedParticleShaderEffect();
@@ -1786,14 +1786,14 @@ CtSceneParticleSystem::Particle::Particle()
 
 }
 
-CtSceneParticleSystem::CtSceneParticleSystem(CtSceneItem *parent)
+CtSceneParticleSystem::CtSceneParticleSystem(CtSprite *parent)
     : CtSceneTextureItem(new CtSceneParticleSystemPrivate(this))
 {
     CT_D(CtSceneParticleSystem);
     d->init(parent);
 }
 
-CtSceneParticleSystem::CtSceneParticleSystem(CtTexture *texture, CtSceneItem *parent)
+CtSceneParticleSystem::CtSceneParticleSystem(CtTexture *texture, CtSprite *parent)
     : CtSceneTextureItem(new CtSceneParticleSystemPrivate(this))
 {
     CT_D(CtSceneParticleSystem);

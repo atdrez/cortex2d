@@ -5,8 +5,6 @@
 #include "cteasingcurve.h"
 #include "ctsignal.h"
 
-class CtSceneItem;
-
 class CtAbstractAnimation
 {
 public:

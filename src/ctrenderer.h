@@ -6,7 +6,7 @@
 #include "ctshadereffect.h"
 
 class CtTexture;
-class CtSceneItemPrivate;
+class CtSpritePrivate;
 class CtSceneFrameBuffer;
 class CtSceneFrameBufferPrivate;
 
@@ -47,7 +47,7 @@ private:
     void begin();
     void end();
 
-    friend class CtSceneItemPrivate;
+    friend class CtSpritePrivate;
     friend class CtSceneFrameBufferPrivate;
 
     GLint m_fbo;

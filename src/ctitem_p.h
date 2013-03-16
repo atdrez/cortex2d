@@ -14,16 +14,16 @@
 
 class CtRenderer;
 
-struct CtSceneItemPrivate
+struct CtSpritePrivate
 {
-    CtSceneItemPrivate(CtSceneItem *q);
-    virtual ~CtSceneItemPrivate();
+    CtSpritePrivate(CtSprite *q);
+    virtual ~CtSpritePrivate();
 
-    virtual void init(CtSceneItem *parent);
+    virtual void init(CtSprite *parent);
     virtual void release();
 
-    void addItem(CtSceneItem *item);
-    void removeItem(CtSceneItem *item);
+    void addItem(CtSprite *item);
+    void removeItem(CtSprite *item);
     void setScene(CtSceneView *newScene);
 
     bool relativeVisible();
@@ -32,18 +32,18 @@ struct CtSceneItemPrivate
     CtSceneFrameBuffer *frameBufferItem();
 
     void checkTransformMatrix();
-    CtMatrix mappedTransformMatrix(CtSceneItem *root);
+    CtMatrix mappedTransformMatrix(CtSprite *root);
 
     CtMatrix currentLocalTransformMatrix();
     CtMatrix currentSceneTransformMatrix();
     CtMatrix4x4 currentViewportProjectionMatrix();
 
-    void fillItems(CtList<CtSceneItem *> &lst);
+    void fillItems(CtList<CtSprite *> &lst);
     virtual void recursivePaint(CtRenderer *state);
 
-    const CtList<CtSceneItem *> &orderedChildren();
+    const CtList<CtSprite *> &orderedChildren();
 
-    CtSceneItem *q;
+    CtSprite *q;
     ctreal x;
     ctreal y;
     ctreal z;
@@ -57,7 +57,7 @@ struct CtSceneItemPrivate
     bool isFrozen;
     ctreal implicitWidth;
     ctreal implicitHeight;
-    CtSceneItem *parent;
+    CtSprite *parent;
     CtSceneView *scene;
     ctreal xCenter;
     ctreal yCenter;
@@ -71,26 +71,26 @@ struct CtSceneItemPrivate
     CtMatrix localTransformMatrix;
     CtMatrix sceneTransformMatrix;
 
-    CtList<CtSceneItem *> children;
-    CtList<CtSceneItem *> sortedChildren;
+    CtList<CtSprite *> children;
+    CtList<CtSprite *> sortedChildren;
 };
 
-struct CtSceneRectPrivate : public CtSceneItemPrivate
+struct CtSceneRectPrivate : public CtSpritePrivate
 {
     CtSceneRectPrivate(CtSceneRect *q);
 
-    void init(CtSceneItem *parent);
+    void init(CtSprite *parent);
     void release();
 
     CtColor color;
     CtShaderEffect *shaderEffect;
 };
 
-struct CtSceneTextPrivate : public CtSceneItemPrivate
+struct CtSceneTextPrivate : public CtSpritePrivate
 {
     CtSceneTextPrivate(CtSceneText *q);
 
-    void init(CtSceneItem *parent);
+    void init(CtSprite *parent);
     void release();
 
     void releaseBuffers();
@@ -105,11 +105,11 @@ struct CtSceneTextPrivate : public CtSceneItemPrivate
     CtShaderEffect *shaderEffect;
 };
 
-struct CtSceneFrameBufferPrivate : public CtSceneItemPrivate
+struct CtSceneFrameBufferPrivate : public CtSpritePrivate
 {
     CtSceneFrameBufferPrivate(CtSceneFrameBuffer *q);
 
-    void init(CtSceneItem *parent);
+    void init(CtSprite *parent);
     void release();
 
     void deleteBuffers();
@@ -125,11 +125,11 @@ struct CtSceneFrameBufferPrivate : public CtSceneItemPrivate
     CtShaderEffect *shaderEffect;
 };
 
-struct CtSceneTextureItemPrivate : public CtSceneItemPrivate
+struct CtSceneTextureItemPrivate : public CtSpritePrivate
 {
     CtSceneTextureItemPrivate(CtSceneTextureItem *q);
 
-    void init(CtSceneItem *parent);
+    void init(CtSprite *parent);
     void release();
 
     int textureAtlasIndex;
@@ -156,7 +156,7 @@ struct CtSceneFragmentsPrivate : public CtSceneTextureItemPrivate
 {
     CtSceneFragmentsPrivate(CtSceneFragments *q);
 
-    void init(CtSceneItem *parent);
+    void init(CtSprite *parent);
     void release();
 
     CtList<CtSceneFragments::Fragment *> fragments;
@@ -166,7 +166,7 @@ struct CtSceneParticleSystemPrivate : public CtSceneTextureItemPrivate
 {
     CtSceneParticleSystemPrivate(CtSceneParticleSystem *q);
 
-    void init(CtSceneItem *parent);
+    void init(CtSprite *parent);
     void release();
 
     void recreateVertexBuffer();

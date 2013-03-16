@@ -11,7 +11,7 @@ public:
         Move = 2
     };
 
-    CtDragCursor(CtSceneItem *sourceItem, CtSceneItem *draggedItem,
+    CtDragCursor(CtSprite *sourceItem, CtSprite *draggedItem,
                  const CtString &mime, Operation operation);
 
     ctreal x() const { return m_x; }
@@ -24,21 +24,21 @@ public:
 
     Operation operation() const { return m_operation; }
 
-    CtSceneItem *sourceItem() const { return m_sourceItem; }
+    CtSprite *sourceItem() const { return m_sourceItem; }
 
-    CtSceneItem *draggedItem() const { return m_draggedItem; }
+    CtSprite *draggedItem() const { return m_draggedItem; }
 
 private:
     ctreal m_x;
     ctreal m_y;
     CtString m_mime;
     Operation m_operation;
-    CtSceneItem *m_sourceItem;
-    CtSceneItem *m_draggedItem;
+    CtSprite *m_sourceItem;
+    CtSprite *m_draggedItem;
 };
 
 
-inline CtDragCursor::CtDragCursor(CtSceneItem *sourceItem, CtSceneItem *draggedItem,
+inline CtDragCursor::CtDragCursor(CtSprite *sourceItem, CtSprite *draggedItem,
                                   const CtString &mime, Operation operation)
     : m_x(0),
       m_y(0),

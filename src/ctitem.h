@@ -12,10 +12,10 @@
 
 
 class CtDragCursor;
-class CtSceneItem;
+class CtSprite;
 class CtSceneView;
 class CtSceneViewData;
-class CtSceneItemPrivate;
+class CtSpritePrivate;
 class CtShaderEffect;
 class CtSceneImagePrivate;
 class CtSceneTextureItemPrivate;
@@ -23,7 +23,7 @@ class CtRenderer;
 class CtFont;
 
 
-class CtSceneItem : public CtObject
+class CtSprite : public CtObject
 {
 public:
     enum ChangeType {
@@ -48,7 +48,7 @@ public:
         int intValue;
         bool boolValue;
         ctreal realValue;
-        CtSceneItem *itemValue;
+        CtSprite *itemValue;
     };
 
     enum Flag {
@@ -61,8 +61,8 @@ public:
         DoNotPaintContent = 0x20
     };
 
-    CtSceneItem(CtSceneItem *parent = 0);
-    virtual ~CtSceneItem();
+    CtSprite(CtSprite *parent = 0);
+    virtual ~CtSprite();
 
     ctreal x() const;
     void setX(ctreal x);
@@ -123,13 +123,13 @@ public:
 
     CtPoint mapToScene(ctreal x, ctreal y) const;
 
-    CtPoint mapToItem(CtSceneItem *item, ctreal x, ctreal y) const;
-    CtPoint mapFromItem(CtSceneItem *item, ctreal x, ctreal y) const;
+    CtPoint mapToItem(CtSprite *item, ctreal x, ctreal y) const;
+    CtPoint mapFromItem(CtSprite *item, ctreal x, ctreal y) const;
 
     CtSceneView *scene() const;
-    CtSceneItem *parent() const;
+    CtSprite *parent() const;
 
-    CtList<CtSceneItem *> children() const;
+    CtList<CtSprite *> children() const;
 
     bool isVisible() const;
     void setVisible(bool visible);
@@ -138,10 +138,10 @@ public:
 
     virtual CtRect boundingRect() const;
 
-    bool collidesWith(CtSceneItem *item) const;
+    bool collidesWith(CtSprite *item) const;
 
 protected:
-    CtSceneItem(CtSceneItemPrivate *dd);
+    CtSprite(CtSpritePrivate *dd);
 
     virtual void paint(CtRenderer *renderer);
     virtual void advance(ctuint ms);
@@ -164,21 +164,21 @@ protected:
     virtual void dragCursorDropEvent(CtDragDropEvent *event);
     virtual void dragCursorCancelEvent(CtDragDropEvent *event);
 
-    CtSceneItemPrivate *d_ptr;
+    CtSpritePrivate *d_ptr;
 
 private:
     friend class CtSceneView;
     friend class CtSceneViewData;
-    friend class CtSceneItemPrivate;
+    friend class CtSpritePrivate;
     friend class CtSceneFrameBufferPrivate;
 };
 
 
-class CtSceneRect : public CtSceneItem
+class CtSceneRect : public CtSprite
 {
 public:
-    CtSceneRect(CtSceneItem *parent = 0);
-    CtSceneRect(ctreal r, ctreal g, ctreal b, CtSceneItem *parent = 0);
+    CtSceneRect(CtSprite *parent = 0);
+    CtSceneRect(ctreal r, ctreal g, ctreal b, CtSprite *parent = 0);
 
     CtColor color() const;
     void setColor(const CtColor &color);
@@ -191,10 +191,10 @@ protected:
 };
 
 
-class CtSceneText : public CtSceneItem
+class CtSceneText : public CtSprite
 {
 public:
-    CtSceneText(CtSceneItem *parent = 0);
+    CtSceneText(CtSprite *parent = 0);
 
     CtColor color() const;
     void setColor(const CtColor &color);
@@ -213,10 +213,10 @@ protected:
 };
 
 
-class CtSceneFrameBuffer : public CtSceneItem
+class CtSceneFrameBuffer : public CtSprite
 {
 public:
-    CtSceneFrameBuffer(CtSceneItem *parent = 0);
+    CtSceneFrameBuffer(CtSprite *parent = 0);
 
     CtShaderEffect *shaderEffect() const;
     void setShaderEffect(CtShaderEffect *effect);
@@ -230,11 +230,11 @@ protected:
 };
 
 
-class CtSceneTextureItem : public CtSceneItem
+class CtSceneTextureItem : public CtSprite
 {
 public:
-    CtSceneTextureItem(CtSceneItem *parent = 0);
-    CtSceneTextureItem(CtTexture *texture, CtSceneItem *parent = 0);
+    CtSceneTextureItem(CtSprite *parent = 0);
+    CtSceneTextureItem(CtTexture *texture, CtSprite *parent = 0);
 
     CtTexture *texture() const;
     void setTexture(CtTexture *texture);
@@ -262,8 +262,8 @@ public:
         TileHorizontally
     };
 
-    CtSceneImage(CtSceneItem *parent = 0);
-    CtSceneImage(CtTexture *texture, CtSceneItem *parent = 0);
+    CtSceneImage(CtSprite *parent = 0);
+    CtSceneImage(CtTexture *texture, CtSprite *parent = 0);
 
     FillMode fillMode() const;
     void setFillMode(FillMode mode);
@@ -278,8 +278,8 @@ protected:
 class CtSceneImagePoly : public CtSceneImage
 {
 public:
-    CtSceneImagePoly(CtSceneItem *parent = 0);
-    CtSceneImagePoly(CtTexture *texture, CtSceneItem *parent = 0);
+    CtSceneImagePoly(CtSprite *parent = 0);
+    CtSceneImagePoly(CtTexture *texture, CtSprite *parent = 0);
 
     CtVector<CtPoint> vertices() const;
     void setVertices(const CtVector<CtPoint> &vertices);
@@ -327,8 +327,8 @@ public:
         void *m_userData;
     };
 
-    CtSceneFragments(CtSceneItem *parent = 0);
-    CtSceneFragments(CtTexture *texture, CtSceneItem *parent = 0);
+    CtSceneFragments(CtSprite *parent = 0);
+    CtSceneFragments(CtTexture *texture, CtSprite *parent = 0);
 
     CtList<Fragment *> fragments() const;
 
@@ -372,8 +372,8 @@ public:
         void *m_userData;
     };
 
-    CtSceneParticleSystem(CtSceneItem *parent = 0);
-    CtSceneParticleSystem(CtTexture *texture, CtSceneItem *parent = 0);
+    CtSceneParticleSystem(CtSprite *parent = 0);
+    CtSceneParticleSystem(CtTexture *texture, CtSprite *parent = 0);
 
     CtVector<Particle *> particles() const;
 

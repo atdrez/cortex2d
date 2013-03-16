@@ -3,9 +3,9 @@
 
 #include "ctwindow.h"
 
-class CtSceneItem;
+class CtSprite;
 class CtDragCursor;
-class CtSceneItemPrivate;
+class CtSpritePrivate;
 
 class CtSceneView : public CtWindow
 {
@@ -13,7 +13,7 @@ public:
     CtSceneView(const char *title, int width, int height);
     virtual ~CtSceneView();
 
-    void setRootItem(CtSceneItem *item);
+    void setRootItem(CtSprite *item);
 
 protected:
     void paint();
@@ -22,12 +22,12 @@ protected:
 
 private:
     bool setDragCursor(CtDragCursor *drag);
-    void itemAddedToScene(CtSceneItem *item);
-    void itemRemovedFromScene(CtSceneItem *item);
-    void itemZValueChanged(CtSceneItem *item);
+    void itemAddedToScene(CtSprite *item);
+    void itemRemovedFromScene(CtSprite *item);
+    void itemZValueChanged(CtSprite *item);
 
-    friend class CtSceneItem;
-    friend class CtSceneItemPrivate;
+    friend class CtSprite;
+    friend class CtSpritePrivate;
 };
 
 #endif

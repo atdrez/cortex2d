@@ -16,8 +16,8 @@ struct CtSceneViewData
 
     void checkSortedItems();
 
-    void updateDragCursor(CtSceneItem *source);
-    void releaseDragCursor(CtSceneItem *source, bool canceled);
+    void updateDragCursor(CtSprite *source);
+    void releaseDragCursor(CtSprite *source, bool canceled);
 
     bool deliverMousePress(CtMouseEvent *event);
     bool deliverMouseMove(CtMouseEvent *event);
@@ -27,15 +27,15 @@ struct CtSceneViewData
     bool deliverTouchUpdate(CtTouchEvent *event);
     bool deliverTouchEnd(CtTouchEvent *event);
 
-    CtTouchPointList mapTouchPoints(CtSceneItem *item, const CtTouchPointList &points) const;
+    CtTouchPointList mapTouchPoints(CtSprite *item, const CtTouchPointList &points) const;
 
     CtDragCursor *drag;
-    CtSceneItem *rootItem;
-    CtList<CtSceneItem *> sortedItems;
+    CtSprite *rootItem;
+    CtList<CtSprite *> sortedItems;
     bool sortedItemsDirty;
-    CtSceneItem *touchGrabber;
-    CtSceneItem *mouseGrabber;
-    CtSceneItem *dragGrabber;
+    CtSprite *touchGrabber;
+    CtSprite *mouseGrabber;
+    CtSprite *dragGrabber;
 };
 
 CtSceneViewData::CtSceneViewData()
@@ -62,7 +62,7 @@ void CtSceneViewData::checkSortedItems()
     sortedItemsDirty = false;
 }
 
-void CtSceneViewData::updateDragCursor(CtSceneItem *source)
+void CtSceneViewData::updateDragCursor(CtSprite *source)
 {
     if (!drag || !drag->sourceItem() || drag->sourceItem() != source)
         return;
@@ -73,10 +73,10 @@ void CtSceneViewData::updateDragCursor(CtSceneItem *source)
 
     checkSortedItems();
 
-    CtSceneItem *currentGrabber = 0;
+    CtSprite *currentGrabber = 0;
 
-    foreach_reverse(CtSceneItem *item, sortedItems) {
-        if (!item->isVisible() || !(item->flags() & CtSceneItem::AcceptsDragEvent))
+    foreach_reverse(CtSprite *item, sortedItems) {
+        if (!item->isVisible() || !(item->flags() & CtSprite::AcceptsDragEvent))
             continue;
 
         const CtMatrix &matrix = item->transformMatrix();
@@ -117,7 +117,7 @@ void CtSceneViewData::updateDragCursor(CtSceneItem *source)
     dragGrabber = currentGrabber;
 }
 
-void CtSceneViewData::releaseDragCursor(CtSceneItem *source, bool canceled)
+void CtSceneViewData::releaseDragCursor(CtSprite *source, bool canceled)
 {
     if (!drag || !drag->sourceItem() || drag->sourceItem() != source)
         return;
@@ -162,16 +162,16 @@ bool CtSceneViewData::deliverMousePress(CtMouseEvent *event)
 
     checkSortedItems();
 
-    foreach_reverse(CtSceneItem *item, sortedItems) {
+    foreach_reverse(CtSprite *item, sortedItems) {
         if (!item->isVisible())
             continue;
 
 #ifdef CT_SIMULATE_TOUCH
-        if (!(item->flags() & CtSceneItem::AcceptsTouchEvent) &&
-            !(item->flags() & CtSceneItem::AcceptsMouseEvent))
+        if (!(item->flags() & CtSprite::AcceptsTouchEvent) &&
+            !(item->flags() & CtSprite::AcceptsMouseEvent))
             continue;
 #else
-        if (!(item->flags() & CtSceneItem::AcceptsMouseEvent))
+        if (!(item->flags() & CtSprite::AcceptsMouseEvent))
             continue;
 #endif
 
@@ -204,9 +204,9 @@ bool CtSceneViewData::deliverMousePress(CtMouseEvent *event)
 bool CtSceneViewData::deliverMouseMove(CtMouseEvent *event)
 {
 #ifndef CT_SIMULATE_TOUCH
-    CtSceneItem *grabber = mouseGrabber;
+    CtSprite *grabber = mouseGrabber;
 #else
-    CtSceneItem *grabber = touchGrabber ? touchGrabber : mouseGrabber;
+    CtSprite *grabber = touchGrabber ? touchGrabber : mouseGrabber;
 #endif
 
     if (!grabber)
@@ -236,9 +236,9 @@ bool CtSceneViewData::deliverMouseMove(CtMouseEvent *event)
 bool CtSceneViewData::deliverMouseRelease(CtMouseEvent *event)
 {
 #ifndef CT_SIMULATE_TOUCH
-    CtSceneItem *grabber = mouseGrabber;
+    CtSprite *grabber = mouseGrabber;
 #else
-    CtSceneItem *grabber = touchGrabber ? touchGrabber : mouseGrabber;
+    CtSprite *grabber = touchGrabber ? touchGrabber : mouseGrabber;
 #endif
 
     if (!grabber)
@@ -276,11 +276,11 @@ bool CtSceneViewData::deliverTouchBegin(CtTouchEvent *event)
 
     checkSortedItems();
 
-    foreach_reverse (CtSceneItem *item, sortedItems) {
+    foreach_reverse (CtSprite *item, sortedItems) {
         if (!item->isVisible())
             continue;
 
-        if (!(item->flags() & CtSceneItem::AcceptsTouchEvent))
+        if (!(item->flags() & CtSprite::AcceptsTouchEvent))
             continue;
 
         CtTouchPointList mappedPoints = mapTouchPoints(item, points);
@@ -328,7 +328,7 @@ bool CtSceneViewData::deliverTouchEnd(CtTouchEvent *event)
     return ok;
 }
 
-CtTouchPointList CtSceneViewData::mapTouchPoints(CtSceneItem *item, const CtTouchPointList &points) const
+CtTouchPointList CtSceneViewData::mapTouchPoints(CtSprite *item, const CtTouchPointList &points) const
 {
     CtTouchPointList result;
     CtMatrix matrix = item->transformMatrix();
@@ -363,7 +363,7 @@ CtSceneView::~CtSceneView()
     d->userData = 0;
 }
 
-void CtSceneView::setRootItem(CtSceneItem *item)
+void CtSceneView::setRootItem(CtSprite *item)
 {
     CT_D(CtWindow);
     CtSceneViewData *data = static_cast<CtSceneViewData *>(d->userData);
@@ -389,12 +389,12 @@ void CtSceneView::advance(ctuint ms)
 
     data->checkSortedItems();
 
-    foreach (CtSceneItem *item, data->sortedItems) {
+    foreach (CtSprite *item, data->sortedItems) {
         if (!item->isFrozen())
             item->advance(ms);
     }
 
-    foreach (CtSceneItem *item, data->sortedItems) {
+    foreach (CtSprite *item, data->sortedItems) {
         if (item->d_ptr->pendingDelete)
             delete item;
     }
@@ -471,14 +471,14 @@ bool CtSceneView::event(CtEvent *event)
         return CtWindow::event(event);
 }
 
-void CtSceneView::itemAddedToScene(CtSceneItem *)
+void CtSceneView::itemAddedToScene(CtSprite *)
 {
     CT_D(CtWindow);
     CtSceneViewData *data = static_cast<CtSceneViewData *>(d->userData);
     data->sortedItemsDirty = true;
 }
 
-void CtSceneView::itemRemovedFromScene(CtSceneItem *item)
+void CtSceneView::itemRemovedFromScene(CtSprite *item)
 {
     CT_D(CtWindow);
     CtSceneViewData *data = static_cast<CtSceneViewData *>(d->userData);
@@ -495,7 +495,7 @@ void CtSceneView::itemRemovedFromScene(CtSceneItem *item)
     }
 }
 
-void CtSceneView::itemZValueChanged(CtSceneItem *item)
+void CtSceneView::itemZValueChanged(CtSprite *item)
 {
     CT_D(CtWindow);
     CtSceneViewData *data = static_cast<CtSceneViewData *>(d->userData);

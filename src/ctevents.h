@@ -4,7 +4,7 @@
 #include "ctglobal.h"
 #include "ctlist.h"
 
-class CtSceneItem;
+class CtSprite;
 
 class CtEvent
 {
@@ -102,17 +102,17 @@ public:
         Move = 2
     };
 
-    CtDragDropEvent(Type type, CtSceneItem *sourceItem, CtSceneItem *targetItem,
-                    CtSceneItem *draggedItem, const CtString &mime, Operation operation,
+    CtDragDropEvent(Type type, CtSprite *sourceItem, CtSprite *targetItem,
+                    CtSprite *draggedItem, const CtString &mime, Operation operation,
                     ctreal x, ctreal y, ctreal sceneX, ctreal sceneY);
 
     CtString mime() const { return m_mime; }
 
-    CtSceneItem *sourceItem() const { return m_sourceItem; }
+    CtSprite *sourceItem() const { return m_sourceItem; }
 
-    CtSceneItem *targetItem() const { return m_targetItem; }
+    CtSprite *targetItem() const { return m_targetItem; }
 
-    CtSceneItem *draggedItem() const { return m_draggedItem; }
+    CtSprite *draggedItem() const { return m_draggedItem; }
 
     ctreal x() const { return m_x; }
     ctreal y() const { return m_y; }
@@ -123,9 +123,9 @@ public:
     Operation operation() const { return m_operation; }
 
 private:
-    CtSceneItem *m_sourceItem;
-    CtSceneItem *m_targetItem;
-    CtSceneItem *m_draggedItem;
+    CtSprite *m_sourceItem;
+    CtSprite *m_targetItem;
+    CtSprite *m_draggedItem;
     CtString m_mime;
     Operation m_operation;
     ctreal m_x;
