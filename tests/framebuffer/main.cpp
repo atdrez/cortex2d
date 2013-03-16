@@ -78,7 +78,7 @@ GroupView::GroupView(const CtString &programId, CtSprite *parent)
 {
     setBufferSize(400, 400);
 
-    CtShaderProgram *program = CtPool<CtShaderProgram>::value(programId);
+    CtGpuProgram *program = CtPool<CtGpuProgram>::value(programId);
     CT_ASSERT(program != 0);
 
     mEffect = new CtShaderEffect(program);
@@ -116,14 +116,14 @@ bool MainWindow::init()
     mTexture2.load(app->applicationDir() + "/umbrella.tga");
 
     // create colorize program
-    CtShaderProgram *colorizeProgram = new CtShaderProgram();
+    CtGpuProgram *colorizeProgram = new CtGpuProgram();
     colorizeProgram->link(vertexShader, colorizeShader);
-    CtPool<CtShaderProgram>::insert("colorize", colorizeProgram);
+    CtPool<CtGpuProgram>::insert("colorize", colorizeProgram);
 
     // create desaturate program
-    CtShaderProgram *desaturateProgram = new CtShaderProgram();
+    CtGpuProgram *desaturateProgram = new CtGpuProgram();
     desaturateProgram->link(vertexShader, desaturateShader);
-    CtPool<CtShaderProgram>::insert("desaturate", desaturateProgram);
+    CtPool<CtGpuProgram>::insert("desaturate", desaturateProgram);
 
     CtSprite *root = new CtSprite();
 

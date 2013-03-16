@@ -22,7 +22,7 @@ static inline void ct_setTriangleStripArray(GLfloat *v, ctreal x1, ctreal y1, ct
 }
 
 
-CtShaderEffect::CtShaderEffect(CtShaderProgram *program)
+CtShaderEffect::CtShaderEffect(CtGpuProgram *program)
     : m_ready(false),
       m_program(program),
       m_locColor(-1),

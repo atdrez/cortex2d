@@ -9,32 +9,7 @@ static const char ct_disablePrecision[] =
     "#define highp\n";
 #endif
 
-
-class CtShaderProgramPrivate
-{
-public:
-    CtShaderProgramPrivate();
-
-    GLuint loadShader(GLenum type, const char *shaderSrc);
-
-    GLuint id;
-    bool linked;
-    GLuint vertexShader;
-    GLuint fragmentShader;
-    CtMap<CtString, GLint> uniformLocations;
-    CtMap<CtString, GLint> attributeLocations;
-};
-
-CtShaderProgramPrivate::CtShaderProgramPrivate()
-    : id(0),
-      linked(false),
-      vertexShader(0),
-      fragmentShader(0)
-{
-
-}
-
-GLuint CtShaderProgramPrivate::loadShader(GLenum type, const char *shaderSrc)
+GLuint CtGpuProgram::loadShader(GLenum type, const char *shaderSrc)
 {
     GLuint shader = CtGL::glCreateShader(type);
 
@@ -71,30 +46,23 @@ GLuint CtShaderProgramPrivate::loadShader(GLenum type, const char *shaderSrc)
 }
 
 
-CtShaderProgram::CtShaderProgram()
-    : d(new CtShaderProgramPrivate)
+CtGpuProgram::CtGpuProgram()
+    : mId(0),
+      mIsLinked(false),
+      mVertexShader(0),
+      mFragmentShader(0)
 {
 
 }
 
-CtShaderProgram::~CtShaderProgram()
+CtGpuProgram::~CtGpuProgram()
 {
     releaseVertexShader();
     releaseFragmentShader();
     unlink();
 }
 
-GLuint CtShaderProgram::id() const
-{
-    return d->id;
-}
-
-bool CtShaderProgram::isValid() const
-{
-    return d->linked;
-}
-
-bool CtShaderProgram::loadVertexShader(const CtString &source)
+bool CtGpuProgram::loadVertexShader(const CtString &source)
 {
     CtString shaderSource;
 #ifndef CT_OPENGL_ES2
@@ -103,14 +71,14 @@ bool CtShaderProgram::loadVertexShader(const CtString &source)
 
     shaderSource += source;
 
-    if (d->vertexShader)
-        CtGL::glDeleteShader(d->vertexShader);
+    if (mVertexShader)
+        CtGL::glDeleteShader(mVertexShader);
 
-    d->vertexShader = d->loadShader(GL_VERTEX_SHADER, shaderSource.data());
-    return (d->vertexShader != 0);
+    mVertexShader = loadShader(GL_VERTEX_SHADER, shaderSource.data());
+    return (mVertexShader != 0);
 }
 
-bool CtShaderProgram::loadFragmentShader(const CtString &source)
+bool CtGpuProgram::loadFragmentShader(const CtString &source)
 {
     CtString shaderSource;
 #ifndef CT_OPENGL_ES2
@@ -119,43 +87,43 @@ bool CtShaderProgram::loadFragmentShader(const CtString &source)
 
     shaderSource += source;
 
-    if (d->fragmentShader)
-        CtGL::glDeleteShader(d->fragmentShader);
+    if (mFragmentShader)
+        CtGL::glDeleteShader(mFragmentShader);
 
-    d->fragmentShader = d->loadShader(GL_FRAGMENT_SHADER, shaderSource.data());
-    return (d->fragmentShader != 0);
+    mFragmentShader = loadShader(GL_FRAGMENT_SHADER, shaderSource.data());
+    return (mFragmentShader != 0);
 }
 
-bool CtShaderProgram::link()
+bool CtGpuProgram::link()
 {
-    if (d->linked)
+    if (mIsLinked)
         return true;
 
-    d->linked = false;
+    mIsLinked = false;
 
-    if (!d->vertexShader || !d->fragmentShader)
+    if (!mVertexShader || !mFragmentShader)
         return false;
 
-    d->id = CtGL::glCreateProgram();
+    mId = CtGL::glCreateProgram();
 
-    if (!d->id)
+    if (!mId)
         return false;
 
-    CtGL::glAttachShader(d->id, d->vertexShader);
-    CtGL::glAttachShader(d->id, d->fragmentShader);
-    CtGL::glLinkProgram(d->id);
+    CtGL::glAttachShader(mId, mVertexShader);
+    CtGL::glAttachShader(mId, mFragmentShader);
+    CtGL::glLinkProgram(mId);
 
     GLint linked;
-    CtGL::glGetProgramiv(d->id, GL_LINK_STATUS, &linked);
+    CtGL::glGetProgramiv(mId, GL_LINK_STATUS, &linked);
 
     if (!linked) {
         GLint infoLen = 0;
-        CtGL::glGetProgramiv(d->id, GL_INFO_LOG_LENGTH, &infoLen);
+        CtGL::glGetProgramiv(mId, GL_INFO_LOG_LENGTH, &infoLen);
 
         if (infoLen > 1) {
             char *infoLog = new char[infoLen];
-            CtGL::glGetProgramInfoLog(d->id, infoLen, NULL, infoLog);
-            CT_WARNING("CtShaderProgram::link: Error linking program:"
+            CtGL::glGetProgramInfoLog(mId, infoLen, NULL, infoLog);
+            CT_WARNING("CtGpuProgram::link: Error linking program:"
                        << CT_ENDL << infoLog);
             delete infoLog;
         }
@@ -164,11 +132,11 @@ bool CtShaderProgram::link()
         return false;
     }
 
-    d->linked = true;
+    mIsLinked = true;
     return true;
 }
 
-bool CtShaderProgram::link(const CtString &vertexShader, const CtString &fragmentShader)
+bool CtGpuProgram::link(const CtString &vertexShader, const CtString &fragmentShader)
 {
     unlink();
 
@@ -188,152 +156,152 @@ bool CtShaderProgram::link(const CtString &vertexShader, const CtString &fragmen
     return result;
 }
 
-void CtShaderProgram::unlink()
+void CtGpuProgram::unlink()
 {
-    if (d->linked) {
-        CtGL::glDeleteProgram(d->id);
-        d->id = 0;
-        d->linked = false;
-        d->uniformLocations.clear();
-        d->attributeLocations.clear();
+    if (mIsLinked) {
+        CtGL::glDeleteProgram(mId);
+        mId = 0;
+        mIsLinked = false;
+        mUniformLocations.clear();
+        mAttributeLocations.clear();
     }
 }
 
-bool CtShaderProgram::bind()
+bool CtGpuProgram::bind()
 {
-    if (!d->linked)
+    if (!mIsLinked)
         return false;
 
-    CtGL::glUseProgram(d->id);
+    CtGL::glUseProgram(mId);
     return !CtGL::glGetError();
 }
 
-bool CtShaderProgram::release()
+bool CtGpuProgram::release()
 {
-    if (!d->linked)
+    if (!mIsLinked)
         return false;
 
     CtGL::glUseProgram(0);
     return !CtGL::glGetError();
 }
 
-void CtShaderProgram::releaseVertexShader()
+void CtGpuProgram::releaseVertexShader()
 {
-    if (d->vertexShader) {
-        CtGL::glDeleteShader(d->vertexShader);
-        d->vertexShader = 0;
+    if (mVertexShader) {
+        CtGL::glDeleteShader(mVertexShader);
+        mVertexShader = 0;
     }
 }
 
-void CtShaderProgram::releaseFragmentShader()
+void CtGpuProgram::releaseFragmentShader()
 {
-    if (d->fragmentShader) {
-        CtGL::glDeleteShader(d->fragmentShader);
-        d->fragmentShader = 0;
+    if (mFragmentShader) {
+        CtGL::glDeleteShader(mFragmentShader);
+        mFragmentShader = 0;
     }
 }
 
-int CtShaderProgram::uniformLocation(const char *name) const
+int CtGpuProgram::uniformLocation(const char *name) const
 {
-    if (!d->linked)
+    if (!mIsLinked)
         return -1;
 
-    CtMap<CtString, GLint>::iterator it = d->uniformLocations.find(name);
+    CtMap<CtString, GLint>::const_iterator it = mUniformLocations.find(name);
 
-    if (it != d->uniformLocations.end())
+    if (it != mUniformLocations.end())
         return it->second;
 
-    GLint location = CtGL::glGetUniformLocation(d->id, name);
-    d->uniformLocations.insert(name, location);
+    GLint location = CtGL::glGetUniformLocation(mId, name);
+    mUniformLocations.insert(name, location);
 
     return location;
 }
 
-int CtShaderProgram::attributeLocation(const char *name) const
+int CtGpuProgram::attributeLocation(const char *name) const
 {
-    if (!d->linked)
+    if (!mIsLinked)
         return -1;
 
-    CtMap<CtString, GLint>::iterator it = d->attributeLocations.find(name);
+    CtMap<CtString, GLint>::const_iterator it = mAttributeLocations.find(name);
 
-    if (it != d->attributeLocations.end())
+    if (it != mAttributeLocations.end())
         return it->second;
 
-    GLint location = CtGL::glGetAttribLocation(d->id, name);
-    d->attributeLocations.insert(name, location);
+    GLint location = CtGL::glGetAttribLocation(mId, name);
+    mAttributeLocations.insert(name, location);
 
     return location;
 }
 
-void CtShaderProgram::setVertexAttributePointer(int location, GLenum type,
+void CtGpuProgram::setVertexAttributePointer(int location, GLenum type,
                                                 int size, int stride, const void *values)
 {
     if (location >= 0)
         CtGL::glVertexAttribPointer(location, size, type, GL_FALSE, stride, values);
 }
 
-void CtShaderProgram::setVertexAttributePointer(int location, int size, const GLfloat *values)
+void CtGpuProgram::setVertexAttributePointer(int location, int size, const GLfloat *values)
 {
     if (location >= 0)
         CtGL::glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, 0,
                                     reinterpret_cast<const void *>(values));
 }
 
-void CtShaderProgram::enableVertexAttributeArray(int location)
+void CtGpuProgram::enableVertexAttributeArray(int location)
 {
     if (location >= 0)
         CtGL::glEnableVertexAttribArray(location);
 }
 
-void CtShaderProgram::setUniformValue(int location, GLint v0)
+void CtGpuProgram::setUniformValue(int location, GLint v0)
 {
     if (location >= 0)
         CtGL::glUniform1i(location, v0);
 }
 
-void CtShaderProgram::setUniformValue(int location, GLint v0, GLint v1)
+void CtGpuProgram::setUniformValue(int location, GLint v0, GLint v1)
 {
     if (location >= 0)
         CtGL::glUniform2i(location, v0, v1);
 }
 
-void CtShaderProgram::setUniformValue(int location, GLint v0, GLint v1, GLint v2)
+void CtGpuProgram::setUniformValue(int location, GLint v0, GLint v1, GLint v2)
 {
     if (location >= 0)
         CtGL::glUniform3i(location, v0, v1, v2);
 }
 
-void CtShaderProgram::setUniformValue(int location, GLint v0, GLint v1, GLint v2, GLint v3)
+void CtGpuProgram::setUniformValue(int location, GLint v0, GLint v1, GLint v2, GLint v3)
 {
     if (location >= 0)
         CtGL::glUniform4i(location, v0, v1, v2, v3);
 }
 
-void CtShaderProgram::setUniformValue(int location, GLfloat value)
+void CtGpuProgram::setUniformValue(int location, GLfloat value)
 {
     if (location >= 0)
         CtGL::glUniform1f(location, value);
 }
 
-void CtShaderProgram::setUniformValue(int location, GLfloat v0, GLfloat v1)
+void CtGpuProgram::setUniformValue(int location, GLfloat v0, GLfloat v1)
 {
     if (location >= 0)
         CtGL::glUniform2f(location, v0, v1);
 }
 
-void CtShaderProgram::setUniformValue(int location, GLfloat v0, GLfloat v1, GLfloat v2)
+void CtGpuProgram::setUniformValue(int location, GLfloat v0, GLfloat v1, GLfloat v2)
 {
     if (location >= 0)
         CtGL::glUniform3f(location, v0, v1, v2);
 }
 
-void CtShaderProgram::setUniformValue(int location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
+void CtGpuProgram::setUniformValue(int location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
 {
     if (location >= 0)
         CtGL::glUniform4f(location, v0, v1, v2, v3);
 }
 
-void CtShaderProgram::setUniformValue(int location, const CtMatrix4x4 &matrix)
+void CtGpuProgram::setUniformValue(int location, const CtMatrix4x4 &matrix)
 {
     if (location >= 0)
         CtGL::glUniformMatrix4fv(location, 1, GL_FALSE, (GLfloat *)matrix.constData());

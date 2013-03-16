@@ -44,10 +44,10 @@ public:
         }
     };
 
-    CtShaderEffect(CtShaderProgram *program);
+    CtShaderEffect(CtGpuProgram *program);
     virtual ~CtShaderEffect();
 
-    CtShaderProgram *program() const { return m_program; }
+    CtGpuProgram *program() const { return m_program; }
 
     void addUniform(CtShaderUniform *uniform);
     void removeUniform(CtShaderUniform *uniform);
@@ -88,7 +88,7 @@ protected:
 
 private:
     bool m_ready;
-    CtShaderProgram *m_program;
+    CtGpuProgram *m_program;
     GLint m_locColor;
     GLint m_locMatrix;
     GLint m_locOpacity;

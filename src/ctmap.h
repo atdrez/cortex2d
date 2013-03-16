@@ -56,6 +56,8 @@ public:
 
     inline iterator find(const T &key) { return mData.find(key); }
 
+    inline const_iterator find(const T &key) const { return mData.find(key); }
+
 private:
     std::map<T, B> mData;
 };

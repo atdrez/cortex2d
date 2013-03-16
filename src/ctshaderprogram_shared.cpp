@@ -132,60 +132,60 @@ static const char ct_textFragmentShader[] = " \
 
 
 
-CtShaderProgram *CtShaderProgram::sharedSolidShaderProgram()
+CtGpuProgram *CtGpuProgram::sharedSolidShaderProgram()
 {
-    static CtShaderProgram *result = 0;
+    static CtGpuProgram *result = 0;
 
     if (!result) {
-        result = new CtShaderProgram();
+        result = new CtGpuProgram();
         result->link(ct_solidVertexShader, ct_solidFragmentShader);
     }
 
     return result;
 }
 
-CtShaderProgram *CtShaderProgram::sharedTextureShaderProgram()
+CtGpuProgram *CtGpuProgram::sharedTextureShaderProgram()
 {
-    static CtShaderProgram *result = 0;
+    static CtGpuProgram *result = 0;
 
     if (!result) {
-        result = new CtShaderProgram();
+        result = new CtGpuProgram();
         result->link(ct_textureVertexShader, ct_textureFragmentShader);
     }
 
     return result;
 }
 
-CtShaderProgram *CtShaderProgram::sharedTextShaderProgram()
+CtGpuProgram *CtGpuProgram::sharedTextShaderProgram()
 {
-    static CtShaderProgram *result = 0;
+    static CtGpuProgram *result = 0;
 
     if (!result) {
-        result = new CtShaderProgram();
+        result = new CtGpuProgram();
         result->link(ct_textureVertexShader, ct_textFragmentShader);
     }
 
     return result;
 }
 
-CtShaderProgram *CtShaderProgram::sharedFragmentShaderProgram()
+CtGpuProgram *CtGpuProgram::sharedFragmentShaderProgram()
 {
-    static CtShaderProgram *result = 0;
+    static CtGpuProgram *result = 0;
 
     if (!result) {
-        result = new CtShaderProgram();
+        result = new CtGpuProgram();
         result->link(ct_fragmentVertexShader, ct_fragmentFragmentShader);
     }
 
     return result;
 }
 
-CtShaderProgram *CtShaderProgram::sharedParticleShaderProgram()
+CtGpuProgram *CtGpuProgram::sharedParticleShaderProgram()
 {
-    static CtShaderProgram *result = 0;
+    static CtGpuProgram *result = 0;
 
     if (!result) {
-        result = new CtShaderProgram();
+        result = new CtGpuProgram();
         result->link(ct_particleVertexShader, ct_particleFragmentShader);
     }
 

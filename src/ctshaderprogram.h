@@ -1,20 +1,22 @@
 #ifndef CTSHADERPROGRAM_H
 #define CTSHADERPROGRAM_H
 
+#include <stdio.h>
 #include "ctGL.h"
+#include "ctmap.h"
 #include "ctglobal.h"
 #include "ctmatrix.h"
 
-class CtShaderProgramPrivate;
+class CtGpuProgramPrivate;
 
-class CtShaderProgram
+class CtGpuProgram
 {
 public:
-    CtShaderProgram();
-    virtual ~CtShaderProgram();
+    CtGpuProgram();
+    virtual ~CtGpuProgram();
 
-    GLuint id() const;
-    bool isValid() const;
+    inline GLuint id() const { return mId; }
+    inline bool isValid() const { return mIsLinked; }
 
     bool loadVertexShader(const CtString &source);
     void releaseVertexShader();
@@ -51,14 +53,21 @@ public:
 
     void setUniformValue(int location, const CtMatrix4x4 &matrix);
 
-    static CtShaderProgram *sharedSolidShaderProgram();
-    static CtShaderProgram *sharedTextureShaderProgram();
-    static CtShaderProgram *sharedTextShaderProgram();
-    static CtShaderProgram *sharedFragmentShaderProgram();
-    static CtShaderProgram *sharedParticleShaderProgram();
+    static CtGpuProgram *sharedSolidShaderProgram();
+    static CtGpuProgram *sharedTextureShaderProgram();
+    static CtGpuProgram *sharedTextShaderProgram();
+    static CtGpuProgram *sharedFragmentShaderProgram();
+    static CtGpuProgram *sharedParticleShaderProgram();
 
 private:
-    CtShaderProgramPrivate *d;
+    GLuint loadShader(GLenum type, const char *shaderSrc);
+
+    GLuint mId;
+    bool mIsLinked;
+    GLuint mVertexShader;
+    GLuint mFragmentShader;
+    mutable CtMap<CtString, GLint> mUniformLocations;
+    mutable CtMap<CtString, GLint> mAttributeLocations;
 };
 
 #endif

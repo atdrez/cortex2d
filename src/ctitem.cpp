@@ -12,7 +12,7 @@
 static CtShaderEffect *ct_sharedSolidShaderEffect()
 {
     static CtShaderEffect *r =
-        new CtShaderEffect(CtShaderProgram::sharedSolidShaderProgram());
+        new CtShaderEffect(CtGpuProgram::sharedSolidShaderProgram());
 
     return r;
 }
@@ -20,28 +20,28 @@ static CtShaderEffect *ct_sharedSolidShaderEffect()
 static CtShaderEffect *ct_sharedTextureShaderEffect()
 {
     static CtShaderEffect *r =
-        new CtShaderEffect(CtShaderProgram::sharedTextureShaderProgram());
+        new CtShaderEffect(CtGpuProgram::sharedTextureShaderProgram());
     return r;
 }
 
 static CtShaderEffect *ct_sharedTextShaderEffect()
 {
     static CtShaderEffect *r
-        = new CtShaderEffect(CtShaderProgram::sharedTextShaderProgram());
+        = new CtShaderEffect(CtGpuProgram::sharedTextShaderProgram());
     return r;
 }
 
 static CtShaderEffect *ct_sharedFragmentShaderEffect()
 {
     static CtShaderEffect *r
-        = new CtShaderEffect(CtShaderProgram::sharedFragmentShaderProgram());
+        = new CtShaderEffect(CtGpuProgram::sharedFragmentShaderProgram());
     return r;
 }
 
 static CtShaderEffect *ct_sharedParticleShaderEffect()
 {
     static CtShaderEffect *r
-        = new CtShaderEffect(CtShaderProgram::sharedParticleShaderProgram());
+        = new CtShaderEffect(CtGpuProgram::sharedParticleShaderProgram());
     return r;
 }
 
@@ -1881,7 +1881,7 @@ void CtParticlesSprite::paint(CtRenderer *renderer)
     }
 
     // use program
-    CtShaderProgram *program = d->shaderEffect->program();
+    CtGpuProgram *program = d->shaderEffect->program();
 
     int locMatrix = program->uniformLocation("ct_Matrix");
     int locOpacity = program->uniformLocation("ct_Opacity");
