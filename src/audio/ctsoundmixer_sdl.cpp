@@ -78,15 +78,15 @@ CtSoundMixerSdlPrivate::~CtSoundMixerSdlPrivate()
 void CtSoundMixerSdlPrivate::addSample(CtSoundSample *sample)
 {
     SDL_LockAudio();
-    sampleList.remove(sample);
-    sampleList.push_back(sample);
+    sampleList.removeAll(sample);
+    sampleList.append(sample);
     SDL_UnlockAudio();
 }
 
 void CtSoundMixerSdlPrivate::removeSample(CtSoundSample *sample)
 {
     SDL_LockAudio();
-    sampleList.remove(sample);
+    sampleList.removeAll(sample);
     SDL_UnlockAudio();
 }
 
