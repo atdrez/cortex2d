@@ -1,15 +1,14 @@
 #include "ctfont.h"
 #include "ctfile.h"
 #include "ctbuffer.h"
-#include "ctfont_p.h"
 #include "cttexture.h"
+#include "freetype-gl.h"
 #include "bmfontparser.h"
 
 static wchar_t *charmap = L"ABCDEFGHIJKLMNOPQRSTUVXYZW "
     "abcdefghijklmnopqrstuvxyzw"
     "0123456789"
     "|/:;,.<>[]{}()+-_!@#$%&*";
-
 
 static texture_atlas_t *ct_sharedTTFTextureMap()
 {
@@ -21,43 +20,42 @@ static texture_atlas_t *ct_sharedTTFTextureMap()
     return result;
 }
 
-
-CtTextureFontPrivate::CtTextureFontPrivate()
-    : fontSize(0),
-      fontHeight(0),
-      ascender(0),
-      descender(0),
-      atlas(0)
+CtFont::CtFont()
+    : mFontSize(0),
+      mFontHeight(0),
+      mAscender(0),
+      mDescender(0),
+      mAtlas(0)
 {
 
 }
 
-CtTextureFontPrivate::~CtTextureFontPrivate()
+CtFont::~CtFont()
 {
     release();
 }
 
-void CtTextureFontPrivate::release()
+void CtFont::release()
 {
-    CtMap<wchar_t, CtGlyph *>::iterator it;
+    CtMap<wchar_t, CtFontGlyph *>::iterator it;
 
-    for (it = glyphs.begin(); it != glyphs.end(); it++)
+    for (it = mGlyphs.begin(); it != mGlyphs.end(); it++)
         delete it->second;
 
-    glyphs.clear();
+    mGlyphs.clear();
 
-    if (atlas) {
-        delete atlas;
-        atlas = 0;
+    if (mAtlas) {
+        delete mAtlas;
+        mAtlas = 0;
     }
 }
 
-bool CtTextureFontPrivate::loadTTF(const CtString &path, int size)
+bool CtFont::loadTTF(const CtString &path, int size)
 {
     release();
 
-    fileName = path;
-    fontSize = size;
+    mFileName = path;
+    mFontSize = size;
 
     static texture_atlas_t *textureMap = ct_sharedTTFTextureMap();
 
@@ -68,15 +66,15 @@ bool CtTextureFontPrivate::loadTTF(const CtString &path, int size)
     if (!font)
         return false;
 
-    fontHeight = font->height;
-    ascender = font->ascender;
-    descender = font->descender;
+    mFontHeight = font->height;
+    mAscender = font->ascender;
+    mDescender = font->descender;
 
     texture_atlas_clear(textureMap);
     texture_font_load_glyphs(font, charmap);
 
-    atlas = new CtAtlasTexture();
-    bool ok = atlas->loadFromData(textureMap->width, textureMap->height,
+    mAtlas = new CtAtlasTexture();
+    bool ok = mAtlas->loadFromData(textureMap->width, textureMap->height,
                                   textureMap->depth, textureMap->data);
 
     if (!ok) {
@@ -92,7 +90,7 @@ bool CtTextureFontPrivate::loadTTF(const CtString &path, int size)
         if (!glyph)
             continue;
 
-        CtGlyph *fontGlyph = new CtGlyph();
+        CtFontGlyph *fontGlyph = new CtFontGlyph();
         fontGlyph->s0 = glyph->s0;
         fontGlyph->t0 = glyph->t0;
         fontGlyph->s1 = glyph->s1;
@@ -105,7 +103,7 @@ bool CtTextureFontPrivate::loadTTF(const CtString &path, int size)
         fontGlyph->yAdvance = glyph->advance_y;
         fontGlyph->charcode = glyph->charcode;
 
-        glyphs.insert(ch, fontGlyph);
+        mGlyphs.insert(ch, fontGlyph);
 
         for (size_t i = 0; i < vector_size(glyph->kerning); i++) {
             kerning_t *kerning = (kerning_t *)vector_get(glyph->kerning, i);
@@ -118,7 +116,7 @@ bool CtTextureFontPrivate::loadTTF(const CtString &path, int size)
     return true;
 }
 
-bool CtTextureFontPrivate::loadBMFont(const CtString &path)
+bool CtFont::loadBMFont(const CtString &path)
 {
     release();
 
@@ -127,15 +125,15 @@ bool CtTextureFontPrivate::loadBMFont(const CtString &path)
     if (!fp.open(CtFile::ReadOnly))
         return false;
 
-    fileName = path;
+    mFileName = path;
 
-    int idx = fileName.lastIndexOf('.');
+    int idx = mFileName.lastIndexOf('.');
 
     if (idx < 0)
         return false;
 
     // TODO: handle different extensions
-    CtString texturePath = fileName.substr(0, idx) + CtString(".tga");
+    CtString texturePath = mFileName.substr(0, idx) + CtString(".tga");
 
     // read file content
     int bufferSize = (int)fp.size();
@@ -156,12 +154,12 @@ bool CtTextureFontPrivate::loadBMFont(const CtString &path)
     float scaleW = font->common.scaleW;
     float scaleH = font->common.scaleH;
 
-    ascender = font->common.base;
-    fontHeight = font->common.lineHeight;
+    mAscender = font->common.base;
+    mFontHeight = font->common.lineHeight;
 
-    atlas = new CtAtlasTexture();
+    mAtlas = new CtAtlasTexture();
 
-    if (!atlas->load(texturePath))
+    if (!mAtlas->load(texturePath))
         return false;
 
 
@@ -174,7 +172,7 @@ bool CtTextureFontPrivate::loadBMFont(const CtString &path)
         float s1 = s0 + float(glyph->width) / scaleW;
         float t1 = t0 + float(glyph->height) / scaleH;
 
-        CtGlyph *fontGlyph = new CtGlyph();
+        CtFontGlyph *fontGlyph = new CtFontGlyph();
         fontGlyph->s0 = s0;
         fontGlyph->t0 = t0;
         fontGlyph->s1 = s1;
@@ -187,7 +185,7 @@ bool CtTextureFontPrivate::loadBMFont(const CtString &path)
         fontGlyph->yAdvance = 0;
         fontGlyph->charcode = charcode;
 
-        glyphs.insert((wchar_t)charcode, fontGlyph);
+        mGlyphs.insert((wchar_t)charcode, fontGlyph);
 
         glyph = glyph->next;
     }
@@ -195,7 +193,7 @@ bool CtTextureFontPrivate::loadBMFont(const CtString &path)
     BMFontKerning *kerning = font->kernings;
 
     while (kerning) {
-        CtGlyph *glyph = glyphs.value(kerning->first, 0);
+        CtFontGlyph *glyph = mGlyphs.value(kerning->first, 0);
 
         if (glyph)
             glyph->kernings.insert(kerning->second, kerning->amount);
@@ -206,50 +204,4 @@ bool CtTextureFontPrivate::loadBMFont(const CtString &path)
     bmFontDelete(font);
 
     return true;
-}
-
-
-CtTextureFont::CtTextureFont()
-    : d(new CtTextureFontPrivate)
-{
-
-}
-
-CtTextureFont::~CtTextureFont()
-{
-    delete d;
-}
-
-CtString CtTextureFont::fileName() const
-{
-    return d->fileName;
-}
-
-int CtTextureFont::fontSize() const
-{
-    return d->fontSize;
-}
-
-CtTextureFont *CtTextureFont::loadTTF(const CtString &fileName, int size)
-{
-    CtTextureFont *result = new CtTextureFont();
-
-    if (!result->d->loadTTF(fileName, size)) {
-        delete result;
-        return 0;
-    }
-
-    return result;
-}
-
-CtTextureFont *CtTextureFont::loadBMFont(const CtString &fileName)
-{
-    CtTextureFont *result = new CtTextureFont();
-
-    if (!result->d->loadBMFont(fileName)) {
-        delete result;
-        return 0;
-    }
-
-    return result;
 }

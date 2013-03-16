@@ -2,8 +2,6 @@
 #include "ctshaderuniform.h"
 #include "ctopenglfunctions.h"
 #include "ctfont.h"
-#include "ctfont_p.h"
-#include "ctfontmanager_p.h"
 
 
 static bool ct_updateVertexAttributes(ctreal x, ctreal y, ctreal w, ctreal h,

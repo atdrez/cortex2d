@@ -7,8 +7,6 @@
 #include "ctshadereffect.h"
 #include "3rdparty/tricollision.h"
 #include "freetype-gl.h"
-#include "ctfont_p.h"
-#include "ctfontmanager_p.h"
 
 
 static CtShaderEffect *ct_sharedSolidShaderEffect()
@@ -1031,10 +1029,8 @@ void CtSceneTextPrivate::recreateBuffers()
     int j = 0;
     int fx = 0;
 
-    CtTextureFontPrivate *dfont = CtTextureFontPrivate::dd(font);
-
     for (int i = 0; i < len; i++) {
-        CtGlyph *glyph = dfont->glyphs.value((wchar_t)str[i], 0);
+        CtFontGlyph *glyph = font->mGlyphs.value((wchar_t)str[i], 0);
 
         if (!glyph)
             continue;
@@ -1044,7 +1040,7 @@ void CtSceneTextPrivate::recreateBuffers()
         const int y  = glyph->yOffset;
         const int w  = glyph->width;
         const int h  = glyph->height;
-        const int by = dfont->ascender;
+        const int by = font->mAscender;
 
         ct_setTriangle2Array(vertices + offset,
                              fx + x, by - y, fx + x + w, by - y + h,
@@ -1089,12 +1085,10 @@ void CtSceneText::paint(CtRenderer *renderer)
     if (!d->font || !d->shaderEffect || d->glyphCount <= 0)
         return;
 
-    CtTextureFontPrivate *dfont = CtTextureFontPrivate::dd(d->font);
-
-    if (!dfont || !dfont->atlas)
+    if (!d->font->mAtlas)
         return;
 
-    renderer->drawVboTextTexture(d->shaderEffect, dfont->atlas, d->indexBuffer,
+    renderer->drawVboTextTexture(d->shaderEffect, d->font->mAtlas, d->indexBuffer,
                                  d->vertexBuffer, d->glyphCount, d->color);
 }
 
@@ -1125,13 +1119,13 @@ void CtSceneText::setText(const CtString &text)
     }
 }
 
-CtTextureFont *CtSceneText::font() const
+CtFont *CtSceneText::font() const
 {
     CT_D(CtSceneText);
     return d->font;
 }
 
-void CtSceneText::setFont(CtTextureFont *font)
+void CtSceneText::setFont(CtFont *font)
 {
     CT_D(CtSceneText);
     if (d->font != font) {

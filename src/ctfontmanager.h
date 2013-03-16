@@ -2,8 +2,9 @@
 #define CTFONTMANAGER_H
 
 #include "ctglobal.h"
+#include "ctmap.h"
 
-class CtTextureFont;
+class CtFont;
 class CtFontManagerPrivate;
 
 class CtFontManager
@@ -14,11 +15,15 @@ public:
     static bool registerFont(const CtString &key, const CtString &fileName, int size);
     static bool releaseFont(const CtString &key);
 
-    static CtTextureFont *findFont(const CtString &key);
+    static CtFont *findFont(const CtString &key);
 
 private:
     CtFontManager();
     ~CtFontManager();
+
+    static CtFontManager *instance();
+
+    CtMap<CtString, CtFont *> mFontHash;
 };
 
 #endif

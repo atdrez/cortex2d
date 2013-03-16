@@ -1,29 +1,6 @@
 #include "ctfontmanager.h"
 #include "ctfont.h"
-#include "ctfont_p.h"
 #include "cttexture.h"
-#include "ctfontmanager_p.h"
-
-
-CtFontManagerPrivate::CtFontManagerPrivate()
-{
-
-}
-
-CtFontManagerPrivate::~CtFontManagerPrivate()
-{
-
-}
-
-CtFontManagerPrivate *CtFontManagerPrivate::instance()
-{
-    static CtFontManagerPrivate *result = 0;
-
-    if (!result)
-        result = new CtFontManagerPrivate();
-
-    return result;
-}
 
 
 CtFontManager::CtFontManager()
@@ -36,61 +13,73 @@ CtFontManager::~CtFontManager()
 
 }
 
+CtFontManager *CtFontManager::instance()
+{
+    static CtFontManager *result = 0;
+
+    if (!result)
+        result = new CtFontManager();
+
+    return result;
+}
+
 bool CtFontManager::registerBMFont(const CtString &key, const CtString &fileName)
 {
-    CtFontManagerPrivate *d = CtFontManagerPrivate::instance();
+    CtFontManager *d = CtFontManager::instance();
 
-    CtTextureFont *font = d->fontHash.value(key, 0);
+    CtFont *font = d->mFontHash.value(key, 0);
 
     if (font)
         return false;
 
-    font = CtTextureFont::loadBMFont(fileName);
+    font = new CtFont();
 
-    if (!font) {
+    if (!font->loadBMFont(fileName)) {
+        delete font;
         return false;
     } else {
-        d->fontHash[key] = font;
+        d->mFontHash[key] = font;
         return true;
     }
 }
 
 bool CtFontManager::registerFont(const CtString &key, const CtString &fileName, int size)
 {
-    CtFontManagerPrivate *d = CtFontManagerPrivate::instance();
+    CtFontManager *d = CtFontManager::instance();
 
-    CtTextureFont *font = d->fontHash.value(key, 0);
+    CtFont *font = d->mFontHash.value(key, 0);
 
     if (font)
         return false;
 
-    font = CtTextureFont::loadTTF(fileName, size);
+    font = new CtFont();
 
-    if (!font) {
+    if (!font->loadTTF(fileName, size)) {
+        delete font;
         return false;
     } else {
-        d->fontHash[key] = font;
+        d->mFontHash[key] = font;
         return true;
     }
 }
 
 bool CtFontManager::releaseFont(const CtString &key)
 {
-    CtFontManagerPrivate *d = CtFontManagerPrivate::instance();
+    CtFontManager *d = CtFontManager::instance();
 
-    CtTextureFont *font = d->fontHash.value(key, 0);
+    CtFont *font = d->mFontHash.value(key, 0);
 
     if (!font)
         return false;
 
-    d->fontHash.remove(key);
+    d->mFontHash.remove(key);
     delete font;
 
     return true;
 }
 
-CtTextureFont *CtFontManager::findFont(const CtString &key)
+CtFont *CtFontManager::findFont(const CtString &key)
 {
-    CtFontManagerPrivate *d = CtFontManagerPrivate::instance();
-    return d->fontHash.value(key, 0);
+    CtFontManager *d = CtFontManager::instance();
+    return d->mFontHash.value(key, 0);
 }

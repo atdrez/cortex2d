@@ -20,7 +20,7 @@ class CtShaderEffect;
 class CtSceneImagePrivate;
 class CtSceneTextureItemPrivate;
 class CtRenderer;
-class CtTextureFont;
+class CtFont;
 
 
 class CtSceneItem : public CtObject
@@ -202,8 +202,8 @@ public:
     CtString text() const;
     void setText(const CtString &text);
 
-    CtTextureFont *font() const;
-    void setFont(CtTextureFont *font);
+    CtFont *font() const;
+    void setFont(CtFont *font);
 
     CtShaderEffect *shaderEffect() const;
     void setShaderEffect(CtShaderEffect *effect);

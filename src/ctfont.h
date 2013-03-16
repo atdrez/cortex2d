@@ -2,28 +2,55 @@
 #define CTFONT_H
 
 #include "ctglobal.h"
+#include "ctmap.h"
 
+struct CtFontGlyph;
+class CtAtlasTexture;
 class CtShaderEffect;
-class CtTextureFontPrivate;
 
-class CtTextureFont
+struct CtFontGlyph
+{
+    float s0;
+    float t0;
+    float s1;
+    float t1;
+    size_t width;
+    size_t height;
+    int xOffset;
+    int yOffset;
+    float xAdvance;
+    float yAdvance;
+    wchar_t charcode;
+    CtMap<wchar_t, float> kernings;
+};
+
+class CtFont
 {
 public:
-    CtString fileName() const;
-    int fontSize() const;
+    CtFont();
+    ~CtFont();
 
-    static CtTextureFont *loadBMFont(const CtString &fileName);
-    static CtTextureFont *loadTTF(const CtString &fileName, int size);
+    int fontSize() const { return mFontSize; }
+    CtString fileName() const { return mFileName; }
+
+    bool loadBMFont(const CtString &fileName);
+    bool loadTTF(const CtString &path, int size);
 
 private:
-    CtTextureFont();
-    ~CtTextureFont();
+    void release();
 
-    CtTextureFontPrivate *d;
+    float mFontSize;
+    float mFontHeight;
+    float mAscender;
+    float mDescender;
+    CtString mFileName;
+    CtAtlasTexture *mAtlas;
+    CtMap<wchar_t, CtFontGlyph *> mGlyphs;
 
     friend class CtFontManager;
+    friend class CtSceneText;
     friend class CtShaderEffect;
-    friend class CtTextureFontPrivate;
+    friend class CtSceneTextPrivate;
 };
 
 #endif

@@ -101,7 +101,7 @@ struct CtSceneTextPrivate : public CtSceneItemPrivate
     int glyphCount;
     GLuint indexBuffer;
     GLuint vertexBuffer;
-    CtTextureFont *font;
+    CtFont *font;
     CtShaderEffect *shaderEffect;
 };
 

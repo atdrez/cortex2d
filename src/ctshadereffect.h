@@ -9,7 +9,7 @@
 #include <map>
 
 class CtRenderer;
-class CtTextureFont;
+class CtFont;
 class CtShaderUniform;
 
 class CtShaderEffect
