@@ -49,12 +49,6 @@ public:
 
     CtShaderProgram *program() const { return m_program; }
 
-    CtString vertexShader() const;
-    void setVertexShader(const CtString &shader);
-
-    CtString fragmentShader() const;
-    void setFragmentShader(const CtString &shader);
-
     void addUniform(CtShaderUniform *uniform);
     void removeUniform(CtShaderUniform *uniform);
 

@@ -7,7 +7,7 @@
 class Button : public FrameItem
 {
 public:
-    Button(const CtString &texturePath, CtSceneItem *parent = 0);
+    Button(const CtString &texturePath, CtSprite *parent = 0);
 
     bool isEnabled() const { return m_enabled; }
     void setEnabled(bool enabled);

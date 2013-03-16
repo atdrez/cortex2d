@@ -3,10 +3,10 @@
 
 #include <Cortex2D>
 
-class FrameItem : public CtSceneImage
+class FrameItem : public CtImageSprite
 {
 public:
-    FrameItem(const CtString &texturePath, CtSceneItem *parent = 0);
+    FrameItem(const CtString &texturePath, CtSprite *parent = 0);
     ~FrameItem();
 
     int frame() const { return m_frame; }

@@ -1,16 +1,17 @@
 #include "frameitem.h"
 
 
-FrameItem::FrameItem(const CtString &texturePath, CtSceneItem *parent)
-    : CtSceneImage(parent),
+FrameItem::FrameItem(const CtString &texturePath, CtSprite *parent)
+    : CtImageSprite(parent),
       m_count(0),
       m_frame(0),
       m_frameIndex(0)
 {
-    CtTexture *texture = CtTextureCache::find(texturePath);
+    CtTexture *texture = CtTexturePool::value(texturePath);
     m_texture = (!texture || !texture->isAtlas()) ? 0 : static_cast<CtAtlasTexture *>(texture);
 
-    CT_ASSERT(!m_texture, "Invalid texture");
+    CT_ASSERT(m_texture != 0);
+
     setTexture(m_texture);
 }
 
@@ -49,7 +50,7 @@ void FrameItem::setFrameKey(const char *key)
 
 void FrameItem::setFrameKeys(const char **keys, int count)
 {
-    CT_ASSERT(!m_texture, "Invalid texture");
+    CT_ASSERT(m_texture != 0);
 
     if (count <= 0)
         return;

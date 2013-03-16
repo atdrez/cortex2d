@@ -13,11 +13,10 @@ private:
     CtTexture m_texture;
 };
 
-class PulsatingRect : public CtSceneRect
+class PulsatingRect : public CtRectSprite
 {
 public:
-    PulsatingRect(CtSceneItem *parent = 0)
-        : CtSceneRect(parent), m_pressed(false) {}
+    PulsatingRect(CtSprite *parent = 0);
 
 protected:
     void advance(ctuint phase);
@@ -28,9 +27,17 @@ private:
     bool m_pressed;
 };
 
+
+PulsatingRect::PulsatingRect(CtSprite *parent)
+    : CtRectSprite(parent),
+      m_pressed(false)
+{
+
+}
+
 void PulsatingRect::advance(ctuint ms)
 {
-    ctreal r = color().r();
+    ctreal r = color().red();
     ctreal step = 0.02;
     ctreal value = (r + step > 1.0f) ? 0.0f : (r + step);
 
@@ -53,7 +60,7 @@ bool MainWindow::init()
     m_texture.load(app->applicationDir() + "/flag.tga");
 
     // create root item
-    CtSceneImage *root = new CtSceneImage(&m_texture, 0);
+    CtImageSprite *root = new CtImageSprite(&m_texture, 0);
     root->setX(50);
     root->setY(90);
     root->setRotation(10);
@@ -61,7 +68,7 @@ bool MainWindow::init()
                              root->height() / 2);
 
     // child of root
-    CtSceneImage *item1 = new CtSceneImage(&m_texture, root);
+    CtImageSprite *item1 = new CtImageSprite(&m_texture, root);
     item1->setX(20);
     item1->setY(20);
     item1->setZ(2); // should be in front of rect1
@@ -70,7 +77,7 @@ bool MainWindow::init()
     item1->setOpacity(0.7);
 
     // child of item1
-    CtSceneImage *item2 = new CtSceneImage(&m_texture, item1);
+    CtImageSprite *item2 = new CtImageSprite(&m_texture, item1);
     item2->setX(14);
     item2->setY(14);
     item2->scale(0.8, 0.8);

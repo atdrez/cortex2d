@@ -9,9 +9,10 @@ public:
 protected:
     bool init();
 
-    CtTextureFont *m_font1;
-    CtTextureFont *m_font2;
-    CtTextureFont *m_font3;
+    CtFont mFont1;
+    CtFont mFont2;
+    CtFont mFont3;
+    CtFont mFont4;
 };
 
 MainWindow::MainWindow()
@@ -24,50 +25,45 @@ bool MainWindow::init()
 {
     CtApplication *app = CtApplication::instance();
 
-    CtFontManager::registerFont("futurex-40", "./futurex.ttf", 40);
-    CtFontManager::registerFont("pusab-20", "./pusab.ttf", 20);
-    CtFontManager::registerFont("toothbrush-30", "./toothbrush.otf", 30);
-
-    m_font1 = CtFontManager::findFont("futurex-40");
-    m_font2 = CtFontManager::findFont("toothbrush-30");
-    m_font3 = CtFontManager::findFont("pusab-20");
-
-    CT_ASSERT(!m_font1 || !m_font2, "Unable to load fonts");
+    mFont1.loadTTF("./futurex.ttf", 40);
+    mFont2.loadTTF("./pusab.ttf", 20);
+    mFont3.loadTTF("./toothbrush.otf", 30);
+    mFont4.loadBMFont("./bubblegum_sans_regular_22.fnt");
 
     // create root item
-    CtSceneItem *root = new CtSceneItem();
+    CtSprite *root = new CtSprite();
 
-    CtSceneText *item1 = new CtSceneText(root);
+    CtTextSprite *item1 = new CtTextSprite(root);
     item1->setX(20);
     item1->setY(40);
-    item1->setFont(m_font1);
+    item1->setFont(&mFont1);
     item1->setColor(CtColor(0.5, 0.8, 1));
     item1->setText("The Quick Brown Fox Jumps Over The Lazy Dog! 0123456789");
 
-    CtSceneText *item2 = new CtSceneText(root);
+    CtTextSprite *item2 = new CtTextSprite(root);
     item2->setX(20);
     item2->setY(100);
-    item2->setFont(m_font2);
+    item2->setFont(&mFont2);
     item2->setText("The Quick Brown Fox Jumps Over The Lazy Dog! 0123456789");
 
-    CtSceneText *item3 = new CtSceneText(root);
+    CtTextSprite *item3 = new CtTextSprite(root);
     item3->setX(20);
     item3->setY(160);
-    item3->setFont(m_font3);
+    item3->setFont(&mFont3);
     item3->setText("The Quick Brown Fox Jumps Over The Lazy Dog! 0123456789");
 
-    CtSceneText *item4 = new CtSceneText(root);
+    CtTextSprite *item4 = new CtTextSprite(root);
     item4->setX(20);
     item4->setY(220);
-    item4->setFont(m_font3);
+    item4->setFont(&mFont4);
     item4->setColor(CtColor(1, 0, 0));
     item4->setText("The Quick Brown Fox Jumps Over The Lazy Dog! 0123456789");
 
-    CtSceneText *item5 = new CtSceneText(root);
+    CtTextSprite *item5 = new CtTextSprite(root);
     item5->setX(20);
     item5->setY(280);
     item5->setRotation(5);
-    item5->setFont(m_font1);
+    item5->setFont(&mFont1);
     item5->setColor(CtColor(0.2, 0.9, 0.5));
     item5->setText("The Quick Brown Fox Jumps Over The Lazy Dog! 0123456789");
 

@@ -13,7 +13,7 @@ public:
         RunToFlyState
     };
 
-    Player(CtSceneItem *parent = 0);
+    Player(CtSprite *parent = 0);
     ~Player();
 
     State state() const;

@@ -10,11 +10,11 @@ protected:
     bool init();
 
 private:
-    CtAtlasTexture m_texture;
+    CtAtlasTexture mTexture;
 };
 
 
-class BlockFragments : public CtSceneFragments
+class BlockFragments : public CtFragmentsSprite
 {
 public:
     struct Info {
@@ -22,7 +22,7 @@ public:
         bool moveLeft;
     };
 
-    BlockFragments(CtAtlasTexture *texture, CtSceneItem *item);
+    BlockFragments(CtAtlasTexture *texture, CtSprite *item);
     ~BlockFragments();
 
     void init();
@@ -32,19 +32,19 @@ protected:
     void initFragment(const CtString &name,
                       ctreal x, ctreal y, ctreal w, ctreal h);
 
-    CtList<Info *> m_info;
+    CtList<Info *> mInfo;
 };
 
 
-BlockFragments::BlockFragments(CtAtlasTexture *texture, CtSceneItem *parent)
-    : CtSceneFragments(texture, parent)
+BlockFragments::BlockFragments(CtAtlasTexture *texture, CtSprite *parent)
+    : CtFragmentsSprite(texture, parent)
 {
 
 }
 
 BlockFragments::~BlockFragments()
 {
-    foreach (Info *info, m_info)
+    foreach (Info *info, mInfo)
         delete info;
 }
 
@@ -114,7 +114,7 @@ MainWindow::MainWindow()
 bool MainWindow::init()
 {
     CtApplication *app = CtApplication::instance();
-    bool ok = m_texture.loadAtlas(app->applicationDir() + "/blocks.atlas");
+    bool ok = mTexture.loadAtlas(app->applicationDir() + "/blocks.atlas");
 
     if (!ok) {
         CT_WARNING("Unable to load atlas");
@@ -122,7 +122,7 @@ bool MainWindow::init()
     }
 
     // create root item
-    BlockFragments *root = new BlockFragments(&m_texture, 0);
+    BlockFragments *root = new BlockFragments(&mTexture, 0);
     root->setX(100);
     root->setY(80);
     root->setWidth(200);

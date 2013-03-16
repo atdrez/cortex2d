@@ -32,10 +32,10 @@ bool MainWindow::init()
     texture->loadAtlas(app->applicationDir() + "/images/default.atlas");
 
     // insert default texture into cache
-    CtTextureCache::insert("default", texture);
+    CtTexturePool::insert("default", texture);
 
     // create root item
-    CtSceneItem *root = new CtSceneItem();
+    CtSprite *root = new CtSprite();
 
     // create player sprite
     m_player = new Player(root);

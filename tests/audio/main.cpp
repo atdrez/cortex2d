@@ -31,15 +31,15 @@ MainWindow::~MainWindow()
 bool MainWindow::init()
 {
     CtSoundMixer *mixer = CtSoundMixer::instance();
-    CtString dir = CtApplication::instance()->applicationDir();
+    mixer->setSpecification(16000, CtSoundMixer::S16LE, 1, 4096);
 
     if (!mixer->open())
         fprintf(stderr, "Error: Unable to open sound mixer\n");
 
-    if (!m_sample1.loadWav(dir + "/wind.wav"))
+    if (!m_sample1.loadWav("./wind.wav"))
         fprintf(stderr, "Error: Unable to open 'wind.wav' file\n");
 
-    if (!m_sample2.loadWav(dir + "/hit.wav"))
+    if (!m_sample2.loadWav("./hit.wav"))
         fprintf(stderr, "Error: Unable to open 'wind.wav' file\n");
 
     m_sample1.setLoopCount(-1);

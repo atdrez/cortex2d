@@ -1,12 +1,12 @@
 #include "button.h"
 
 
-Button::Button(const CtString &texturePath, CtSceneItem *parent)
+Button::Button(const CtString &texturePath, CtSprite *parent)
     : FrameItem(texturePath, parent),
       m_pressed(false),
       m_enabled(true)
 {
-    setFlag(CtSceneItem::AcceptsTouchEvent, true);
+    setFlag(CtSprite::AcceptsTouchEvent, true);
 }
 
 void Button::setEnabled(bool enabled)
@@ -15,7 +15,7 @@ void Button::setEnabled(bool enabled)
         return;
 
     m_enabled = enabled;
-    setFrameKey(enabled ? m_normalFrame.c_str() : m_disabledFrame.c_str());
+    setFrameKey(enabled ? m_normalFrame.data() : m_disabledFrame.data());
 }
 
 void Button::setNormalFrame(const CtString &key)
@@ -23,7 +23,7 @@ void Button::setNormalFrame(const CtString &key)
     m_normalFrame = key;
 
     if (m_enabled)
-        setFrameKey(key.c_str());
+        setFrameKey(key.data());
 }
 
 void Button::setPressedFrame(const CtString &key)
@@ -31,7 +31,7 @@ void Button::setPressedFrame(const CtString &key)
     m_pressedFrame = key;
 
     if (m_enabled && m_pressed)
-        setFrameKey(key.c_str());
+        setFrameKey(key.data());
 }
 
 void Button::setDisabledFrame(const CtString &key)
@@ -39,7 +39,7 @@ void Button::setDisabledFrame(const CtString &key)
     m_disabledFrame = key;
 
     if (!m_enabled)
-        setFrameKey(key.c_str());
+        setFrameKey(key.data());
 }
 
 void Button::touchBeginEvent(CtTouchEvent *event)
@@ -47,8 +47,8 @@ void Button::touchBeginEvent(CtTouchEvent *event)
     if (m_enabled) {
         m_pressed = true;
 
-        if (!m_pressedFrame.empty())
-            setFrameKey(m_pressedFrame.c_str());
+        if (!m_pressedFrame.isEmpty())
+            setFrameKey(m_pressedFrame.data());
     } else {
         FrameItem::touchBeginEvent(event);
     }
@@ -60,10 +60,10 @@ void Button::touchEndEvent(CtTouchEvent *event)
 
     m_pressed = false;
 
-    if (m_enabled || m_disabledFrame.empty())
-        setFrameKey(m_normalFrame.c_str());
+    if (m_enabled || m_disabledFrame.isEmpty())
+        setFrameKey(m_normalFrame.data());
     else
-        setFrameKey(m_disabledFrame.c_str());
+        setFrameKey(m_disabledFrame.data());
 
     if (m_enabled && touch.isInsideClickThreshold())
         clicked();

@@ -1,7 +1,7 @@
 #include "player.h"
 
 
-Player::Player(CtSceneItem *parent)
+Player::Player(CtSprite *parent)
     : FrameItem("default", parent),
       m_state(WalkingState),
       m_frame(0)
