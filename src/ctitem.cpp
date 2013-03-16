@@ -138,13 +138,13 @@ bool CtSpritePrivate::relativeFrozen()
         return isFrozen || parent->isFrozen();
 }
 
-CtSceneFrameBuffer *CtSpritePrivate::frameBufferItem()
+CtFrameBufferSprite *CtSpritePrivate::frameBufferItem()
 {
     // XXX: optimize
     if (!parent)
         return 0;
     else if (parent->d_ptr->isFrameBuffer)
-        return static_cast<CtSceneFrameBuffer *>(parent);
+        return static_cast<CtFrameBufferSprite *>(parent);
     else
         return parent->d_ptr->frameBufferItem();
 }
@@ -277,7 +277,7 @@ void CtSpritePrivate::checkTransformMatrix()
     localTransformMatrix.invert();
 
     // fbo
-    CtSceneFrameBuffer *fbo = frameBufferItem();
+    CtFrameBufferSprite *fbo = frameBufferItem();
 
     if (!fbo || !fbo->isValidBuffer())
         fboTransformMatrix = sceneTransformMatrix;
@@ -302,7 +302,7 @@ CtMatrix CtSpritePrivate::currentLocalTransformMatrix()
 CtMatrix4x4 CtSpritePrivate::currentViewportProjectionMatrix()
 {
     CtSceneView *sc = q->scene();
-    CtSceneFrameBuffer *fb = frameBufferItem();
+    CtFrameBufferSprite *fb = frameBufferItem();
 
     checkTransformMatrix();
 
@@ -901,79 +901,79 @@ void CtSprite::dragCursorCancelEvent(CtDragDropEvent *event)
 }
 
 /////////////////////////////////////////////////
-// CtSceneRect
+// CtRectSprite
 /////////////////////////////////////////////////
 
-CtSceneRectPrivate::CtSceneRectPrivate(CtSceneRect *q)
+CtRectSpritePrivate::CtRectSpritePrivate(CtRectSprite *q)
     : CtSpritePrivate(q),
       shaderEffect(0)
 {
 
 }
 
-void CtSceneRectPrivate::init(CtSprite *parent)
+void CtRectSpritePrivate::init(CtSprite *parent)
 {
     CtSpritePrivate::init(parent);
     shaderEffect = ct_sharedSolidShaderEffect();
 }
 
-void CtSceneRectPrivate::release()
+void CtRectSpritePrivate::release()
 {
     CtSpritePrivate::release();
 }
 
 
-CtSceneRect::CtSceneRect(CtSprite *parent)
-    : CtSprite(new CtSceneRectPrivate(this))
+CtRectSprite::CtRectSprite(CtSprite *parent)
+    : CtSprite(new CtRectSpritePrivate(this))
 {
-    CT_D(CtSceneRect);
+    CT_D(CtRectSprite);
     d->init(parent);
 }
 
-CtSceneRect::CtSceneRect(ctreal r, ctreal g, ctreal b, CtSprite *parent)
-    : CtSprite(new CtSceneRectPrivate(this))
+CtRectSprite::CtRectSprite(ctreal r, ctreal g, ctreal b, CtSprite *parent)
+    : CtSprite(new CtRectSpritePrivate(this))
 {
-    CT_D(CtSceneRect);
+    CT_D(CtRectSprite);
     d->init(parent);
     d->color = CtColor(r, g, b);
 }
 
-void CtSceneRect::paint(CtRenderer *renderer)
+void CtRectSprite::paint(CtRenderer *renderer)
 {
-    CT_D(CtSceneRect);
+    CT_D(CtRectSprite);
     renderer->drawSolid(d->shaderEffect, d->width, d->height,
                         d->color.red(), d->color.green(), d->color.blue(), d->color.alpha());
 }
 
-CtColor CtSceneRect::color() const
+CtColor CtRectSprite::color() const
 {
-    CT_D(CtSceneRect);
+    CT_D(CtRectSprite);
     return d->color;
 }
 
-void CtSceneRect::setColor(const CtColor &color)
+void CtRectSprite::setColor(const CtColor &color)
 {
-    CT_D(CtSceneRect);
+    CT_D(CtRectSprite);
     d->color = color;
 }
 
-CtShaderEffect *CtSceneRect::shaderEffect() const
+CtShaderEffect *CtRectSprite::shaderEffect() const
 {
-    CT_D(CtSceneRect);
+    CT_D(CtRectSprite);
     return d->shaderEffect;
 }
 
-void CtSceneRect::setShaderEffect(CtShaderEffect *effect)
+void CtRectSprite::setShaderEffect(CtShaderEffect *effect)
 {
-    CT_D(CtSceneRect);
+    CT_D(CtRectSprite);
     d->shaderEffect = effect;
 }
 
 /////////////////////////////////////////////////
-// CtSceneText
+// CtTextSprite
 /////////////////////////////////////////////////
 
-CtSceneTextPrivate::CtSceneTextPrivate(CtSceneText *q)
+CtTextSpritePrivate::CtTextSpritePrivate(CtTextSprite *q)
     : CtSpritePrivate(q),
       color(0, 0, 0),
       glyphCount(0),
@@ -985,19 +985,19 @@ CtSceneTextPrivate::CtSceneTextPrivate(CtSceneText *q)
 
 }
 
-void CtSceneTextPrivate::init(CtSprite *parent)
+void CtTextSpritePrivate::init(CtSprite *parent)
 {
     CtSpritePrivate::init(parent);
     shaderEffect = ct_sharedTextShaderEffect();
 }
 
-void CtSceneTextPrivate::release()
+void CtTextSpritePrivate::release()
 {
     CtSpritePrivate::release();
     releaseBuffers();
 }
 
-void CtSceneTextPrivate::releaseBuffers()
+void CtTextSpritePrivate::releaseBuffers()
 {
     if (indexBuffer > 0) {
         glDeleteBuffers(1, &indexBuffer);
@@ -1012,7 +1012,7 @@ void CtSceneTextPrivate::releaseBuffers()
     glyphCount = 0;
 }
 
-void CtSceneTextPrivate::recreateBuffers()
+void CtTextSpritePrivate::recreateBuffers()
 {
     releaseBuffers();
 
@@ -1071,16 +1071,16 @@ void CtSceneTextPrivate::recreateBuffers()
     glyphCount = n;
 }
 
-CtSceneText::CtSceneText(CtSprite *parent)
-    : CtSprite(new CtSceneTextPrivate(this))
+CtTextSprite::CtTextSprite(CtSprite *parent)
+    : CtSprite(new CtTextSpritePrivate(this))
 {
-    CT_D(CtSceneText);
+    CT_D(CtTextSprite);
     d->init(parent);
 }
 
-void CtSceneText::paint(CtRenderer *renderer)
+void CtTextSprite::paint(CtRenderer *renderer)
 {
-    CT_D(CtSceneText);
+    CT_D(CtTextSprite);
 
     if (!d->font || !d->shaderEffect || d->glyphCount <= 0)
         return;
@@ -1092,65 +1092,65 @@ void CtSceneText::paint(CtRenderer *renderer)
                                  d->vertexBuffer, d->glyphCount, d->color);
 }
 
-CtColor CtSceneText::color() const
+CtColor CtTextSprite::color() const
 {
-    CT_D(CtSceneText);
+    CT_D(CtTextSprite);
     return d->color;
 }
 
-void CtSceneText::setColor(const CtColor &color)
+void CtTextSprite::setColor(const CtColor &color)
 {
-    CT_D(CtSceneText);
+    CT_D(CtTextSprite);
     d->color = color;
 }
 
-CtString CtSceneText::text() const
+CtString CtTextSprite::text() const
 {
-    CT_D(CtSceneText);
+    CT_D(CtTextSprite);
     return d->text;
 }
 
-void CtSceneText::setText(const CtString &text)
+void CtTextSprite::setText(const CtString &text)
 {
-    CT_D(CtSceneText);
+    CT_D(CtTextSprite);
     if (d->text != text) {
         d->text = text;
         d->recreateBuffers();
     }
 }
 
-CtFont *CtSceneText::font() const
+CtFont *CtTextSprite::font() const
 {
-    CT_D(CtSceneText);
+    CT_D(CtTextSprite);
     return d->font;
 }
 
-void CtSceneText::setFont(CtFont *font)
+void CtTextSprite::setFont(CtFont *font)
 {
-    CT_D(CtSceneText);
+    CT_D(CtTextSprite);
     if (d->font != font) {
         d->font = font;
         d->recreateBuffers();
     }
 }
 
-CtShaderEffect *CtSceneText::shaderEffect() const
+CtShaderEffect *CtTextSprite::shaderEffect() const
 {
-    CT_D(CtSceneText);
+    CT_D(CtTextSprite);
     return d->shaderEffect;
 }
 
-void CtSceneText::setShaderEffect(CtShaderEffect *effect)
+void CtTextSprite::setShaderEffect(CtShaderEffect *effect)
 {
-    CT_D(CtSceneText);
+    CT_D(CtTextSprite);
     d->shaderEffect = effect;
 }
 
 /////////////////////////////////////////////////
-// CtSceneFrameBuffer
+// CtFrameBufferSprite
 /////////////////////////////////////////////////
 
-CtSceneFrameBufferPrivate::CtSceneFrameBufferPrivate(CtSceneFrameBuffer *q)
+CtFrameBufferSpritePrivate::CtFrameBufferSpritePrivate(CtFrameBufferSprite *q)
     : CtSpritePrivate(q),
       bufferWidth(0),
       bufferHeight(0),
@@ -1162,7 +1162,7 @@ CtSceneFrameBufferPrivate::CtSceneFrameBufferPrivate(CtSceneFrameBuffer *q)
     isFrameBuffer = true;
 }
 
-void CtSceneFrameBufferPrivate::init(CtSprite *parent)
+void CtFrameBufferSpritePrivate::init(CtSprite *parent)
 {
     CtSpritePrivate::init(parent);
 
@@ -1170,13 +1170,13 @@ void CtSceneFrameBufferPrivate::init(CtSprite *parent)
     texture = new CtTexture();
 }
 
-void CtSceneFrameBufferPrivate::release()
+void CtFrameBufferSpritePrivate::release()
 {
     CtSpritePrivate::release();
     delete texture;
 }
 
-void CtSceneFrameBufferPrivate::recursivePaint(CtRenderer *renderer)
+void CtFrameBufferSpritePrivate::recursivePaint(CtRenderer *renderer)
 {
     if (!texture->isValid()) {
         // invalid framebuffer
@@ -1202,7 +1202,7 @@ void CtSceneFrameBufferPrivate::recursivePaint(CtRenderer *renderer)
     renderer->end();
 }
 
-void CtSceneFrameBufferPrivate::deleteBuffers()
+void CtFrameBufferSpritePrivate::deleteBuffers()
 {
     if (framebuffer > 0) {
         glDeleteFramebuffers(1, &framebuffer);
@@ -1215,7 +1215,7 @@ void CtSceneFrameBufferPrivate::deleteBuffers()
     }
 }
 
-void CtSceneFrameBufferPrivate::resizeBuffer(int w, int h)
+void CtFrameBufferSpritePrivate::resizeBuffer(int w, int h)
 {
     if (w == bufferWidth && h == bufferHeight)
         return;
@@ -1264,48 +1264,48 @@ void CtSceneFrameBufferPrivate::resizeBuffer(int w, int h)
 }
 
 
-CtSceneFrameBuffer::CtSceneFrameBuffer(CtSprite *parent)
-    : CtSprite(new CtSceneFrameBufferPrivate(this))
+CtFrameBufferSprite::CtFrameBufferSprite(CtSprite *parent)
+    : CtSprite(new CtFrameBufferSpritePrivate(this))
 {
-    CT_D(CtSceneFrameBuffer);
+    CT_D(CtFrameBufferSprite);
     d->init(parent);
 }
 
-void CtSceneFrameBuffer::paint(CtRenderer *renderer)
+void CtFrameBufferSprite::paint(CtRenderer *renderer)
 {
-    CT_D(CtSceneFrameBuffer);
+    CT_D(CtFrameBufferSprite);
     renderer->drawTexture(d->shaderEffect, d->texture, d->width, d->height);
 }
 
-CtShaderEffect *CtSceneFrameBuffer::shaderEffect() const
+CtShaderEffect *CtFrameBufferSprite::shaderEffect() const
 {
-    CT_D(CtSceneFrameBuffer);
+    CT_D(CtFrameBufferSprite);
     return d->shaderEffect;
 }
 
-void CtSceneFrameBuffer::setShaderEffect(CtShaderEffect *effect)
+void CtFrameBufferSprite::setShaderEffect(CtShaderEffect *effect)
 {
-    CT_D(CtSceneFrameBuffer);
+    CT_D(CtFrameBufferSprite);
     d->shaderEffect = effect;
 }
 
-bool CtSceneFrameBuffer::isValidBuffer() const
+bool CtFrameBufferSprite::isValidBuffer() const
 {
-    CT_D(CtSceneFrameBuffer);
+    CT_D(CtFrameBufferSprite);
     return d->texture->isValid();
 }
 
-void CtSceneFrameBuffer::setBufferSize(int width, int height)
+void CtFrameBufferSprite::setBufferSize(int width, int height)
 {
-    CT_D(CtSceneFrameBuffer);
+    CT_D(CtFrameBufferSprite);
     d->resizeBuffer(width, height);
 }
 
 /////////////////////////////////////////////////
-// CtSceneTextureItem
+// CtTextureSprite
 /////////////////////////////////////////////////
 
-CtSceneTextureItemPrivate::CtSceneTextureItemPrivate(CtSceneTextureItem *q)
+CtTextureSpritePrivate::CtTextureSpritePrivate(CtTextureSprite *q)
     : CtSpritePrivate(q),
       textureAtlasIndex(-1),
       ownTexture(false),
@@ -1315,7 +1315,7 @@ CtSceneTextureItemPrivate::CtSceneTextureItemPrivate(CtSceneTextureItem *q)
 
 }
 
-void CtSceneTextureItemPrivate::init(CtSprite *parent)
+void CtTextureSpritePrivate::init(CtSprite *parent)
 {
     CtSpritePrivate::init(parent);
 
@@ -1327,7 +1327,7 @@ void CtSceneTextureItemPrivate::init(CtSprite *parent)
     shaderEffect = ct_sharedTextureShaderEffect();
 }
 
-void CtSceneTextureItemPrivate::release()
+void CtTextureSpritePrivate::release()
 {
     if (texture && ownTexture) {
         delete texture;
@@ -1338,36 +1338,36 @@ void CtSceneTextureItemPrivate::release()
 }
 
 
-CtSceneTextureItem::CtSceneTextureItem(CtSprite *parent)
-    : CtSprite(new CtSceneTextureItemPrivate(this))
+CtTextureSprite::CtTextureSprite(CtSprite *parent)
+    : CtSprite(new CtTextureSpritePrivate(this))
 {
-    CT_D(CtSceneTextureItem);
+    CT_D(CtTextureSprite);
     d->init(parent);
 }
 
-CtSceneTextureItem::CtSceneTextureItem(CtTexture *texture, CtSprite *parent)
-    : CtSprite(new CtSceneTextureItemPrivate(this))
+CtTextureSprite::CtTextureSprite(CtTexture *texture, CtSprite *parent)
+    : CtSprite(new CtTextureSpritePrivate(this))
 {
-    CT_D(CtSceneTextureItem);
+    CT_D(CtTextureSprite);
     d->texture = texture;
     d->init(parent);
 }
 
-CtSceneTextureItem::CtSceneTextureItem(CtSceneTextureItemPrivate *dd)
+CtTextureSprite::CtTextureSprite(CtTextureSpritePrivate *dd)
     : CtSprite(dd)
 {
 
 }
 
-CtTexture *CtSceneTextureItem::texture() const
+CtTexture *CtTextureSprite::texture() const
 {
-    CT_D(CtSceneTextureItem);
+    CT_D(CtTextureSprite);
     return d->texture;
 }
 
-void CtSceneTextureItem::setTexture(CtTexture *texture)
+void CtTextureSprite::setTexture(CtTexture *texture)
 {
-    CT_D(CtSceneTextureItem);
+    CT_D(CtTextureSprite);
     if (d->texture == texture)
         return;
 
@@ -1380,33 +1380,33 @@ void CtSceneTextureItem::setTexture(CtTexture *texture)
     d->texture = texture;
 }
 
-int CtSceneTextureItem::textureAtlasIndex() const
+int CtTextureSprite::textureAtlasIndex() const
 {
-    CT_D(CtSceneTextureItem);
+    CT_D(CtTextureSprite);
     return d->textureAtlasIndex;
 }
 
-void CtSceneTextureItem::setTextureAtlasIndex(int index)
+void CtTextureSprite::setTextureAtlasIndex(int index)
 {
-    CT_D(CtSceneTextureItem);
+    CT_D(CtTextureSprite);
     d->textureAtlasIndex = index;
 }
 
-CtShaderEffect *CtSceneTextureItem::shaderEffect() const
+CtShaderEffect *CtTextureSprite::shaderEffect() const
 {
-    CT_D(CtSceneTextureItem);
+    CT_D(CtTextureSprite);
     return d->shaderEffect;
 }
 
-void CtSceneTextureItem::setShaderEffect(CtShaderEffect *effect)
+void CtTextureSprite::setShaderEffect(CtShaderEffect *effect)
 {
-    CT_D(CtSceneTextureItem);
+    CT_D(CtTextureSprite);
     d->shaderEffect = effect;
 }
 
-bool CtSceneTextureItem::load(const CtString &filePath)
+bool CtTextureSprite::load(const CtString &filePath)
 {
-    CT_D(CtSceneTextureItem);
+    CT_D(CtTextureSprite);
 
     if (!d->ownTexture) {
         d->texture = new CtTexture();
@@ -1423,91 +1423,91 @@ bool CtSceneTextureItem::load(const CtString &filePath)
 }
 
 /////////////////////////////////////////////////
-// CtSceneImage
+// CtImageSprite
 /////////////////////////////////////////////////
 
-CtSceneImagePrivate::CtSceneImagePrivate(CtSceneImage *q)
-    : CtSceneTextureItemPrivate(q),
-      fillMode(CtSceneImage::Stretch)
+CtImageSpritePrivate::CtImageSpritePrivate(CtImageSprite *q)
+    : CtTextureSpritePrivate(q),
+      fillMode(CtImageSprite::Stretch)
 {
 
 }
 
-CtSceneImage::CtSceneImage(CtSprite *parent)
-    : CtSceneTextureItem(new CtSceneImagePrivate(this))
+CtImageSprite::CtImageSprite(CtSprite *parent)
+    : CtTextureSprite(new CtImageSpritePrivate(this))
 {
-    CT_D(CtSceneImage);
+    CT_D(CtImageSprite);
     d->init(parent);
 }
 
-CtSceneImage::CtSceneImage(CtTexture *texture, CtSprite *parent)
-    : CtSceneTextureItem(new CtSceneImagePrivate(this))
+CtImageSprite::CtImageSprite(CtTexture *texture, CtSprite *parent)
+    : CtTextureSprite(new CtImageSpritePrivate(this))
 {
-    CT_D(CtSceneImage);
+    CT_D(CtImageSprite);
     d->texture = texture;
     d->init(parent);
 }
 
-CtSceneImage::CtSceneImage(CtSceneImagePrivate *dd)
-    : CtSceneTextureItem(dd)
+CtImageSprite::CtImageSprite(CtImageSpritePrivate *dd)
+    : CtTextureSprite(dd)
 {
 
 }
 
-CtSceneImage::FillMode CtSceneImage::fillMode() const
+CtImageSprite::FillMode CtImageSprite::fillMode() const
 {
-    CT_D(CtSceneImage);
+    CT_D(CtImageSprite);
     return d->fillMode;
 }
 
-void CtSceneImage::setFillMode(FillMode mode)
+void CtImageSprite::setFillMode(FillMode mode)
 {
-    CT_D(CtSceneImage);
+    CT_D(CtImageSprite);
     d->fillMode = mode;
 }
 
-void CtSceneImage::paint(CtRenderer *renderer)
+void CtImageSprite::paint(CtRenderer *renderer)
 {
-    CT_D(CtSceneImage);
+    CT_D(CtImageSprite);
 
-    const bool vTile = (d->fillMode == CtSceneImage::Tile ||
-                        d->fillMode == CtSceneImage::TileVertically);
+    const bool vTile = (d->fillMode == CtImageSprite::Tile ||
+                        d->fillMode == CtImageSprite::TileVertically);
 
-    const bool hTile = (d->fillMode == CtSceneImage::Tile ||
-                        d->fillMode == CtSceneImage::TileHorizontally);
+    const bool hTile = (d->fillMode == CtImageSprite::Tile ||
+                        d->fillMode == CtImageSprite::TileHorizontally);
 
     renderer->drawTexture(d->shaderEffect, d->texture, d->width, d->height,
                           vTile, hTile, d->textureAtlasIndex);
 }
 
 /////////////////////////////////////////////////
-// CtSceneImagePoly
+// CtImagePolygonSprite
 /////////////////////////////////////////////////
 
-CtSceneImagePolyPrivate::CtSceneImagePolyPrivate(CtSceneImagePoly *q)
-    : CtSceneImagePrivate(q)
+CtImagePolygonSpritePrivate::CtImagePolygonSpritePrivate(CtImagePolygonSprite *q)
+    : CtImageSpritePrivate(q)
 {
 
 }
 
-CtSceneImagePoly::CtSceneImagePoly(CtSprite *parent)
-    : CtSceneImage(new CtSceneImagePolyPrivate(this))
+CtImagePolygonSprite::CtImagePolygonSprite(CtSprite *parent)
+    : CtImageSprite(new CtImagePolygonSpritePrivate(this))
 {
-    CT_D(CtSceneImagePoly);
+    CT_D(CtImagePolygonSprite);
     d->init(parent);
 }
 
-CtSceneImagePoly::CtSceneImagePoly(CtTexture *texture, CtSprite *parent)
-    : CtSceneImage(new CtSceneImagePolyPrivate(this))
+CtImagePolygonSprite::CtImagePolygonSprite(CtTexture *texture, CtSprite *parent)
+    : CtImageSprite(new CtImagePolygonSpritePrivate(this))
 {
-    CT_D(CtSceneImagePoly);
+    CT_D(CtImagePolygonSprite);
     d->texture = texture;
     d->init(parent);
 }
 
-void CtSceneImagePoly::paint(CtRenderer *renderer)
+void CtImagePolygonSprite::paint(CtRenderer *renderer)
 {
-    CT_D(CtSceneImagePoly);
+    CT_D(CtImagePolygonSprite);
 
     const int count = d->vertices.size();
 
@@ -1515,15 +1515,15 @@ void CtSceneImagePoly::paint(CtRenderer *renderer)
         return;
 
     if (d->textureAtlasIndex >= 0) {
-        CT_WARNING("CtSceneImagePoly does not support atlas texture yet!");
+        CT_WARNING("CtImagePolygonSprite does not support atlas texture yet!");
         return;
     }
 
-    const bool vTile = (d->fillMode == CtSceneImagePoly::Tile ||
-                        d->fillMode == CtSceneImagePoly::TileVertically);
+    const bool vTile = (d->fillMode == CtImagePolygonSprite::Tile ||
+                        d->fillMode == CtImagePolygonSprite::TileVertically);
 
-    const bool hTile = (d->fillMode == CtSceneImagePoly::Tile ||
-                        d->fillMode == CtSceneImagePoly::TileHorizontally);
+    const bool hTile = (d->fillMode == CtImagePolygonSprite::Tile ||
+                        d->fillMode == CtImagePolygonSprite::TileHorizontally);
 
     int i = 0;
     GLfloat *vertices = new GLfloat[count * 2];
@@ -1549,45 +1549,45 @@ void CtSceneImagePoly::paint(CtRenderer *renderer)
     delete [] texCoords;
 }
 
-CtVector<CtPoint> CtSceneImagePoly::vertices() const
+CtVector<CtPoint> CtImagePolygonSprite::vertices() const
 {
-    CT_D(CtSceneImagePoly);
+    CT_D(CtImagePolygonSprite);
     return d->vertices;
 }
 
-void CtSceneImagePoly::setVertices(const CtVector<CtPoint> &vertices)
+void CtImagePolygonSprite::setVertices(const CtVector<CtPoint> &vertices)
 {
-    CT_D(CtSceneImagePoly);
+    CT_D(CtImagePolygonSprite);
     d->vertices = vertices;
 }
 
 
 /////////////////////////////////////////////////
-// CtSceneFragments
+// CtFragmentsSprite
 /////////////////////////////////////////////////
 
-CtSceneFragmentsPrivate::CtSceneFragmentsPrivate(CtSceneFragments *q)
-    : CtSceneTextureItemPrivate(q)
+CtFragmentsSpritePrivate::CtFragmentsSpritePrivate(CtFragmentsSprite *q)
+    : CtTextureSpritePrivate(q)
 {
 
 }
 
-void CtSceneFragmentsPrivate::init(CtSprite *parent)
+void CtFragmentsSpritePrivate::init(CtSprite *parent)
 {
-    CtSceneTextureItemPrivate::init(parent);
+    CtTextureSpritePrivate::init(parent);
     shaderEffect = ct_sharedFragmentShaderEffect();
 }
 
-void CtSceneFragmentsPrivate::release()
+void CtFragmentsSpritePrivate::release()
 {
-    CtSceneTextureItemPrivate::release();
+    CtTextureSpritePrivate::release();
 
-    foreach (CtSceneFragments::Fragment *f, fragments)
+    foreach (CtFragmentsSprite::Fragment *f, fragments)
         delete f;
 }
 
 
-CtSceneFragments::Fragment::Fragment()
+CtFragmentsSprite::Fragment::Fragment()
     : m_x(0),
       m_y(0),
       m_width(0),
@@ -1599,61 +1599,61 @@ CtSceneFragments::Fragment::Fragment()
 
 }
 
-void CtSceneFragments::Fragment::setX(ctreal x)
+void CtFragmentsSprite::Fragment::setX(ctreal x)
 {
     m_x = x;
 }
 
-void CtSceneFragments::Fragment::setY(ctreal y)
+void CtFragmentsSprite::Fragment::setY(ctreal y)
 {
     m_y = y;
 }
 
-void CtSceneFragments::Fragment::setWidth(ctreal w)
+void CtFragmentsSprite::Fragment::setWidth(ctreal w)
 {
     m_width = w;
 }
 
-void CtSceneFragments::Fragment::setHeight(ctreal h)
+void CtFragmentsSprite::Fragment::setHeight(ctreal h)
 {
     m_height = h;
 }
 
-void CtSceneFragments::Fragment::setAtlasIndex(int index)
+void CtFragmentsSprite::Fragment::setAtlasIndex(int index)
 {
     m_atlasIndex = index;
 }
 
-void CtSceneFragments::Fragment::setUserData(void *data)
+void CtFragmentsSprite::Fragment::setUserData(void *data)
 {
     m_userData = data;
 }
 
 
-CtSceneFragments::CtSceneFragments(CtSprite *parent)
-    : CtSceneTextureItem(new CtSceneFragmentsPrivate(this))
+CtFragmentsSprite::CtFragmentsSprite(CtSprite *parent)
+    : CtTextureSprite(new CtFragmentsSpritePrivate(this))
 {
-    CT_D(CtSceneFragments);
+    CT_D(CtFragmentsSprite);
     d->init(parent);
 }
 
-CtSceneFragments::CtSceneFragments(CtTexture *texture, CtSprite *parent)
-    : CtSceneTextureItem(new CtSceneFragmentsPrivate(this))
+CtFragmentsSprite::CtFragmentsSprite(CtTexture *texture, CtSprite *parent)
+    : CtTextureSprite(new CtFragmentsSpritePrivate(this))
 {
-    CT_D(CtSceneFragments);
+    CT_D(CtFragmentsSprite);
     d->texture = texture;
     d->init(parent);
 }
 
-CtList<CtSceneFragments::Fragment *> CtSceneFragments::fragments() const
+CtList<CtFragmentsSprite::Fragment *> CtFragmentsSprite::fragments() const
 {
-    CT_D(CtSceneFragments);
+    CT_D(CtFragmentsSprite);
     return d->fragments;
 }
 
-void CtSceneFragments::clearFragments()
+void CtFragmentsSprite::clearFragments()
 {
-    CT_D(CtSceneFragments);
+    CT_D(CtFragmentsSprite);
 
     foreach (Fragment *f, d->fragments)
         delete f;
@@ -1661,14 +1661,14 @@ void CtSceneFragments::clearFragments()
     d->fragments.clear();
 }
 
-bool CtSceneFragments::appendFragment(Fragment *fragment)
+bool CtFragmentsSprite::appendFragment(Fragment *fragment)
 {
     return insertFragment(-1, fragment);
 }
 
-bool CtSceneFragments::insertFragment(int index, Fragment *fragment)
+bool CtFragmentsSprite::insertFragment(int index, Fragment *fragment)
 {
-    CT_D(CtSceneFragments);
+    CT_D(CtFragmentsSprite);
 
     foreach (Fragment *f, d->fragments) {
         if (fragment == f)
@@ -1687,9 +1687,9 @@ bool CtSceneFragments::insertFragment(int index, Fragment *fragment)
     return true;
 }
 
-bool CtSceneFragments::removeFragment(Fragment *fragment)
+bool CtFragmentsSprite::removeFragment(Fragment *fragment)
 {
-    CT_D(CtSceneFragments);
+    CT_D(CtFragmentsSprite);
 
     CtList<Fragment *>::iterator it;
 
@@ -1704,9 +1704,9 @@ bool CtSceneFragments::removeFragment(Fragment *fragment)
     return false;
 }
 
-void CtSceneFragments::paint(CtRenderer *renderer)
+void CtFragmentsSprite::paint(CtRenderer *renderer)
 {
-    CT_D(CtSceneFragments);
+    CT_D(CtFragmentsSprite);
 
     if (!d->shaderEffect)
         return;
@@ -1714,7 +1714,7 @@ void CtSceneFragments::paint(CtRenderer *renderer)
     CtShaderEffect::Element e;
     CtList<CtShaderEffect::Element> elements;
 
-    foreach (CtSceneFragments::Fragment *f, d->fragments) {
+    foreach (CtFragmentsSprite::Fragment *f, d->fragments) {
         e.x = f->x();
         e.y = f->y();
         e.width = f->width();
@@ -1729,11 +1729,11 @@ void CtSceneFragments::paint(CtRenderer *renderer)
 
 
 /////////////////////////////////////////////////
-// CtSceneParticleSystem
+// CtParticlesSprite
 /////////////////////////////////////////////////
 
-CtSceneParticleSystemPrivate::CtSceneParticleSystemPrivate(CtSceneParticleSystem *q)
-    : CtSceneTextureItemPrivate(q),
+CtParticlesSpritePrivate::CtParticlesSpritePrivate(CtParticlesSprite *q)
+    : CtTextureSpritePrivate(q),
       vertices(0),
       attrCount(7),
       vertexSize(7 * sizeof(GLfloat)),
@@ -1742,17 +1742,17 @@ CtSceneParticleSystemPrivate::CtSceneParticleSystemPrivate(CtSceneParticleSystem
 
 }
 
-void CtSceneParticleSystemPrivate::init(CtSprite *parent)
+void CtParticlesSpritePrivate::init(CtSprite *parent)
 {
-    CtSceneTextureItemPrivate::init(parent);
+    CtTextureSpritePrivate::init(parent);
     shaderEffect = ct_sharedParticleShaderEffect();
 }
 
-void CtSceneParticleSystemPrivate::release()
+void CtParticlesSpritePrivate::release()
 {
-    CtSceneTextureItemPrivate::release();
+    CtTextureSpritePrivate::release();
 
-    foreach (CtSceneParticleSystem::Particle *f, particles)
+    foreach (CtParticlesSprite::Particle *f, particles)
         delete f;
 
     if (vertices) {
@@ -1761,7 +1761,7 @@ void CtSceneParticleSystemPrivate::release()
     }
 }
 
-void CtSceneParticleSystemPrivate::recreateVertexBuffer()
+void CtParticlesSpritePrivate::recreateVertexBuffer()
 {
     if (vertices) {
         delete [] vertices;
@@ -1776,7 +1776,7 @@ void CtSceneParticleSystemPrivate::recreateVertexBuffer()
 }
 
 
-CtSceneParticleSystem::Particle::Particle()
+CtParticlesSprite::Particle::Particle()
     : m_x(0),
       m_y(0),
       m_size(10),
@@ -1786,30 +1786,30 @@ CtSceneParticleSystem::Particle::Particle()
 
 }
 
-CtSceneParticleSystem::CtSceneParticleSystem(CtSprite *parent)
-    : CtSceneTextureItem(new CtSceneParticleSystemPrivate(this))
+CtParticlesSprite::CtParticlesSprite(CtSprite *parent)
+    : CtTextureSprite(new CtParticlesSpritePrivate(this))
 {
-    CT_D(CtSceneParticleSystem);
+    CT_D(CtParticlesSprite);
     d->init(parent);
 }
 
-CtSceneParticleSystem::CtSceneParticleSystem(CtTexture *texture, CtSprite *parent)
-    : CtSceneTextureItem(new CtSceneParticleSystemPrivate(this))
+CtParticlesSprite::CtParticlesSprite(CtTexture *texture, CtSprite *parent)
+    : CtTextureSprite(new CtParticlesSpritePrivate(this))
 {
-    CT_D(CtSceneParticleSystem);
+    CT_D(CtParticlesSprite);
     d->texture = texture;
     d->init(parent);
 }
 
-CtVector<CtSceneParticleSystem::Particle *> CtSceneParticleSystem::particles() const
+CtVector<CtParticlesSprite::Particle *> CtParticlesSprite::particles() const
 {
-    CT_D(CtSceneParticleSystem);
+    CT_D(CtParticlesSprite);
     return d->particles;
 }
 
-bool CtSceneParticleSystem::addParticle(Particle *particle)
+bool CtParticlesSprite::addParticle(Particle *particle)
 {
-    CT_D(CtSceneParticleSystem);
+    CT_D(CtParticlesSprite);
 
     foreach (Particle *p, d->particles) {
         if (particle == p)
@@ -1821,9 +1821,9 @@ bool CtSceneParticleSystem::addParticle(Particle *particle)
     return true;
 }
 
-bool CtSceneParticleSystem::removeParticle(Particle *fragment)
+bool CtParticlesSprite::removeParticle(Particle *fragment)
 {
-    CT_D(CtSceneParticleSystem);
+    CT_D(CtParticlesSprite);
 
     bool found = false;
     CtVector<Particle *>::iterator it;
@@ -1844,9 +1844,9 @@ bool CtSceneParticleSystem::removeParticle(Particle *fragment)
     return found;
 }
 
-void CtSceneParticleSystem::clearParticles()
+void CtParticlesSprite::clearParticles()
 {
-    CT_D(CtSceneParticleSystem);
+    CT_D(CtParticlesSprite);
 
     foreach (Particle *p, d->particles)
         delete p;
@@ -1855,9 +1855,9 @@ void CtSceneParticleSystem::clearParticles()
     d->recreateVertexBuffer();
 }
 
-void CtSceneParticleSystem::paint(CtRenderer *renderer)
+void CtParticlesSprite::paint(CtRenderer *renderer)
 {
-    CT_D(CtSceneParticleSystem);
+    CT_D(CtParticlesSprite);
 
     CtTexture *texture = d->texture;
 
@@ -1866,7 +1866,7 @@ void CtSceneParticleSystem::paint(CtRenderer *renderer)
 
     GLfloat *vptr = d->vertices;
 
-    foreach (CtSceneParticleSystem::Particle *p, d->particles) {
+    foreach (CtParticlesSprite::Particle *p, d->particles) {
         const CtColor &c = p->color();
 
         vptr[0] = p->x();

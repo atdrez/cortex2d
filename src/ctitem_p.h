@@ -29,7 +29,7 @@ struct CtSpritePrivate
     bool relativeVisible();
     ctreal relativeOpacity();
     bool relativeFrozen();
-    CtSceneFrameBuffer *frameBufferItem();
+    CtFrameBufferSprite *frameBufferItem();
 
     void checkTransformMatrix();
     CtMatrix mappedTransformMatrix(CtSprite *root);
@@ -75,9 +75,9 @@ struct CtSpritePrivate
     CtList<CtSprite *> sortedChildren;
 };
 
-struct CtSceneRectPrivate : public CtSpritePrivate
+struct CtRectSpritePrivate : public CtSpritePrivate
 {
-    CtSceneRectPrivate(CtSceneRect *q);
+    CtRectSpritePrivate(CtRectSprite *q);
 
     void init(CtSprite *parent);
     void release();
@@ -86,9 +86,9 @@ struct CtSceneRectPrivate : public CtSpritePrivate
     CtShaderEffect *shaderEffect;
 };
 
-struct CtSceneTextPrivate : public CtSpritePrivate
+struct CtTextSpritePrivate : public CtSpritePrivate
 {
-    CtSceneTextPrivate(CtSceneText *q);
+    CtTextSpritePrivate(CtTextSprite *q);
 
     void init(CtSprite *parent);
     void release();
@@ -105,9 +105,9 @@ struct CtSceneTextPrivate : public CtSpritePrivate
     CtShaderEffect *shaderEffect;
 };
 
-struct CtSceneFrameBufferPrivate : public CtSpritePrivate
+struct CtFrameBufferSpritePrivate : public CtSpritePrivate
 {
-    CtSceneFrameBufferPrivate(CtSceneFrameBuffer *q);
+    CtFrameBufferSpritePrivate(CtFrameBufferSprite *q);
 
     void init(CtSprite *parent);
     void release();
@@ -125,9 +125,9 @@ struct CtSceneFrameBufferPrivate : public CtSpritePrivate
     CtShaderEffect *shaderEffect;
 };
 
-struct CtSceneTextureItemPrivate : public CtSpritePrivate
+struct CtTextureSpritePrivate : public CtSpritePrivate
 {
-    CtSceneTextureItemPrivate(CtSceneTextureItem *q);
+    CtTextureSpritePrivate(CtTextureSprite *q);
 
     void init(CtSprite *parent);
     void release();
@@ -138,33 +138,33 @@ struct CtSceneTextureItemPrivate : public CtSpritePrivate
     CtShaderEffect *shaderEffect;
 };
 
-struct CtSceneImagePrivate : public CtSceneTextureItemPrivate
+struct CtImageSpritePrivate : public CtTextureSpritePrivate
 {
-    CtSceneImagePrivate(CtSceneImage *q);
+    CtImageSpritePrivate(CtImageSprite *q);
 
-    CtSceneImage::FillMode fillMode;
+    CtImageSprite::FillMode fillMode;
 };
 
-struct CtSceneImagePolyPrivate : public CtSceneImagePrivate
+struct CtImagePolygonSpritePrivate : public CtImageSpritePrivate
 {
-    CtSceneImagePolyPrivate(CtSceneImagePoly *q);
+    CtImagePolygonSpritePrivate(CtImagePolygonSprite *q);
 
     CtVector<CtPoint> vertices;
 };
 
-struct CtSceneFragmentsPrivate : public CtSceneTextureItemPrivate
+struct CtFragmentsSpritePrivate : public CtTextureSpritePrivate
 {
-    CtSceneFragmentsPrivate(CtSceneFragments *q);
+    CtFragmentsSpritePrivate(CtFragmentsSprite *q);
 
     void init(CtSprite *parent);
     void release();
 
-    CtList<CtSceneFragments::Fragment *> fragments;
+    CtList<CtFragmentsSprite::Fragment *> fragments;
 };
 
-struct CtSceneParticleSystemPrivate : public CtSceneTextureItemPrivate
+struct CtParticlesSpritePrivate : public CtTextureSpritePrivate
 {
-    CtSceneParticleSystemPrivate(CtSceneParticleSystem *q);
+    CtParticlesSpritePrivate(CtParticlesSprite *q);
 
     void init(CtSprite *parent);
     void release();
@@ -175,7 +175,7 @@ struct CtSceneParticleSystemPrivate : public CtSceneTextureItemPrivate
     int attrCount;
     int vertexSize;
     int vertexCount;
-    CtVector<CtSceneParticleSystem::Particle *> particles;
+    CtVector<CtParticlesSprite::Particle *> particles;
 };
 
 #endif

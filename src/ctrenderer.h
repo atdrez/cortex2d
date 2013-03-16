@@ -7,8 +7,8 @@
 
 class CtTexture;
 class CtSpritePrivate;
-class CtSceneFrameBuffer;
-class CtSceneFrameBufferPrivate;
+class CtFrameBufferSprite;
+class CtFrameBufferSpritePrivate;
 
 class CtRenderer
 {
@@ -48,7 +48,7 @@ private:
     void end();
 
     friend class CtSpritePrivate;
-    friend class CtSceneFrameBufferPrivate;
+    friend class CtFrameBufferSpritePrivate;
 
     GLint m_fbo;
     GLint m_defaultFbo;

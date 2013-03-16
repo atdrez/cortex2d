@@ -49,9 +49,9 @@ private:
     CtMap<wchar_t, CtFontGlyph *> mGlyphs;
 
     friend class CtFontManager;
-    friend class CtSceneText;
+    friend class CtTextSprite;
     friend class CtShaderEffect;
-    friend class CtSceneTextPrivate;
+    friend class CtTextSpritePrivate;
 };
 
 typedef CtPool<CtFont> CtFontPool;

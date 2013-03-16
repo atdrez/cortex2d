@@ -17,8 +17,8 @@ class CtSceneView;
 class CtSceneViewData;
 class CtSpritePrivate;
 class CtShaderEffect;
-class CtSceneImagePrivate;
-class CtSceneTextureItemPrivate;
+class CtImageSpritePrivate;
+class CtTextureSpritePrivate;
 class CtRenderer;
 class CtFont;
 
@@ -170,15 +170,15 @@ private:
     friend class CtSceneView;
     friend class CtSceneViewData;
     friend class CtSpritePrivate;
-    friend class CtSceneFrameBufferPrivate;
+    friend class CtFrameBufferSpritePrivate;
 };
 
 
-class CtSceneRect : public CtSprite
+class CtRectSprite : public CtSprite
 {
 public:
-    CtSceneRect(CtSprite *parent = 0);
-    CtSceneRect(ctreal r, ctreal g, ctreal b, CtSprite *parent = 0);
+    CtRectSprite(CtSprite *parent = 0);
+    CtRectSprite(ctreal r, ctreal g, ctreal b, CtSprite *parent = 0);
 
     CtColor color() const;
     void setColor(const CtColor &color);
@@ -191,10 +191,10 @@ protected:
 };
 
 
-class CtSceneText : public CtSprite
+class CtTextSprite : public CtSprite
 {
 public:
-    CtSceneText(CtSprite *parent = 0);
+    CtTextSprite(CtSprite *parent = 0);
 
     CtColor color() const;
     void setColor(const CtColor &color);
@@ -213,10 +213,10 @@ protected:
 };
 
 
-class CtSceneFrameBuffer : public CtSprite
+class CtFrameBufferSprite : public CtSprite
 {
 public:
-    CtSceneFrameBuffer(CtSprite *parent = 0);
+    CtFrameBufferSprite(CtSprite *parent = 0);
 
     CtShaderEffect *shaderEffect() const;
     void setShaderEffect(CtShaderEffect *effect);
@@ -230,11 +230,11 @@ protected:
 };
 
 
-class CtSceneTextureItem : public CtSprite
+class CtTextureSprite : public CtSprite
 {
 public:
-    CtSceneTextureItem(CtSprite *parent = 0);
-    CtSceneTextureItem(CtTexture *texture, CtSprite *parent = 0);
+    CtTextureSprite(CtSprite *parent = 0);
+    CtTextureSprite(CtTexture *texture, CtSprite *parent = 0);
 
     CtTexture *texture() const;
     void setTexture(CtTexture *texture);
@@ -248,11 +248,11 @@ public:
     void setShaderEffect(CtShaderEffect *effect);
 
 protected:
-    CtSceneTextureItem(CtSceneTextureItemPrivate *dd);
+    CtTextureSprite(CtTextureSpritePrivate *dd);
 };
 
 
-class CtSceneImage : public CtSceneTextureItem
+class CtImageSprite : public CtTextureSprite
 {
 public:
     enum FillMode {
@@ -262,24 +262,24 @@ public:
         TileHorizontally
     };
 
-    CtSceneImage(CtSprite *parent = 0);
-    CtSceneImage(CtTexture *texture, CtSprite *parent = 0);
+    CtImageSprite(CtSprite *parent = 0);
+    CtImageSprite(CtTexture *texture, CtSprite *parent = 0);
 
     FillMode fillMode() const;
     void setFillMode(FillMode mode);
 
 protected:
-    CtSceneImage(CtSceneImagePrivate *dd);
+    CtImageSprite(CtImageSpritePrivate *dd);
 
     void paint(CtRenderer *renderer);
 };
 
 
-class CtSceneImagePoly : public CtSceneImage
+class CtImagePolygonSprite : public CtImageSprite
 {
 public:
-    CtSceneImagePoly(CtSprite *parent = 0);
-    CtSceneImagePoly(CtTexture *texture, CtSprite *parent = 0);
+    CtImagePolygonSprite(CtSprite *parent = 0);
+    CtImagePolygonSprite(CtTexture *texture, CtSprite *parent = 0);
 
     CtVector<CtPoint> vertices() const;
     void setVertices(const CtVector<CtPoint> &vertices);
@@ -289,7 +289,7 @@ protected:
 };
 
 
-class CtSceneFragments : public CtSceneTextureItem
+class CtFragmentsSprite : public CtTextureSprite
 {
 public:
     class Fragment {
@@ -327,8 +327,8 @@ public:
         void *m_userData;
     };
 
-    CtSceneFragments(CtSprite *parent = 0);
-    CtSceneFragments(CtTexture *texture, CtSprite *parent = 0);
+    CtFragmentsSprite(CtSprite *parent = 0);
+    CtFragmentsSprite(CtTexture *texture, CtSprite *parent = 0);
 
     CtList<Fragment *> fragments() const;
 
@@ -342,7 +342,7 @@ protected:
 };
 
 
-class CtSceneParticleSystem : public CtSceneTextureItem
+class CtParticlesSprite : public CtTextureSprite
 {
 public:
     class Particle {
@@ -372,8 +372,8 @@ public:
         void *m_userData;
     };
 
-    CtSceneParticleSystem(CtSprite *parent = 0);
-    CtSceneParticleSystem(CtTexture *texture, CtSprite *parent = 0);
+    CtParticlesSprite(CtSprite *parent = 0);
+    CtParticlesSprite(CtTexture *texture, CtSprite *parent = 0);
 
     CtVector<Particle *> particles() const;
 
