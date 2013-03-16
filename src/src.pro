@@ -52,6 +52,7 @@ HEADERS += \
     ctanimations.h \
     cteasingcurve.h \
     ctfont.h \
+    ctpool.h \
     ctfontmanager.h \
     utils/ctfile.h \
     utils/ctbuffer.h \
