@@ -1,65 +1,50 @@
 #include "cttexture.h"
+#include <string.h>
 #include "ctopenglfunctions.h"
 #include "utils/ctfile.h"
 #include "utils/cttgaloader.h"
 #include "utils/ctpngloader.h"
 #include "utils/ctpvrloader.h"
 #include "utils/ctddsloader.h"
-#include <string.h>
-
-
-CtString ct_dirPath(const CtString &path)
-{
-    CtString r = path;
-    int idx = r.lastIndexOf('/');
-
-    if (idx < 0) {
-        return CtString("");
-    } else if (idx == 0) {
-        return CtString("/");
-    } else {
-        r.remove(idx, r.length());
-        return r;
-    }
-}
 
 
 CtTexture::CtTexture()
-    : m_inverted(false),
-      m_textureId(0),
-      m_width(0),
-      m_height(0),
-      m_format(GL_RGB),
-      m_isAtlas(false)
+    : mId(0),
+      mWidth(0),
+      mHeight(0),
+      mFormat(GL_RGB),
+      mIsAtlas(false),
+      mIsInverted(false)
 {
 
 }
 
 CtTexture::CtTexture(bool isAtlas)
-    : m_inverted(false),
-      m_textureId(0),
-      m_width(0),
-      m_height(0),
-      m_format(GL_RGB),
-      m_isAtlas(isAtlas)
+    : mId(0),
+      mWidth(0),
+      mHeight(0),
+      mFormat(GL_RGB),
+      mIsAtlas(isAtlas),
+      mIsInverted(false)
 {
 
 }
 
 CtTexture::~CtTexture()
 {
-
+    release();
 }
 
 void CtTexture::release()
 {
-    if (m_textureId) {
-        CtGL::glDeleteTextures(1, &m_textureId);
-        m_width = 0;
-        m_height = 0;
-        m_textureId = 0;
-        m_inverted = false;
-        m_format = GL_RGB;
+    if (mId) {
+        CtGL::glDeleteTextures(1, &mId);
+
+        mId = 0;
+        mWidth = 0;
+        mHeight = 0;
+        mFormat = GL_RGB;
+        mIsInverted = false;
     }
 }
 
@@ -70,34 +55,38 @@ bool CtTexture::loadFromData(int w, int h, int depth, const GLvoid *data)
     if (depth != 4 && depth != 3 && depth != 1)
         return false;
 
-    CtGL::glGenTextures(1, &m_textureId);
+    CtGL::glGenTextures(1, &mId);
     CT_CHECK_GL_ERROR(return false);
 
-    m_width = w;
-    m_height = h;
-    m_format = ((depth == 4) ? GL_RGBA : ((depth == 3) ? GL_RGB : GL_ALPHA));
+    mWidth = w;
+    mHeight = h;
+    mIsInverted = true;
+    mFormat = ((depth == 4) ? GL_RGBA : ((depth == 3) ? GL_RGB : GL_ALPHA));
 
-    CtGL::glBindTexture(GL_TEXTURE_2D, m_textureId);
+    CtGL::glBindTexture(GL_TEXTURE_2D, mId);
     CT_CHECK_GL_ERROR(return false);
 
-    CtGL::glTexImage2D(GL_TEXTURE_2D, 0, m_format, m_width,
-                       m_height, 0, m_format, GL_UNSIGNED_BYTE, data);
-
+    CtGL::glTexImage2D(GL_TEXTURE_2D, 0, mFormat, mWidth, mHeight,
+                       0, mFormat, GL_UNSIGNED_BYTE, data);
     CT_CHECK_GL_ERROR(return false);
 
     CtGL::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     CtGL::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    m_inverted = true;
     return true;
+}
+
+void CtTexture::setError(const CtString &error)
+{
+    mError = error;
 }
 
 bool CtTexture::loadTGA(const CtString &fileName)
 {
     CtTGATexture texture;
 
-    if (!texture.loadFromFile((char *)fileName.data())) {
-        m_error = texture.errorMessage;
+    if (!texture.loadFromFile(fileName.data())) {
+        mError = texture.errorMessage;
         return false;
     }
 
@@ -109,8 +98,8 @@ bool CtTexture::loadPNG(const CtString &fileName)
 {
     CtPNGTexture texture;
 
-    if (!texture.loadFromFile((char *)fileName.data())) {
-        m_error = texture.errorMessage;
+    if (!texture.loadFromFile(fileName.data())) {
+        mError = texture.errorMessage;
         return false;
     }
 
@@ -118,7 +107,7 @@ bool CtTexture::loadPNG(const CtString &fileName)
                            texture.bytesPerPixel, texture.buffer);
 
     if (ok)
-        m_inverted = false;
+        mIsInverted = false;
 
     return ok;
 }
@@ -126,8 +115,9 @@ bool CtTexture::loadPNG(const CtString &fileName)
 bool CtTexture::loadPVR(const CtString &fileName)
 {
     CtPVRTexture texture;
-    if (!texture.loadFromFile((char *)fileName.data())) {
-        m_error = texture.errorMessage;
+
+    if (!texture.loadFromFile(fileName.data())) {
+        mError = texture.errorMessage;
         return false;
     }
 
@@ -138,9 +128,9 @@ bool CtTexture::loadPVR(const CtString &fileName)
 bool CtTexture::loadDDS(const CtString &fileName)
 {
     CtDDSTexture texture;
-    if (!texture.loadFromFile((char *)fileName.data())) {
-        m_error = texture.errorMessage;
-        CT_DEBUG(m_error);
+
+    if (!texture.loadFromFile(fileName.data())) {
+        mError = texture.errorMessage;
         return false;
     }
 
@@ -150,25 +140,25 @@ bool CtTexture::loadDDS(const CtString &fileName)
 
 bool CtTexture::load(const CtString &fileName)
 {
-    int idx = fileName.lastIndexOf('.');
+    const int idx = fileName.lastIndexOf('.');
 
     if (idx < 0)
         return false;
 
     const CtString &ext = fileName.substr(idx + 1);
 
-    if (ext == "dds") {
+    if (ext == "dds")
         return loadDDS(fileName);
-    } else if (ext == "pvr") {
+    else if (ext == "pvr")
         return loadPVR(fileName);
-    } else if (ext == "png") {
+    else if (ext == "png")
         return loadPNG(fileName);
-    } else if (ext == "tga") {
+    else if (ext == "tga")
         return loadTGA(fileName);
-    }
 
     return false;
 }
+
 
 CtAtlasTexture::CtAtlasTexture()
     : CtTexture(true)
@@ -183,43 +173,28 @@ CtAtlasTexture::~CtAtlasTexture()
 
 int CtAtlasTexture::tileCount() const
 {
-    return m_rects.size();
+    return mSourceRects.size();
 }
 
-void CtAtlasTexture::setTileCount(int count)
+int CtAtlasTexture::indexOfKey(const CtString &key) const
 {
-    if (count > 0) {
-        m_rects.resize(count);
-        m_drects.resize(count);
-    }
+    return mKeys.value(key, -1);
 }
 
 CtRect CtAtlasTexture::sourceRectAt(int index) const
 {
-    if (index >= 0 && index < (int)m_rects.size())
-        return m_rects.at(index);
+    if (index >= 0 && index < (int)mSourceRects.size())
+        return mSourceRects.at(index);
     else
         return CtRect();
-}
-
-void CtAtlasTexture::setSourceRectAt(int index, const CtRect &rect)
-{
-    if (index >= 0 && index < (int)m_rects.size())
-        m_rects[index] = rect;
 }
 
 CtRect CtAtlasTexture::viewportRectAt(int index) const
 {
-    if (index >= 0 && index < (int)m_drects.size())
-        return m_drects.at(index);
+    if (index >= 0 && index < (int)mViewportRects.size())
+        return mViewportRects.at(index);
     else
         return CtRect();
-}
-
-void CtAtlasTexture::setViewportRectAt(int index, const CtRect &rect)
-{
-    if (index >= 0 && index < (int)m_drects.size())
-        m_drects[index] = rect;
 }
 
 bool CtAtlasTexture::loadAtlas(const CtString &filePath)
@@ -237,7 +212,7 @@ bool CtAtlasTexture::loadAtlas(const CtString &filePath)
         return false;
 
     if (version > 1) {
-        CT_WARNING("Invalid version of atlas");
+        setError("Invalid version of atlas");
         return false;
     }
 
@@ -246,7 +221,7 @@ bool CtAtlasTexture::loadAtlas(const CtString &filePath)
         return false;
 
     if (lenName <= 0 || lenName > 1024) {
-        CT_WARNING("Invalid string found on atlas file");
+        setError("Invalid string found on atlas file");
         return false;
     }
 
@@ -274,10 +249,8 @@ bool CtAtlasTexture::loadAtlas(const CtString &filePath)
         ok = load(filePath + ".tga");
     }
 
-    if (!ok) {
-        CT_WARNING("Unable to load atlas file " << error());
+    if (!ok)
         return false;
-    }
 
     ctuint32 totalEntries;
     if (!fp.read(&totalEntries, sizeof(ctuint32), 1))
@@ -287,8 +260,15 @@ bool CtAtlasTexture::loadAtlas(const CtString &filePath)
 
     ctuint32 originalWidth, originalHeight;
 
-    setTileCount(totalEntries);
-    m_keys.clear();
+    mKeys.clear();
+
+    if (totalEntries > 0) {
+        mSourceRects.resize(totalEntries);
+        mViewportRects.resize(totalEntries);
+    } else {
+        mSourceRects.clear();
+        mViewportRects.clear();
+    }
 
     for (ctuint32 i = 0; i < totalEntries; i++) {
         ctuint32 lenKey;
@@ -296,7 +276,7 @@ bool CtAtlasTexture::loadAtlas(const CtString &filePath)
             return false;
 
         if (lenKey == 0 || lenKey > 1024) {
-            CT_WARNING("Invalid string found on atlas file");
+            setError("Invalid string found on atlas file");
             return false;
         }
 
@@ -316,16 +296,12 @@ bool CtAtlasTexture::loadAtlas(const CtString &filePath)
             !fp.read(&originalHeight, sizeof(ctuint32), 1))
             return false;
 
-        m_keys[texKey] = i;
-        setSourceRectAt(i, CtRect(ctreal(x), ctreal(y), ctreal(w), ctreal(h)));
-        setViewportRectAt(i, CtRect(-ctreal(xOffset), -ctreal(yOffset),
-                                    ctreal(originalWidth), ctreal(originalHeight)));
+        mKeys[texKey] = i;
+        mSourceRects[i] = CtRect(ctreal(x), ctreal(y),
+                                 ctreal(w), ctreal(h));
+        mViewportRects[i] = CtRect(-ctreal(xOffset), -ctreal(yOffset),
+                                   ctreal(originalWidth), ctreal(originalHeight));
     }
 
     return true;
-}
-
-int CtAtlasTexture::indexOfKey(const CtString &key) const
-{
-    return m_keys.value(key, -1);
 }

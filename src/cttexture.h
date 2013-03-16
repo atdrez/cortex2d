@@ -1,13 +1,13 @@
 #ifndef CTTEXTURE_H
 #define CTTEXTURE_H
 
-#include "ctglobal.h"
 #include "ctGL.h"
 #include "ctrect.h"
-#include "ctpoint.h"
 #include "ctmap.h"
 #include "ctpool.h"
+#include "ctglobal.h"
 #include "ctvector.h"
+
 
 class CtTexture
 {
@@ -15,39 +15,39 @@ public:
     CtTexture();
     virtual ~CtTexture();
 
-    GLuint id() const { return m_textureId; }
-    GLenum format() const { return m_format; }
+    inline GLuint id() const { return mId; }
+    inline GLenum format() const { return mFormat; }
 
-    int width() const { return m_width; }
-    int height() const { return m_height; }
+    inline int width() const { return mWidth; }
+    inline int height() const { return mHeight; }
 
-    bool isAtlas() const { return m_isAtlas; }
-    bool isInverted() const { return m_inverted; }
+    inline bool isAtlas() const { return mIsAtlas; }
+    inline bool isInverted() const { return mIsInverted; }
 
-    CtString error() const { return m_error; }
-    bool isValid() const { return m_textureId != 0; }
+    inline CtString error() const { return mError; }
+    inline bool isValid() const { return mId != 0; }
 
+    bool load(const CtString &fileName);
     bool loadFromData(int w, int h, int depth, const GLvoid *data);
 
     void release();
 
-    bool load(const CtString &fileName);
-
 protected:
     CtTexture(bool isAtlas);
+    void setError(const CtString &error);
     bool loadTGA(const CtString &fileName);
     bool loadPNG(const CtString &fileName);
     bool loadPVR(const CtString &fileName);
     bool loadDDS(const CtString &fileName);
 
 private:
-    bool m_inverted;
-    GLuint m_textureId;
-    int m_width;
-    int m_height;
-    GLenum m_format;
-    bool m_isAtlas;
-    CtString m_error;
+    GLuint mId;
+    int mWidth;
+    int mHeight;
+    GLenum mFormat;
+    bool mIsAtlas;
+    bool mIsInverted;
+    CtString mError;
 };
 
 class CtAtlasTexture : public CtTexture
@@ -57,22 +57,17 @@ public:
     ~CtAtlasTexture();
 
     int tileCount() const;
-    void setTileCount(int count);
+    int indexOfKey(const CtString &key) const;
 
     bool loadAtlas(const CtString &path);
 
-    int indexOfKey(const CtString &key) const;
-
     CtRect sourceRectAt(int index) const;
-    void setSourceRectAt(int index, const CtRect &rect);
-
     CtRect viewportRectAt(int index) const;
-    void setViewportRectAt(int index, const CtRect &rect);
 
 private:
-    CtVector<CtRect> m_rects;
-    CtVector<CtRect> m_drects;
-    CtMap<CtString, int> m_keys;
+    CtMap<CtString, int> mKeys;
+    CtVector<CtRect> mSourceRects;
+    CtVector<CtRect> mViewportRects;
 };
 
 
