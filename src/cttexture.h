@@ -6,6 +6,7 @@
 #include "ctrect.h"
 #include "ctpoint.h"
 #include "ctmap.h"
+#include "ctpool.h"
 #include "ctvector.h"
 
 class CtTexture
@@ -75,24 +76,7 @@ private:
 };
 
 
-class CtTextureCache
-{
-public:
-    static CtTexture *find(const CtString &key);
+typedef CtPool<CtTexture> CtTexturePool;
 
-    static void insert(const CtString &key, CtTexture *texture);
-    static CtTexture *take(const CtString &key);
-    static void remove(const CtString &key);
-
-    static void clear();
-
-    static CtTextureCache *instance();
-
-private:
-    CtTextureCache();
-    ~CtTextureCache();
-
-    CtMap<CtString, CtTexture *> m_map;
-};
 
 #endif

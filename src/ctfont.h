@@ -54,6 +54,6 @@ private:
     friend class CtSceneTextPrivate;
 };
 
-typedef CtPool<CtFont *> CtFontPool;
+typedef CtPool<CtFont> CtFontPool;
 
 #endif

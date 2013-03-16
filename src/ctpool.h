@@ -11,10 +11,12 @@ class CtPool
 public:
     static bool contains(const CtString &id);
 
-    static void insert(const CtString &id, const T &value);
+    static T *value(const CtString &id);
+    static void insert(const CtString &id, T *value);
     static void remove(const CtString &id);
+    static T *take(const CtString &id);
 
-    static T value(const CtString &id, const T &defaultValue = T());
+    static void clear();
 
 private:
     CtPool() {}
@@ -22,7 +24,7 @@ private:
 
     static CtPool *instance();
 
-    CtMap<CtString, T> mValues;
+    CtMap<CtString, T *> mValues;
 };
 
 
@@ -40,7 +42,7 @@ inline bool CtPool<T>::contains(const CtString &id)
 }
 
 template <typename T>
-inline void CtPool<T>::insert(const CtString &id, const T &value)
+inline void CtPool<T>::insert(const CtString &id, T *value)
 {
     instance()->mValues.insert(id, value);
 }
@@ -48,13 +50,43 @@ inline void CtPool<T>::insert(const CtString &id, const T &value)
 template <typename T>
 inline void CtPool<T>::remove(const CtString &id)
 {
-    instance()->mValues.remove(id);
+    T *value = CtPool<T>::take(id);
+
+    if (value)
+        delete value;
 }
 
 template <typename T>
-inline T CtPool<T>::value(const CtString &id, const T &defaultValue)
+inline T *CtPool<T>::value(const CtString &id)
 {
-    return instance()->mValues.value(id, defaultValue);
+    return instance()->mValues.value(id, 0);
+}
+
+template <typename T>
+inline void CtPool<T>::clear()
+{
+    CtPool<T> *d = instance();
+    typename CtMap<CtString, T *>::iterator it;
+
+    for (it = d->mValues.begin(); it != d->mValues.end(); it++)
+        delete it->second;
+
+    d->mValues.clear();
+}
+
+template <typename T>
+inline T *CtPool<T>::take(const CtString &id)
+{
+    CtPool<T> *d = instance();
+    typename CtMap<CtString, T *>::iterator it = d->mValues.find(id);
+
+    if (it == d->mValues.end())
+        return 0;
+
+    T *result = it->second;
+    d->mValues.remove(it);
+
+    return result;
 }
 
 #endif
