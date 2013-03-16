@@ -53,7 +53,6 @@ HEADERS += \
     cteasingcurve.h \
     ctfont.h \
     ctpool.h \
-    ctfontmanager.h \
     utils/ctfile.h \
     utils/ctbuffer.h \
     utils/cttgaloader.h \
@@ -84,7 +83,6 @@ SOURCES += \
     ctanimations.cpp \
     cteasingcurve.cpp \
     ctfont.cpp \
-    ctfontmanager.cpp \
     utils/ctfile.cpp \
     utils/ctbuffer.cpp \
     utils/cttgaloader.cpp \

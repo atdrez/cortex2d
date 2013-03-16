@@ -3,6 +3,7 @@
 
 #include "ctglobal.h"
 #include "ctmap.h"
+#include "ctpool.h"
 
 struct CtFontGlyph;
 class CtAtlasTexture;
@@ -52,5 +53,7 @@ private:
     friend class CtShaderEffect;
     friend class CtSceneTextPrivate;
 };
+
+typedef CtPool<CtFont *> CtFontPool;
 
 #endif
