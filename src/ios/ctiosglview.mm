@@ -216,7 +216,7 @@ struct WindowWrapper {
         bool isDown = (touch.phase != UITouchPhaseEnded);
 
         CtTouchPoint point(tid, x, y, fx, fy, 1, isDown);
-        points.push_back(point);
+        points.append(point);
 
         // XXX: handle multitouch (broken)
         //dw->touches.push_back();
