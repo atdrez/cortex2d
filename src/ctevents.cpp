@@ -128,7 +128,7 @@ CtTouchEvent::CtTouchEvent(Type type, int id, const CtTouchPointList &points)
 
 CtTouchPoint CtTouchEvent::touchPointAt(int index) const
 {
-    if (index < 0 || index >= m_points.size())
+    if (index < 0 || index >= (int)m_points.size())
         return CtTouchPoint();
 
     // XXX: should be a std::vector

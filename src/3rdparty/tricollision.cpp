@@ -24,6 +24,7 @@
  */
 
 #include <math.h>
+#include <string.h>
 
 #define FABS(x) ((float)fabs(x))        /* implement as is fastest on your machine */
 
@@ -582,8 +583,17 @@ int tri_tri_intersect_with_isectline(float V0[3],float V1[3],float V2[3],
     float vp0,vp1,vp2;
     float up0,up1,up2;
     float b,c,max;
-    float tmp,diff[3];
+    //float tmp,diff[3];
     int smallest1,smallest2;
+
+    memset(isect1, 0x0, sizeof(isect1));
+    memset(isect2, 0x0, sizeof(isect2));
+
+    memset(isectpointA1, 0x0, sizeof(isectpointA1));
+    memset(isectpointA2, 0x0, sizeof(isectpointA2));
+
+    memset(isectpointB1, 0x0, sizeof(isectpointB1));
+    memset(isectpointB2, 0x0, sizeof(isectpointB2));
 
     /* compute plane equation of triangle(V0,V1,V2) */
     SUB(E1,V1,V0);

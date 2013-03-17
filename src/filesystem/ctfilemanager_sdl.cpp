@@ -48,6 +48,8 @@ bool CtFileManager::copy(const CtString &srcPath, const CtString &destPath)
     output << input.rdbuf();
     input.close();
     output.close();
+
+    return true;
 }
 
 CtString CtFileManager::concatPath(const CtString &path, const CtString &subPath) const

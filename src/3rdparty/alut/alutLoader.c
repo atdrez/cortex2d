@@ -498,8 +498,10 @@ alutUnloadWAV (ALenum UNUSED (format), ALvoid *data, ALsizei UNUSED (size),
                ALsizei UNUSED (frequency))
 {
   /* Don't do an _alutSanityCheck () because it's not required in ALUT 0.x.x */
-
-  free (data);
+    (void)format;
+    (void)size;
+    (void)frequency;
+    free (data);
 }
 
 const char *

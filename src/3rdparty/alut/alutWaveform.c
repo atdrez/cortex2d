@@ -19,6 +19,7 @@ typedef double (*waveformFunction) (double lastPhase, double phase);
 static double
 waveformSine (double UNUSED (lastPhase), double phase)
 {
+  (void)lastPhase;
   static const double pi = 3.14159265358979323846;
   return sin (phase * pi);
 }
@@ -26,18 +27,22 @@ waveformSine (double UNUSED (lastPhase), double phase)
 static double
 waveformSquare (double UNUSED (lastPhase), double phase)
 {
+  (void)lastPhase;
   return (phase >= 0.5) ? -1 : 1;
 }
 
 static double
 waveformSawtooth (double UNUSED (lastPhase), double phase)
 {
+  (void)lastPhase;
   return 2 * phase - 1;
 }
 
 static double
 waveformWhitenoise (double UNUSED (lastPhase), double UNUSED (phase))
 {
+  (void)lastPhase;
+  (void)phase;
   static const long prime = 67867967L;
   return 2 * (double) (random () % prime) / prime - 1;
 }

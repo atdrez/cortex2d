@@ -34,6 +34,7 @@ void CtSoundMixerOpenALPrivate::close()
 void CtSoundMixerOpenALPrivate::setSpec(int frequency, CtSoundMixer::Format format,
                                         int channels, int samples)
 {
+    CT_UNUSED(samples);
     CT_UNUSED(frequency);
     CT_UNUSED(format);
     CT_UNUSED(channels);

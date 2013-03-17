@@ -158,6 +158,7 @@ void CtNumberAnimation::setFinalValue(ctreal value)
 
 void CtNumberAnimation::progressChanged(ctreal progress)
 {
+    CT_UNUSED(progress);
     updateCurrentValue();
 }
 

@@ -105,12 +105,12 @@ bool CtApplication::event(CtEvent *event)
 
 void CtApplication::readyEvent(CtEvent *event)
 {
-
+    CT_UNUSED(event);
 }
 
 void CtApplication::releaseEvent(CtEvent *event)
 {
-
+    CT_UNUSED(event);
 }
 
 void CtApplication::openURL(const CtString &url)

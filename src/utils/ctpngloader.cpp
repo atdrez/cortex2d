@@ -151,7 +151,7 @@ bool CtPNGTexture::loadFileData(CtFile &fp)
     const png_bytep *rows = png_get_rows(pngPtr, infoPtr);
     const unsigned int bytesPerRow = w * bytesPerPixel;
 
-    for (int i = 0; i < h; i++)
+    for (png_uint_32 i = 0; i < h; i++)
         memcpy(buffer + bytesPerRow * i, rows[i], bytesPerRow);
 
     // set image size

@@ -94,6 +94,8 @@ int CtFile::seek(ctint64 offset, SeekOrigin origin)
         return SDL_RWseek(m_in.rw, offset, RW_SEEK_CUR);
     }
 #endif
+
+    return 0;
 }
 
 size_t CtFile::read(void *ptr, size_t size, size_t count)

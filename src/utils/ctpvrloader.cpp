@@ -86,11 +86,12 @@ bool CtPVRTexture::readTexture(CtFile &fp)
     // version
     // 0x50565203, if endianess does match
     // 0x03525650, if endianess does not match
-    const ctuint32 version = header.readUInt32(0);
+    // TODO: handle version
+    //const ctuint32 version = header.readUInt32(0);
 
     // flag 0x02 is pre-multiplied by alpha
-    const ctuint32 flags = header.readUInt32(4);
-    const bool isPreMultiplied = (flags & 0x02);
+    //const ctuint32 flags = header.readUInt32(4);
+    //const bool isPreMultiplied = (flags & 0x02);
 
     /*******************************************
      *  PIXEL FORMAT
@@ -103,7 +104,7 @@ bool CtPVRTexture::readTexture(CtFile &fp)
      * 5 = PVRTC-II 4bpp
     *******************************************/
     const ctuint64 pixelFormat = header.readUInt64(8);
-    const ctuint32 colorSpace = header.readUInt32(16); // 0 = Linear RGB
+    //const ctuint32 colorSpace = header.readUInt32(16); // 0 = Linear RGB
     const ctuint32 metaDataSize = header.readUInt32(48);
 
     width = header.readUInt32(28);
