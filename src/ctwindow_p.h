@@ -1,7 +1,7 @@
 #ifndef CTWINDOW_P_H
 #define CTWINDOW_P_H
 
-#include "ctitem.h"
+#include "ctglobal.h"
 
 class CtWindow;
 

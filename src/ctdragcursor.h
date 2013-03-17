@@ -1,7 +1,7 @@
 #ifndef CTDRAGCURSOR_H
 #define CTDRAGCURSOR_H
 
-#include "ctitem.h"
+#include "ctsprite.h"
 
 class CtDragCursor
 {

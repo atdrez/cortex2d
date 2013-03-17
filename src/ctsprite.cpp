@@ -1,4 +1,4 @@
-#include "ctitem.h"
+#include "ctsprite.h"
 #include "ctmath.h"
 #include "ctfont.h"
 #include "ctrenderer.h"

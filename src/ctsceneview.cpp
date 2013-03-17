@@ -1,5 +1,5 @@
 #include "ctsceneview.h"
-#include "ctitem.h"
+#include "ctsprite.h"
 #include "ctrenderer.h"
 #include "ctdragcursor.h"
 #include "ctwindow_p.h"

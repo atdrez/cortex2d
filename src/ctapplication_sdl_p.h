@@ -4,6 +4,7 @@
 #include "SDL.h"
 #include "ctglobal.h"
 #include "ctmap.h"
+#include "ctpoint.h"
 #include "ctwindow_sdl_p.h"
 #include "ctapplication_p.h"
 

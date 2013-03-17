@@ -33,7 +33,7 @@ HEADERS += \
     ctevents.h \
     ctmatrix.h \
     ctglobal.h \
-    ctitem.h \
+    ctsprite.h \
     ctGL.h \
     ctrect.h \
     ctpoint.h \
@@ -74,7 +74,7 @@ SOURCES += \
     ctapplication_sdl.cpp \
     ctevents.cpp \
     ctmatrix.cpp \
-    ctitem.cpp \
+    ctsprite.cpp \
     ctobject.cpp \
     cttexture.cpp \
     ctrenderer.cpp \
