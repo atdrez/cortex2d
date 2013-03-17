@@ -3,6 +3,7 @@
 
 #include "ctlist.h"
 #include "ctcolor.h"
+#include "ctglobal.h"
 #include "ctmatrix.h"
 #include "cttexture.h"
 #include "ctshaderprogram.h"
@@ -98,6 +99,8 @@ private:
     CtList<CtShaderUniform *> m_uniforms;
 
     friend class CtRenderer;
+
+    CT_PRIVATE_COPY(CtShaderEffect);
 };
 
 static inline void ct_setTriangle2Array(GLfloat *v, ctreal x1, ctreal y1, ctreal x2, ctreal y2,

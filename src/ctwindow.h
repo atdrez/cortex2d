@@ -49,6 +49,8 @@ private:
     friend class CtWindowPrivate;
 
     friend CtWindowPrivate *CtWindow_dptr(CtWindow *window);
+
+    CT_PRIVATE_COPY(CtWindow);
 };
 
 #endif

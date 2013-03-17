@@ -31,6 +31,8 @@ public:
 private:
     int m_size;
     ctubyte *m_data;
+
+    CT_PRIVATE_COPY(CtBuffer);
 };
 
 #endif

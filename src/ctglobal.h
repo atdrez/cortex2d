@@ -60,6 +60,8 @@ typedef uint16_t ctuint16;
 typedef uint32_t ctuint32;
 typedef uint64_t ctuint64;
 
+#define CT_PRIVATE_COPY(T) private: T(const T &); T &operator=(const T &);
+
 #define ctSrand(t) srand(t)
 #define ctRand(t) rand(t)
 

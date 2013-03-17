@@ -29,6 +29,8 @@ private:
 #ifndef CT_IPHONE
     bool loadFileData(CtFile &fp);
 #endif
+
+    CT_PRIVATE_COPY(CtPNGTexture);
 };
 
 

@@ -3,7 +3,8 @@
 
 CtSoundMixerOpenALPrivate::CtSoundMixerOpenALPrivate()
     : isOpen(false),
-      active(true)
+      active(true),
+      sampleList()
 {
 
 }

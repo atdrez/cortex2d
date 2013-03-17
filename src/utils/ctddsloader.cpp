@@ -16,7 +16,9 @@ CtDDSTexture::CtDDSTexture()
       height(0),
       bitsPerPixel(0),
       buffer(0),
-      bufferSize(0)
+      bufferSize(0),
+      errorMessage(),
+      internalFormat(0)
 {
 
 }

@@ -29,7 +29,8 @@ CtPNGTexture::CtPNGTexture()
       height(0),
       bytesPerPixel(0),
       buffer(0),
-      bufferSize(0)
+      bufferSize(0),
+      errorMessage()
 {
 
 }

@@ -2,6 +2,7 @@
 #define CTBASICAPPLICATION_H
 
 #include "ctapplication.h"
+#include "ctglobal.h"
 #include "ctwindow.h"
 
 template <class T>
@@ -34,6 +35,8 @@ protected:
 
 private:
     CtWindow *m_window;
+
+    CT_PRIVATE_COPY(CtBasicApplication);
 };
 
 #endif

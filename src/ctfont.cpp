@@ -20,12 +20,32 @@ static texture_atlas_t *ct_sharedTTFTextureMap()
     return result;
 }
 
+CtFontGlyph::CtFontGlyph()
+    : s0(0),
+      t0(0),
+      s1(0),
+      t1(0),
+      width(0),
+      height(0),
+      xOffset(0),
+      yOffset(0),
+      xAdvance(0),
+      yAdvance(0),
+      charcode(0),
+      kernings()
+{
+
+}
+
+
 CtFont::CtFont()
     : mFontSize(0),
       mFontHeight(0),
       mAscender(0),
       mDescender(0),
-      mAtlas(0)
+      mFileName(),
+      mAtlas(0),
+      mGlyphs()
 {
 
 }

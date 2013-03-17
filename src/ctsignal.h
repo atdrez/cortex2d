@@ -2,6 +2,7 @@
 #define CTSIGNAL_H
 
 #include <set>
+#include "ctglobal.h"
 
 namespace CtPrivate {
     /**************************************************************************
@@ -38,6 +39,8 @@ namespace CtPrivate {
 
         T *object;
         Method method;
+
+        CT_PRIVATE_COPY(Callback0);
     };
 
     /**************************************************************************
@@ -76,6 +79,8 @@ namespace CtPrivate {
 
         T *object;
         Method method;
+
+        CT_PRIVATE_COPY(Callback1);
     };
 
     template<class Cb>
@@ -102,6 +107,8 @@ private:
     typedef CtPrivate::AbstractCallback0<void> _Callback;
 
 public:
+    CtSignal0() : m_callbacks() {}
+
     template<class T>
     void connect(T *obj, void (T::*func)()) {
         m_callbacks.insert(new CtPrivate::Callback0<T>(obj, func));
@@ -140,6 +147,8 @@ public:
 
 private:
     std::set<_Callback *> m_callbacks;
+
+    CT_PRIVATE_COPY(CtSignal0);
 };
 
 
@@ -154,6 +163,8 @@ private:
     typedef CtPrivate::AbstractCallback1<P1> _Callback;
 
 public:
+    CtSignal1() : m_callbacks() {}
+
     template<class T>
     void connect(T *obj, void (T::*func)(P1 p1)) {
         m_callbacks.insert(new CtPrivate::Callback1<T, P1>(obj, func));
@@ -192,6 +203,8 @@ public:
 
 private:
     std::set<_Callback *> m_callbacks;
+
+    CT_PRIVATE_COPY(CtSignal1);
 };
 
 #endif

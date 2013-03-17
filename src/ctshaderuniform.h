@@ -61,7 +61,8 @@ private:
 };
 
 CtShaderUniform::CtShaderUniform(const CtString &name, Type type)
-    : m_type(type),
+    : m(),
+      m_type(type),
       m_name(name),
       m_location(-1)
 {

@@ -38,6 +38,7 @@ private:
     friend class CtApplicationPrivate;
     friend int ctMain(int argc, char **argv, CtApplication *app);
 
+    CT_PRIVATE_COPY(CtApplication);
 };
 
 int ctMain(int argc, char **argv, CtApplication *app);

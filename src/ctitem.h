@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "ctGL.h"
 #include "ctlist.h"
+#include "ctglobal.h"
 #include "ctevents.h"
 #include "ctmatrix.h"
 #include "cttexture.h"
@@ -212,6 +213,8 @@ private:
     friend class CtSceneView;
     friend class CtSceneViewData;
     friend class CtFrameBufferSprite;
+
+    CT_PRIVATE_COPY(CtSprite);
 };
 
 
@@ -234,6 +237,8 @@ protected:
 private:
     CtColor mColor;
     CtShaderEffect *mShaderEffect;
+
+    CT_PRIVATE_COPY(CtRectSprite);
 };
 
 
@@ -269,6 +274,8 @@ private:
     GLuint mVertexBuffer;
     CtFont *mFont;
     CtShaderEffect *mShaderEffect;
+
+    CT_PRIVATE_COPY(CtTextSprite);
 };
 
 
@@ -299,6 +306,8 @@ private:
     GLuint mDepthbuffer;
     CtTexture *mTexture;
     CtShaderEffect *mShaderEffect;
+
+    CT_PRIVATE_COPY(CtFrameBufferSprite);
 };
 
 
@@ -327,6 +336,8 @@ private:
     bool mOwnTexture;
     CtTexture *mTexture;
     CtShaderEffect *mShaderEffect;
+
+    CT_PRIVATE_COPY(CtTextureSprite);
 };
 
 
@@ -352,6 +363,8 @@ protected:
 
 private:
     CtImageSprite::FillMode mFillMode;
+
+    CT_PRIVATE_COPY(CtImageSprite);
 };
 
 
@@ -370,6 +383,8 @@ protected:
 
 private:
     CtVector<CtPoint> mVertices;
+
+    CT_PRIVATE_COPY(CtImagePolygonSprite);
 };
 
 
@@ -427,6 +442,8 @@ protected:
 
 private:
     CtList<CtFragmentsSprite::Fragment *> mFragments;
+
+    CT_PRIVATE_COPY(CtFragmentsSprite);
 };
 
 
@@ -481,6 +498,8 @@ private:
     int mVertexSize;
     int mVertexCount;
     CtVector<CtParticlesSprite::Particle *> mParticles;
+
+    CT_PRIVATE_COPY(CtParticlesSprite);
 };
 
 

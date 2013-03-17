@@ -113,7 +113,8 @@ bool CtTouchPoint::isInsideClickThreshold() const
 
 CtTouchEvent::CtTouchEvent(Type type, int id, const CtTouchPoint &p)
     :  CtEvent(type),
-       m_id(id)
+       m_id(id),
+       m_points()
 {
     m_points.append(p);
 }

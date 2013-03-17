@@ -14,7 +14,7 @@ public:
     typedef typename std::list<T>::reverse_iterator reverse_iterator;
     typedef typename std::list<T>::const_reverse_iterator const_reverse_iterator;
 
-    CtList() {}
+    CtList() : mList() {}
 
     inline iterator begin() { return mList.begin(); }
     inline const_iterator begin() const { return mList.begin(); }

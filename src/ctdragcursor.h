@@ -35,6 +35,8 @@ private:
     Operation m_operation;
     CtSprite *m_sourceItem;
     CtSprite *m_draggedItem;
+
+    CT_PRIVATE_COPY(CtDragCursor);
 };
 
 

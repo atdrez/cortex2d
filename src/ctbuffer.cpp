@@ -36,12 +36,10 @@ static inline void ct_readType(T *value, ctubyte *d, int i)
 
 
 CtBuffer::CtBuffer(int size)
-    : m_size(size)
+    : m_size(size),
+      m_data(size > 0 ? new ctubyte[size] : 0)
 {
-    if (size > 0)
-        m_data = new ctubyte[size];
-    else
-        m_data = 0;
+
 }
 
 CtBuffer::~CtBuffer()

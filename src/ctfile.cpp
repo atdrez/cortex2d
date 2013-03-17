@@ -8,7 +8,8 @@
 
 
 CtFile::CtFile(const CtString &path)
-    : m_path(path)
+    : m_in(),
+      m_path(path)
 {
     m_in.fp = 0;
     m_in.rw = 0;

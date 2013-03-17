@@ -13,7 +13,7 @@ public:
     typedef typename std::map<T, B>::reverse_iterator reverse_iterator;
     typedef typename std::map<T, B>::const_reverse_iterator const_reverse_iterator;
 
-    CtMap() {}
+    CtMap() : mData() {}
 
     inline iterator begin() { return mData.begin(); }
     inline const_iterator begin() const { return mData.begin(); }

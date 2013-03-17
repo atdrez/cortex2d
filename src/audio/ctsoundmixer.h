@@ -36,6 +36,8 @@ private:
 
     CtSoundMixerPrivate *d_ptr;
     friend class CtSoundMixerPrivate;
+
+    CT_PRIVATE_COPY(CtSoundMixer);
 };
 
 #endif

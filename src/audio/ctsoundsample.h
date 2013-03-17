@@ -26,6 +26,8 @@ public:
 private:
     CtSoundSamplePrivate *d_ptr;
     friend class CtSoundSamplePrivate;
+
+    CT_PRIVATE_COPY(CtSoundSample);
 };
 
 #endif

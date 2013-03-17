@@ -48,6 +48,8 @@ private:
     bool mIsAtlas;
     bool mIsInverted;
     CtString mError;
+
+    CT_PRIVATE_COPY(CtTexture);
 };
 
 class CtAtlasTexture : public CtTexture
@@ -68,6 +70,8 @@ private:
     CtMap<CtString, int> mKeys;
     CtVector<CtRect> mSourceRects;
     CtVector<CtRect> mViewportRects;
+
+    CT_PRIVATE_COPY(CtAtlasTexture);
 };
 
 

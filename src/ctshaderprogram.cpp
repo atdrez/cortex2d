@@ -50,7 +50,9 @@ CtGpuProgram::CtGpuProgram()
     : mId(0),
       mIsLinked(false),
       mVertexShader(0),
-      mFragmentShader(0)
+      mFragmentShader(0),
+      mUniformLocations(),
+      mAttributeLocations()
 {
 
 }

@@ -6,7 +6,9 @@
 CtApplicationPrivate::CtApplicationPrivate(CtApplication *q)
     : q_ptr(q),
       argc(0),
-      argv(0)
+      argv(0),
+      activeWindow(0),
+      windows()
 {
 
 }

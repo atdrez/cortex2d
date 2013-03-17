@@ -53,10 +53,12 @@ void CtAbstractAnimation::ct_advance(ctuint msecs)
 
 CtRangeAnimation::CtRangeAnimation()
     : CtAbstractAnimation(),
+      finished(),
       m_loops(0),
       m_duration(0),
       m_progress(0),
-      m_consumedTime(0)
+      m_consumedTime(0),
+      m_easingCurve()
 {
 
 }
@@ -133,9 +135,10 @@ void CtRangeAnimation::stateChanged(State oldState, State newState)
 
 CtNumberAnimation::CtNumberAnimation()
     : CtRangeAnimation(),
-     m_startValue(0),
-     m_finalValue(0),
-     m_currentValue(0)
+      valueChanged(),
+      m_startValue(0),
+      m_finalValue(0),
+      m_currentValue(0)
 {
 
 }

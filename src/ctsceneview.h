@@ -28,6 +28,8 @@ private:
 
     friend class CtSprite;
     friend class CtSpritePrivate;
+
+    CT_PRIVATE_COPY(CtSceneView);
 };
 
 #endif

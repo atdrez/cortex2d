@@ -14,7 +14,8 @@ CtTexture::CtTexture()
       mHeight(0),
       mFormat(GL_RGB),
       mIsAtlas(false),
-      mIsInverted(false)
+      mIsInverted(false),
+      mError()
 {
 
 }
@@ -25,7 +26,8 @@ CtTexture::CtTexture(bool isAtlas)
       mHeight(0),
       mFormat(GL_RGB),
       mIsAtlas(isAtlas),
-      mIsInverted(false)
+      mIsInverted(false),
+      mError()
 {
 
 }
@@ -161,7 +163,10 @@ bool CtTexture::load(const CtString &fileName)
 
 
 CtAtlasTexture::CtAtlasTexture()
-    : CtTexture(true)
+    : CtTexture(true),
+      mKeys(),
+      mSourceRects(),
+      mViewportRects()
 {
 
 }

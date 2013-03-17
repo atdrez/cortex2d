@@ -24,6 +24,8 @@ struct CtWindowSdlPrivate : public CtWindowPrivate
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_GLContext context;
+
+    CT_PRIVATE_COPY(CtWindowSdlPrivate);
 };
 
 #endif

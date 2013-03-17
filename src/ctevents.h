@@ -38,6 +38,7 @@ public:
     };
 
     CtEvent(Type type);
+    virtual ~CtEvent() {}
 
     Type type() const { return m_type; }
 
@@ -47,6 +48,8 @@ public:
 private:
     Type m_type;
     bool m_accepted;
+
+    CT_PRIVATE_COPY(CtEvent);
 };
 
 
@@ -55,6 +58,8 @@ class CtWindowMinimizeEvent : public CtEvent
 public:
     CtWindowMinimizeEvent()
         : CtEvent(WindowMinimize) {}
+
+    CT_PRIVATE_COPY(CtWindowMinimizeEvent);
 };
 
 
@@ -63,6 +68,8 @@ class CtWindowRestoreEvent : public CtEvent
 public:
     CtWindowRestoreEvent()
         : CtEvent(WindowRestore) {}
+
+    CT_PRIVATE_COPY(CtWindowRestoreEvent);
 };
 
 
@@ -91,6 +98,8 @@ private:
     ctreal m_initialX;
     ctreal m_initialY;
     Ct::MouseButton m_button;
+
+    CT_PRIVATE_COPY(CtMouseEvent);
 };
 
 
@@ -132,6 +141,8 @@ private:
     ctreal m_y;
     ctreal m_sceneX;
     ctreal m_sceneY;
+
+    CT_PRIVATE_COPY(CtDragDropEvent);
 };
 
 
@@ -148,6 +159,8 @@ private:
     int m_key;
     int m_modifiers;
     bool m_autoRepeat;
+
+    CT_PRIVATE_COPY(CtKeyEvent);
 };
 
 
@@ -162,6 +175,8 @@ public:
 private:
     int m_width;
     int m_height;
+
+    CT_PRIVATE_COPY(CtWindowResizeEvent);
 };
 
 class CtWindowCloseEvent : public CtEvent
@@ -169,6 +184,8 @@ class CtWindowCloseEvent : public CtEvent
 public:
     CtWindowCloseEvent()
         : CtEvent(WindowClose) {}
+
+    CT_PRIVATE_COPY(CtWindowCloseEvent);
 };
 
 class CtTouchPoint
@@ -224,6 +241,8 @@ public:
 private:
     int m_id;
     CtTouchPointList m_points;
+
+    CT_PRIVATE_COPY(CtTouchEvent);
 };
 
 #endif

@@ -19,12 +19,14 @@ public:
     static void clear();
 
 private:
-    CtPool() {}
+    CtPool() : mValues() {}
     ~CtPool() {}
 
     static CtPool *instance();
 
     CtMap<CtString, T *> mValues;
+
+    CT_PRIVATE_COPY(CtPool);
 };
 
 

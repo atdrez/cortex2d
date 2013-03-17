@@ -51,7 +51,9 @@ static void ct_releaseALBuffer(const CtString &path)
 
 CtSoundSampleOpenALPrivate::CtSoundSampleOpenALPrivate()
     : CtSoundSamplePrivate(),
+      filePath(),
       buffer(0),
+      source(0),
       totalLoopCount(1)
 {
     alGenSources(1, &source);

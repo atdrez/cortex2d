@@ -28,6 +28,8 @@ struct CtApplicationSdlPrivate : public CtApplicationPrivate
     CtMap<int, CtPoint> m_touchPoints;
     CtPoint mousePressPos;
     Ct::MouseButton mouseButton;
+
+    CT_PRIVATE_COPY(CtApplicationSdlPrivate);
 };
 
 #endif

@@ -2,6 +2,7 @@
 #define CTOBJECT_H
 
 #include "ctsignal.h"
+#include "ctglobal.h"
 
 class CtEvent;
 
@@ -21,6 +22,8 @@ protected:
 
 private:
     CtObject *m_parent;
+
+    CT_PRIVATE_COPY(CtObject);
 };
 
 #endif

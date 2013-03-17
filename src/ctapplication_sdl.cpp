@@ -19,6 +19,8 @@ CtApplicationSdlPrivate::CtApplicationSdlPrivate(CtApplication *q)
       m_quit(false),
       m_ready(false),
       m_touchId(-1),
+      m_touchPoints(),
+      mousePressPos(),
       mouseButton(Ct::NoButton)
 {
 

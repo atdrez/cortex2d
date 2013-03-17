@@ -30,7 +30,8 @@ CtShaderEffect::CtShaderEffect(CtGpuProgram *program)
       m_locOpacity(-1),
       m_locTexture(-1),
       m_locPosition(-1),
-      m_locTexCoord(-1)
+      m_locTexCoord(-1),
+      m_uniforms()
 {
     CT_ASSERT(m_program != 0);
 }

@@ -21,6 +21,8 @@ unix {
     DEFINES += CT_SDL_AUDIO
 }
 
+QMAKE_CXXFLAGS = -Weffc++
+
 HEADERS += \
     cortex2d.h \
     ctcolor.h \

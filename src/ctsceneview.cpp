@@ -35,11 +35,14 @@ struct CtSceneViewData
     CtSprite *touchGrabber;
     CtSprite *mouseGrabber;
     CtSprite *dragGrabber;
+
+    CT_PRIVATE_COPY(CtSceneViewData);
 };
 
 CtSceneViewData::CtSceneViewData()
     : drag(0),
       rootItem(0),
+      sortedItems(),
       sortedItemsDirty(true),
       touchGrabber(0),
       mouseGrabber(0),

@@ -11,6 +11,8 @@ class CtShaderEffect;
 
 struct CtFontGlyph
 {
+    CtFontGlyph();
+
     float s0;
     float t0;
     float s1;
@@ -52,6 +54,8 @@ private:
     friend class CtTextSprite;
     friend class CtShaderEffect;
     friend class CtTextSpritePrivate;
+
+    CT_PRIVATE_COPY(CtFont);
 };
 
 typedef CtPool<CtFont> CtFontPool;

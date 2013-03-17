@@ -26,6 +26,8 @@ public:
 
 private:
     bool readTexture(CtFile &fp);
+
+    CT_PRIVATE_COPY(CtPVRTexture);
 };
 
 #endif

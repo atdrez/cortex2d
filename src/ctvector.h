@@ -13,7 +13,7 @@ public:
     typedef typename std::vector<T>::reverse_iterator reverse_iterator;
     typedef typename std::vector<T>::const_reverse_iterator const_reverse_iterator;
 
-    CtVector() {}
+    CtVector() : mData() {}
 
     inline iterator begin() { return mData.begin(); }
     inline const_iterator begin() const { return mData.begin(); }

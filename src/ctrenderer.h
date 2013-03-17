@@ -55,6 +55,8 @@ private:
     ctreal m_opacity;
     CtList<GLuint> m_buffers;
     CtMatrix4x4 m_projectionMatrix;
+
+    CT_PRIVATE_COPY(CtRenderer);
 };
 
 #endif

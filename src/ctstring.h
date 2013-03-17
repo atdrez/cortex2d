@@ -9,7 +9,7 @@
 class CtString
 {
 public:
-    CtString() {}
+    CtString() : mStr() {}
     CtString(const char *cstr) : mStr(cstr) {}
     CtString(const char *cstr, int len) : mStr(cstr, len) {}
     CtString(const std::string &str) : mStr(str) {}

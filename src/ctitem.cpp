@@ -264,7 +264,13 @@ CtSprite::CtSprite(CtSprite *parent)
       mTransformDirty(true),
       mFlags(CtSprite::NoFlag),
       mIsFrameBuffer(false),
-      mPendingDelete(false)
+      mPendingDelete(false),
+      mLocalMatrix(),
+      mFboTransformMatrix(),
+      mLocalTransformMatrix(),
+      mSceneTransformMatrix(),
+      mChildren(),
+      mSortedChildren()
 {
     if (mParent)
         mParent->addItem(this);
@@ -871,6 +877,7 @@ void CtTextSprite::recreateBuffers()
 CtTextSprite::CtTextSprite(CtSprite *parent)
     : CtSprite(parent),
       mColor(0, 0, 0),
+      mText(),
       mGlyphCount(0),
       mIndexBuffer(0),
       mVertexBuffer(0),
@@ -1169,13 +1176,15 @@ void CtImageSprite::paint(CtRenderer *renderer)
 /////////////////////////////////////////////////
 
 CtImagePolygonSprite::CtImagePolygonSprite(CtSprite *parent)
-    : CtImageSprite(parent)
+    : CtImageSprite(parent),
+      mVertices()
 {
 
 }
 
 CtImagePolygonSprite::CtImagePolygonSprite(CtTexture *texture, CtSprite *parent)
-    : CtImageSprite(texture, parent)
+    : CtImageSprite(texture, parent),
+      mVertices()
 {
 
 }
@@ -1248,13 +1257,15 @@ CtFragmentsSprite::Fragment::Fragment()
 
 
 CtFragmentsSprite::CtFragmentsSprite(CtSprite *parent)
-    : CtTextureSprite(parent)
+    : CtTextureSprite(parent),
+      mFragments()
 {
     setShaderEffect(ct_sharedFragmentShaderEffect());
 }
 
 CtFragmentsSprite::CtFragmentsSprite(CtTexture *texture, CtSprite *parent)
-    : CtTextureSprite(texture, parent)
+    : CtTextureSprite(texture, parent),
+      mFragments()
 {
     setShaderEffect(ct_sharedFragmentShaderEffect());
 }
@@ -1353,7 +1364,8 @@ CtParticlesSprite::CtParticlesSprite(CtSprite *parent)
       mVertices(0),
       mAttrCount(7),
       mVertexSize(7 * sizeof(GLfloat)),
-      mVertexCount(0)
+      mVertexCount(0),
+      mParticles()
 {
     setShaderEffect(ct_sharedParticleShaderEffect());
 }
@@ -1363,7 +1375,8 @@ CtParticlesSprite::CtParticlesSprite(CtTexture *texture, CtSprite *parent)
       mVertices(0),
       mAttrCount(7),
       mVertexSize(7 * sizeof(GLfloat)),
-      mVertexCount(0)
+      mVertexCount(0),
+      mParticles()
 {
     setShaderEffect(ct_sharedParticleShaderEffect());
 }

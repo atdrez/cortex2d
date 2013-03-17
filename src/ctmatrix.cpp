@@ -4,13 +4,25 @@
 
 
 CtMatrix::CtMatrix()
+    : mV11(1),
+      mV12(0),
+      mV21(0),
+      mV22(1),
+      mDx(0),
+      mDy(0)
 {
-    setIdentity();
+
 }
 
 CtMatrix::CtMatrix(const CtMatrix &matrix)
+    : mV11(matrix.mV11),
+      mV12(matrix.mV12),
+      mV21(matrix.mV21),
+      mV22(matrix.mV22),
+      mDx(matrix.mDx),
+      mDy(matrix.mDy)
 {
-    setMatrix(matrix);
+
 }
 
 void CtMatrix::setIdentity()

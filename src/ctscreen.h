@@ -16,6 +16,8 @@ private:
     ~CtScreen();
 
     CtScreenPrivate *d;
+
+    CT_PRIVATE_COPY(CtScreen);
 };
 
 #endif

@@ -29,6 +29,8 @@ struct CtWindowPrivate
     int height;
     void *userData;
     bool minimized;
+
+    CT_PRIVATE_COPY(CtWindowPrivate);
 };
 
 #endif

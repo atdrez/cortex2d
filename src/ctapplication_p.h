@@ -12,6 +12,7 @@ class CtWindowPrivate;
 struct CtApplicationPrivate
 {
     CtApplicationPrivate(CtApplication *q);
+    virtual ~CtApplicationPrivate() {}
 
     virtual bool init(int argc, char **argv);
     virtual void quit();
@@ -35,6 +36,8 @@ struct CtApplicationPrivate
     CtList<CtWindowPrivate *> windows;
 
     friend class CtWindow;
+
+    CT_PRIVATE_COPY(CtApplicationPrivate);
 };
 
 #endif

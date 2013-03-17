@@ -29,8 +29,8 @@ public:
 private:
     bool readHeader(CtFile &fp, bool *compressed);
     bool loadFileData(CtFile &fp, bool compressed);
+
+    CT_PRIVATE_COPY(CtTGATexture);
 };
-
-
 
 #endif

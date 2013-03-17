@@ -2,7 +2,8 @@
 #include "ctevents.h"
 
 CtObject::CtObject(CtObject *parent)
-    : m_parent(parent)
+    : destroyed(),
+      m_parent(parent)
 {
 
 }
