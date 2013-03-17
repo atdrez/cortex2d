@@ -47,8 +47,8 @@ private:
     void begin();
     void end();
 
-    friend class CtSpritePrivate;
-    friend class CtFrameBufferSpritePrivate;
+    friend class CtSprite;
+    friend class CtFrameBufferSprite;
 
     GLint m_fbo;
     GLint m_defaultFbo;

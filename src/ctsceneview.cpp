@@ -1,6 +1,5 @@
 #include "ctsceneview.h"
 #include "ctitem.h"
-#include "ctitem_p.h"
 #include "ctrenderer.h"
 #include "ctdragcursor.h"
 #include "ctwindow_p.h"
@@ -57,7 +56,7 @@ void CtSceneViewData::checkSortedItems()
     sortedItems.clear();
 
     if (rootItem)
-        rootItem->d_ptr->fillItems(sortedItems);
+        rootItem->fillItems(sortedItems);
 
     sortedItemsDirty = false;
 }
@@ -372,12 +371,12 @@ void CtSceneView::setRootItem(CtSprite *item)
         return;
 
     if (data->rootItem)
-        data->rootItem->d_ptr->setScene(0);
+        data->rootItem->setScene(0);
 
     data->rootItem = item;
 
     if (data->rootItem)
-        data->rootItem->d_ptr->setScene(this);
+        data->rootItem->setScene(this);
 
     data->sortedItemsDirty = true;
 }
@@ -395,7 +394,7 @@ void CtSceneView::advance(ctuint ms)
     }
 
     foreach (CtSprite *item, data->sortedItems) {
-        if (item->d_ptr->pendingDelete)
+        if (item->mPendingDelete)
             delete item;
     }
 }
@@ -414,7 +413,7 @@ void CtSceneView::paint()
     CtRenderer renderer;
 
     if (data->rootItem && data->rootItem->isVisible())
-        data->rootItem->d_ptr->recursivePaint(&renderer);
+        data->rootItem->recursivePaint(&renderer);
 
     CT_GL_DEBUG_CHECK();
 }
@@ -498,6 +497,8 @@ void CtSceneView::itemRemovedFromScene(CtSprite *item)
 void CtSceneView::itemZValueChanged(CtSprite *item)
 {
     CT_D(CtWindow);
+    CT_UNUSED(item);
+
     CtSceneViewData *data = static_cast<CtSceneViewData *>(d->userData);
     data->sortedItemsDirty = true;
 }

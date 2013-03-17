@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ctitem.h"
-#include "ctitem_p.h"
 #include "ctwindow.h"
 #include "ctapplication.h"
 #include "ctapplication_p.h"

@@ -1,10 +1,11 @@
 #include "ctitem.h"
 #include "ctmath.h"
-#include "ctitem_p.h"
+#include "ctfont.h"
 #include "ctrenderer.h"
 #include "ctsceneview.h"
 #include "ctdragcursor.h"
 #include "ctshadereffect.h"
+#include "ctopenglfunctions.h"
 #include "3rdparty/tricollision.h"
 #include "freetype-gl.h"
 
@@ -45,139 +46,87 @@ static CtShaderEffect *ct_sharedParticleShaderEffect()
     return r;
 }
 
-bool CtSpritePrivate_sort_compare(CtSprite *a, CtSprite *b)
+bool CtSprite_sort_compare(CtSprite *a, CtSprite *b)
 {
     return (!a || !b) ? false : (a->z() < b->z());
 }
 
 
-CtSpritePrivate::CtSpritePrivate(CtSprite *q)
-    : q(q),
-      x(0),
-      y(0),
-      z(0),
-      width(0),
-      height(0),
-      xScale(1),
-      yScale(1),
-      rotation(0),
-      opacity(1.0),
-      visible(true),
-      isFrozen(false),
-      implicitWidth(0),
-      implicitHeight(0),
-      parent(0),
-      scene(0),
-      xCenter(0),
-      yCenter(0),
-      sortDirty(false),
-      transformDirty(true),
-      flags(CtSprite::NoFlag),
-      isFrameBuffer(false),
-      pendingDelete(false)
-{
-
-}
-
-CtSpritePrivate::~CtSpritePrivate()
-{
-
-}
-
-void CtSpritePrivate::init(CtSprite *p)
-{
-    parent = p;
-    if (parent)
-        parent->d_ptr->addItem(q);
-}
-
-void CtSpritePrivate::release()
-{
-    if (parent)
-        parent->d_ptr->removeItem(q);
-
-    // delete children
-    CtList<CtSprite *> oldChildren = children;
-
-    foreach (CtSprite *item, oldChildren)
-        delete item;
-}
-
-ctreal CtSpritePrivate::relativeOpacity()
+ctreal CtSprite::relativeOpacity() const
 {
     // XXX: optimize
-    if (!parent || opacity == 0.0 || (flags & CtSprite::IgnoreAllParentOpacity)) {
-        return opacity;
-    } else if ((flags & CtSprite::IgnoreParentOpacity)) {
-        CtSprite *topParent = parent ? parent->parent() : 0;
+    if (!mParent || mOpacity == 0.0 || (mFlags & CtSprite::IgnoreAllParentOpacity)) {
+        return mOpacity;
+    } else if ((mFlags & CtSprite::IgnoreParentOpacity)) {
+        CtSprite *topParent = mParent ? mParent->parent() : 0;
 
         if (!topParent)
-            return opacity;
+            return mOpacity;
         else
-            return opacity * topParent->opacity();
+            return mOpacity * topParent->opacity();
     } else {
-        return opacity * parent->opacity();
+        return mOpacity * mParent->opacity();
     }
 }
 
-bool CtSpritePrivate::relativeVisible()
+bool CtSprite::relativeVisible() const
 {
     // XXX: optimize
-    if (!parent)
-        return visible;
+    if (!mParent)
+        return mVisible;
     else
-        return visible && parent->isVisible();
+        return mVisible && mParent->isVisible();
 }
 
-bool CtSpritePrivate::relativeFrozen()
+bool CtSprite::relativeFrozen() const
 {
     // XXX: optimize
-    if (!parent)
-        return isFrozen;
+    if (!mParent)
+        return mIsFrozen;
     else
-        return isFrozen || parent->isFrozen();
+        return mIsFrozen || mParent->isFrozen();
 }
 
-CtFrameBufferSprite *CtSpritePrivate::frameBufferItem()
+CtFrameBufferSprite *CtSprite::frameBufferItem() const
 {
     // XXX: optimize
-    if (!parent)
+    if (!mParent)
         return 0;
-    else if (parent->d_ptr->isFrameBuffer)
-        return static_cast<CtFrameBufferSprite *>(parent);
+    else if (mParent->mIsFrameBuffer)
+        return static_cast<CtFrameBufferSprite *>(mParent);
     else
-        return parent->d_ptr->frameBufferItem();
+        return mParent->frameBufferItem();
 }
 
-void CtSpritePrivate::fillItems(CtList<CtSprite *> &lst)
+void CtSprite::fillItems(CtList<CtSprite *> &lst)
 {
-    lst.append(q);
+    lst.append(this);
 
     const CtList<CtSprite *> &items = orderedChildren();
 
     foreach (CtSprite *item, items)
-        item->d_ptr->fillItems(lst);
+        item->fillItems(lst);
 }
 
-const CtList<CtSprite *> &CtSpritePrivate::orderedChildren()
+const CtList<CtSprite *> &CtSprite::orderedChildren()
 {
-    if (!sortDirty)
-        return sortedChildren;
+    if (!mSortDirty)
+        return mSortedChildren;
 
-    sortDirty = false;
-    sortedChildren = children;
-    sortedChildren.sort(CtSpritePrivate_sort_compare);
+    mSortDirty = false;
+    mSortedChildren = mChildren;
+    mSortedChildren.sort(CtSprite_sort_compare);
 
-    return sortedChildren;
+    return mSortedChildren;
 }
 
-void CtSpritePrivate::recursivePaint(CtRenderer *renderer)
+void CtSprite::recursivePaint(CtRenderer *renderer)
 {
-    if ((flags & CtSprite::DoNotPaintContent) == 0) {
+    if ((mFlags & CtSprite::DoNotPaintContent) == 0) {
         renderer->begin();
         renderer->m_opacity = relativeOpacity();
         renderer->m_projectionMatrix = currentViewportProjectionMatrix();
-        q->paint(renderer);
+        paint(renderer);
         renderer->end();
     }
 
@@ -185,123 +134,111 @@ void CtSpritePrivate::recursivePaint(CtRenderer *renderer)
 
     foreach (CtSprite *item, lst) {
         if (item->isVisible())
-            item->d_ptr->recursivePaint(renderer);
+            item->recursivePaint(renderer);
     }
 }
 
-void CtSpritePrivate::addItem(CtSprite *item)
+void CtSprite::addItem(CtSprite *item)
 {
-    if (children.contains(item))
+    if (mChildren.contains(item))
         return;
 
-    children.removeAll(item);
-    children.append(item);
+    mChildren.removeAll(item);
+    mChildren.append(item);
 
-    sortDirty = true;
+    mSortDirty = true;
 
-    CtSceneView *mScene = q->scene();
+    CtSceneView *mScene = scene();
 
     if (mScene)
-        mScene->itemAddedToScene(q);
+        mScene->itemAddedToScene(this);
 
     CtSprite::ChangeValue value;
     value.itemValue = item;
-    q->itemChanged(CtSprite::ChildAdded, value);
+    itemChanged(CtSprite::ChildAdded, value);
 }
 
-void CtSpritePrivate::removeItem(CtSprite *item)
+void CtSprite::removeItem(CtSprite *item)
 {
-    if (!children.contains(item))
+    if (!mChildren.contains(item))
         return;
 
-    children.removeAll(item);
+    mChildren.removeAll(item);
 
-    sortDirty = true;
+    mSortDirty = true;
 
-    CtSceneView *mScene = q->scene();
+    CtSceneView *mScene = scene();
 
     if (mScene)
-        mScene->itemRemovedFromScene(q);
+        mScene->itemRemovedFromScene(this);
 
     CtSprite::ChangeValue value;
     value.itemValue = item;
-    q->itemChanged(CtSprite::ChildRemoved, value);
+    itemChanged(CtSprite::ChildRemoved, value);
 }
 
-void CtSpritePrivate::setScene(CtSceneView *newScene)
+void CtSprite::setScene(CtSceneView *newScene)
 {
-    scene = newScene;
+    mScene = newScene;
     // update cache
 }
 
-CtMatrix CtSpritePrivate::mappedTransformMatrix(CtSprite *root)
+CtMatrix CtSprite::mappedTransformMatrix(CtSprite *root) const
 {
-    const ctreal ox = ctRound(xCenter);
-    const ctreal oy = ctRound(yCenter);
+    const ctreal ox = ctRound(mXCenter);
+    const ctreal oy = ctRound(mYCenter);
 
     // pixel aligned
-    const ctreal rx = ctRound(x);
-    const ctreal ry = ctRound(y);
+    const ctreal rx = ctRound(mX);
+    const ctreal ry = ctRound(mY);
 
     CtMatrix modelMatrix;
     modelMatrix.translate(rx, ry);
 
     modelMatrix.translate(ox, oy);
-    modelMatrix.scale(xScale, yScale);
-    modelMatrix.rotate(-(GLfloat)rotation);
+    modelMatrix.scale(mXScale, mYScale);
+    modelMatrix.rotate(-(GLfloat)mRotation);
     modelMatrix.translate(-ox, -oy);
 
-    CtMatrix m = localMatrix;
+    CtMatrix m = mLocalMatrix;
     m.multiply(modelMatrix);
     modelMatrix.setMatrix(m);
 
-    if (parent && (parent != root))
-        modelMatrix.multiply(parent->d_ptr->mappedTransformMatrix(root));
+    if (mParent && (mParent != root))
+        modelMatrix.multiply(mParent->mappedTransformMatrix(root));
 
     if (!root) {
-        sceneTransformMatrix = modelMatrix;
-        localTransformMatrix = modelMatrix;
-        localTransformMatrix.invert();
+        mSceneTransformMatrix = modelMatrix;
+        mLocalTransformMatrix = modelMatrix;
+        mLocalTransformMatrix.invert();
     }
 
     return modelMatrix;
 }
 
-void CtSpritePrivate::checkTransformMatrix()
+void CtSprite::checkTransformMatrix() const
 {
-    if (!transformDirty)
+    if (!mTransformDirty)
         return;
 
-    sceneTransformMatrix = mappedTransformMatrix(0);
-    localTransformMatrix = sceneTransformMatrix;
-    localTransformMatrix.invert();
+    mSceneTransformMatrix = mappedTransformMatrix(0);
+    mLocalTransformMatrix = mSceneTransformMatrix;
+    mLocalTransformMatrix.invert();
 
     // fbo
     CtFrameBufferSprite *fbo = frameBufferItem();
 
     if (!fbo || !fbo->isValidBuffer())
-        fboTransformMatrix = sceneTransformMatrix;
+        mFboTransformMatrix = mSceneTransformMatrix;
     else
-        fboTransformMatrix = mappedTransformMatrix(fbo);
+        mFboTransformMatrix = mappedTransformMatrix(fbo);
 
     //transformDirty = true; // XXX: enable for optimization
 }
 
-CtMatrix CtSpritePrivate::currentSceneTransformMatrix()
+CtMatrix4x4 CtSprite::currentViewportProjectionMatrix()
 {
-    checkTransformMatrix();
-    return sceneTransformMatrix;
-}
-
-CtMatrix CtSpritePrivate::currentLocalTransformMatrix()
-{
-    checkTransformMatrix();
-    return localTransformMatrix;
-}
-
-CtMatrix4x4 CtSpritePrivate::currentViewportProjectionMatrix()
-{
-    CtSceneView *sc = q->scene();
+    CtSceneView *sc = scene();
     CtFrameBufferSprite *fb = frameBufferItem();
 
     checkTransformMatrix();
@@ -310,9 +247,9 @@ CtMatrix4x4 CtSpritePrivate::currentViewportProjectionMatrix()
 
     if (sc) {
         if (!fb || !fb->isValidBuffer())
-            result = sceneTransformMatrix.toMatrix4x4();
+            result = mSceneTransformMatrix.toMatrix4x4();
         else
-            result = fboTransformMatrix.toMatrix4x4();
+            result = mFboTransformMatrix.toMatrix4x4();
 
         CtMatrix4x4 ortho;
         ortho.ortho(0, sc->width(), sc->height(), 0, 1, -1);
@@ -324,129 +261,107 @@ CtMatrix4x4 CtSpritePrivate::currentViewportProjectionMatrix()
 
 CtSprite::CtSprite(CtSprite *parent)
     : CtObject(parent),
-      d_ptr(new CtSpritePrivate(this))
+      mX(0),
+      mY(0),
+      mZ(0),
+      mWidth(0),
+      mHeight(0),
+      mXScale(1),
+      mYScale(1),
+      mRotation(0),
+      mOpacity(1.0),
+      mVisible(true),
+      mIsFrozen(false),
+      mImplicitWidth(0),
+      mImplicitHeight(0),
+      mParent(parent),
+      mScene(0),
+      mXCenter(0),
+      mYCenter(0),
+      mSortDirty(false),
+      mTransformDirty(true),
+      mFlags(CtSprite::NoFlag),
+      mIsFrameBuffer(false),
+      mPendingDelete(false)
 {
-    CT_D(CtSprite);
-    d->init(parent);
-}
-
-CtSprite::CtSprite(CtSpritePrivate *dd)
-    : d_ptr(dd)
-{
-
+    if (mParent)
+        mParent->addItem(this);
 }
 
 CtSprite::~CtSprite()
 {
-    CT_D(CtSprite);
-    d->release();
-    delete d;
+    if (mParent)
+        mParent->removeItem(this);
+
+    // delete children
+    CtList<CtSprite *> oldChildren = mChildren;
+
+    foreach (CtSprite *item, oldChildren)
+        delete item;
 }
 
 CtSceneView *CtSprite::scene() const
 {
-    CT_D(CtSprite);
-    if (d->parent)
-        return d->parent->scene();
+    if (mParent)
+        return mParent->scene();
     else
-        return d->scene;
-}
-
-CtSprite *CtSprite::parent() const
-{
-    CT_D(CtSprite);
-    return d->parent;
-}
-
-ctreal CtSprite::x() const
-{
-    CT_D(CtSprite);
-    return d->x;
+        return mScene;
 }
 
 void CtSprite::setX(ctreal x)
 {
-    CT_D(CtSprite);
-    if (d->x == x)
+    if (mX == x)
         return;
 
-    d->x = x;
+    mX = x;
 
     ChangeValue value;
     value.realValue = x;
     itemChanged(XChange, value);
 }
 
-ctreal CtSprite::y() const
-{
-    CT_D(CtSprite);
-    return d->y;
-}
-
 void CtSprite::setY(ctreal y)
 {
-    CT_D(CtSprite);
-    if (d->y == y)
+    if (mY == y)
         return;
 
-    d->y = y;
+    mY = y;
 
     ChangeValue value;
     value.realValue = y;
     itemChanged(YChange, value);
 }
 
-ctreal CtSprite::z() const
-{
-    CT_D(CtSprite);
-    return d->z;
-}
-
 void CtSprite::setZ(ctreal z)
 {
-    CT_D(CtSprite);
-    if (d->z == z)
+    if (mZ == z)
         return;
 
-    d->z = z;
+    mZ = z;
 
     ChangeValue value;
     value.realValue = z;
     itemChanged(ZChange, value);
 }
 
-ctreal CtSprite::rotation() const
-{
-    CT_D(CtSprite);
-    return d->rotation;
-}
-
 void CtSprite::setRotation(ctreal rotation)
 {
-    CT_D(CtSprite);
-    if (d->rotation == rotation)
+    if (mRotation == rotation)
         return;
 
-    d->rotation = rotation;
+    mRotation = rotation;
 
     ChangeValue value;
     value.realValue = rotation;
     itemChanged(RotationChange, value);
 }
 
-bool CtSprite::isFrozen() const
-{
-    CT_D(CtSprite);
-    return d->relativeFrozen();
-}
-
 void CtSprite::setFrozen(bool frozen)
 {
-    CT_D(CtSprite);
-    if (d->isFrozen == frozen)
+    if (mIsFrozen == frozen)
         return;
 
-    d->isFrozen = frozen;
+    mIsFrozen = frozen;
 
     // XXX: should emit when parent changes too
     ChangeValue value;
@@ -454,38 +369,24 @@ void CtSprite::setFrozen(bool frozen)
     itemChanged(FrozenChange, value);
 }
 
-ctreal CtSprite::xScale() const
-{
-    CT_D(CtSprite);
-    return d->xScale;
-}
-
 void CtSprite::setXScale(ctreal scale)
 {
-    CT_D(CtSprite);
-    if (d->xScale == scale)
+    if (mXScale == scale)
         return;
 
-    d->xScale = scale;
+    mXScale = scale;
 
     ChangeValue value;
     value.realValue = scale;
     itemChanged(XScaleChange, value);
 }
 
-ctreal CtSprite::yScale() const
-{
-    CT_D(CtSprite);
-    return d->yScale;
-}
-
 void CtSprite::setYScale(ctreal scale)
 {
-    CT_D(CtSprite);
-    if (d->yScale == scale)
+    if (mYScale == scale)
         return;
 
-    d->yScale = scale;
+    mYScale = scale;
 
     ChangeValue value;
     value.realValue = scale;
@@ -500,118 +401,80 @@ void CtSprite::scale(ctreal xScale, ctreal yScale)
 
 ctreal CtSprite::opacity() const
 {
-    CT_D(CtSprite);
-    return d->relativeOpacity();
+    return relativeOpacity();
 }
 
 void CtSprite::setOpacity(ctreal opacity)
 {
-    CT_D(CtSprite);
     opacity = ctClamp<ctreal>(0, opacity, 1);
 
-    if (d->opacity == opacity)
+    if (mOpacity == opacity)
         return;
 
-    d->opacity = opacity;
+    mOpacity = opacity;
 
     ChangeValue value;
     value.realValue = opacity;
     itemChanged(OpacityChange, value);
 }
 
-int CtSprite::flags() const
-{
-    CT_D(CtSprite);
-    return d->flags;
-}
-
 void CtSprite::setFlag(Flag flag, bool enabled)
 {
-    CT_D(CtSprite);
     if (enabled) {
-        d->flags |= flag;
+        mFlags |= flag;
     } else {
-        if ((d->flags & flag))
-            d->flags ^= flag;
+        if ((mFlags & flag))
+            mFlags ^= flag;
     }
 }
 
 void CtSprite::deleteLater()
 {
-    CT_D(CtSprite);
-    d->pendingDelete = true;
-}
-
-ctreal CtSprite::width() const
-{
-    CT_D(CtSprite);
-    return d->width;
+    mPendingDelete = true;
 }
 
 void CtSprite::setWidth(ctreal width)
 {
-    CT_D(CtSprite);
-    if (d->width == width)
+    if (mWidth == width)
         return;
 
-    d->width = width;
+    mWidth = width;
 
     ChangeValue value;
     value.realValue = width;
     itemChanged(WidthChange, value);
 }
 
-ctreal CtSprite::height() const
-{
-    CT_D(CtSprite);
-    return d->height;
-}
-
 void CtSprite::setHeight(ctreal height)
 {
-    CT_D(CtSprite);
-    if (d->height == height)
+    if (mHeight == height)
         return;
 
-    d->height = height;
+    mHeight = height;
 
     ChangeValue value;
     value.realValue = height;
     itemChanged(HeightChange, value);
 }
 
-ctreal CtSprite::implicitWidth() const
-{
-    CT_D(CtSprite);
-    return d->implicitWidth;
-}
-
 void CtSprite::setImplicitWidth(ctreal width)
 {
-    CT_D(CtSprite);
-    if (d->implicitWidth == width)
+    if (mImplicitWidth == width)
         return;
 
-    d->implicitWidth = width;
+    mImplicitWidth = width;
 
     ChangeValue value;
     value.realValue = width;
     itemChanged(ImplicitWidthChange, value);
 }
 
-ctreal CtSprite::implicitHeight() const
-{
-    CT_D(CtSprite);
-    return d->implicitHeight;
-}
-
 void CtSprite::setImplicitHeight(ctreal height)
 {
-    CT_D(CtSprite);
-    if (d->implicitHeight == height)
+    if (mImplicitHeight == height)
         return;
 
-    d->implicitHeight = height;
+    mImplicitHeight = height;
 
     ChangeValue value;
     value.realValue = height;
@@ -624,10 +487,9 @@ void CtSprite::resize(ctreal width, ctreal height)
     setHeight(height);
 }
 
-bool CtSprite::contains(ctreal x, ctreal y)
+bool CtSprite::contains(ctreal x, ctreal y) const
 {
-    CT_D(CtSprite);
-    return (x >= 0 && y >= 0 && x < d->width && y < d->height);
+    return (x >= 0 && y >= 0 && x < mWidth && y < mHeight);
 }
 
 void CtSprite::paint(CtRenderer *renderer)
@@ -642,17 +504,15 @@ void CtSprite::advance(ctuint ms)
 
 bool CtSprite::isVisible() const
 {
-    CT_D(CtSprite);
-    return d->relativeVisible();
+    return relativeVisible();
 }
 
 void CtSprite::setVisible(bool visible)
 {
-    CT_D(CtSprite);
-    if (d->visible == visible)
+    if (mVisible == visible)
         return;
 
-    d->visible = visible;
+    mVisible = visible;
 
     // XXX: should emit when parent changes too
     ChangeValue value;
@@ -662,14 +522,12 @@ void CtSprite::setVisible(bool visible)
 
 void CtSprite::translate(ctreal x, ctreal y)
 {
-    CT_D(CtSprite);
-    d->localMatrix.translate(x, y);
+    mLocalMatrix.translate(x, y);
 }
 
 CtRect CtSprite::boundingRect() const
 {
-    CT_D(CtSprite);
-    return CtRect(0, 0, d->width, d->height);
+    return CtRect(0, 0, mWidth, mHeight);
 }
 
 bool CtSprite::setDragCursor(CtDragCursor *drag)
@@ -757,39 +615,35 @@ bool CtSprite::collidesWith(CtSprite *item) const
 
 CtPoint CtSprite::transformOrigin() const
 {
-    CT_D(CtSprite);
-    return CtPoint(d->xCenter, d->yCenter);
+    return CtPoint(mXCenter, mYCenter);
 }
 
 void CtSprite::setTransformOrigin(ctreal x, ctreal y)
 {
-    CT_D(CtSprite);
-    d->xCenter = x;
-    d->yCenter = y;
+    mXCenter = x;
+    mYCenter = y;
 }
 
 CtList<CtSprite *> CtSprite::children() const
 {
-    CT_D(CtSprite);
-    return d->children;
+    return mChildren;
 }
 
 CtMatrix CtSprite::transformMatrix() const
 {
-    CT_D(CtSprite);
-    return d->currentLocalTransformMatrix();
+    checkTransformMatrix();
+    return mLocalTransformMatrix;
 }
 
 CtMatrix CtSprite::sceneTransformMatrix() const
 {
-    CT_D(CtSprite);
-    return d->currentSceneTransformMatrix();
+    checkTransformMatrix();
+    return mSceneTransformMatrix;
 }
 
 void CtSprite::setLocalTransform(const CtMatrix &matrix)
 {
-    CT_D(CtSprite);
-    d->localMatrix = matrix;
+    mLocalMatrix = matrix;
 }
 
 bool CtSprite::event(CtEvent *event)
@@ -904,122 +758,65 @@ void CtSprite::dragCursorCancelEvent(CtDragDropEvent *event)
 // CtRectSprite
 /////////////////////////////////////////////////
 
-CtRectSpritePrivate::CtRectSpritePrivate(CtRectSprite *q)
-    : CtSpritePrivate(q),
-      shaderEffect(0)
-{
-
-}
-
-void CtRectSpritePrivate::init(CtSprite *parent)
-{
-    CtSpritePrivate::init(parent);
-    shaderEffect = ct_sharedSolidShaderEffect();
-}
-
-void CtRectSpritePrivate::release()
-{
-    CtSpritePrivate::release();
-}
-
-
 CtRectSprite::CtRectSprite(CtSprite *parent)
-    : CtSprite(new CtRectSpritePrivate(this))
+    : CtSprite(parent),
+      mColor(1, 1, 1),
+      mShaderEffect(ct_sharedSolidShaderEffect())
 {
-    CT_D(CtRectSprite);
-    d->init(parent);
+
 }
 
 CtRectSprite::CtRectSprite(ctreal r, ctreal g, ctreal b, CtSprite *parent)
-    : CtSprite(new CtRectSpritePrivate(this))
+    : CtSprite(parent),
+      mColor(r, g, b),
+      mShaderEffect(ct_sharedSolidShaderEffect())
 {
-    CT_D(CtRectSprite);
-    d->init(parent);
-    d->color = CtColor(r, g, b);
+
 }
 
 void CtRectSprite::paint(CtRenderer *renderer)
 {
-    CT_D(CtRectSprite);
-    renderer->drawSolid(d->shaderEffect, d->width, d->height,
-                        d->color.red(), d->color.green(), d->color.blue(), d->color.alpha());
-}
-
-CtColor CtRectSprite::color() const
-{
-    CT_D(CtRectSprite);
-    return d->color;
+    renderer->drawSolid(mShaderEffect, width(), height(),
+                        mColor.red(), mColor.green(), mColor.blue(), mColor.alpha());
 }
 
 void CtRectSprite::setColor(const CtColor &color)
 {
-    CT_D(CtRectSprite);
-    d->color = color;
-}
-
-CtShaderEffect *CtRectSprite::shaderEffect() const
-{
-    CT_D(CtRectSprite);
-    return d->shaderEffect;
+    mColor = color;
 }
 
 void CtRectSprite::setShaderEffect(CtShaderEffect *effect)
 {
-    CT_D(CtRectSprite);
-    d->shaderEffect = effect;
+    mShaderEffect = effect;
 }
 
 /////////////////////////////////////////////////
 // CtTextSprite
 /////////////////////////////////////////////////
 
-CtTextSpritePrivate::CtTextSpritePrivate(CtTextSprite *q)
-    : CtSpritePrivate(q),
-      color(0, 0, 0),
-      glyphCount(0),
-      indexBuffer(0),
-      vertexBuffer(0),
-      font(0),
-      shaderEffect(0)
+void CtTextSprite::releaseBuffers()
 {
-
-}
-
-void CtTextSpritePrivate::init(CtSprite *parent)
-{
-    CtSpritePrivate::init(parent);
-    shaderEffect = ct_sharedTextShaderEffect();
-}
-
-void CtTextSpritePrivate::release()
-{
-    CtSpritePrivate::release();
-    releaseBuffers();
-}
-
-void CtTextSpritePrivate::releaseBuffers()
-{
-    if (indexBuffer > 0) {
-        glDeleteBuffers(1, &indexBuffer);
-        indexBuffer = 0;
+    if (mIndexBuffer > 0) {
+        glDeleteBuffers(1, &mIndexBuffer);
+        mIndexBuffer = 0;
     }
 
-    if (vertexBuffer > 0) {
-        glDeleteBuffers(1, &vertexBuffer);
-        vertexBuffer = 0;
+    if (mVertexBuffer > 0) {
+        glDeleteBuffers(1, &mVertexBuffer);
+        mVertexBuffer = 0;
     }
 
-    glyphCount = 0;
+    mGlyphCount = 0;
 }
 
-void CtTextSpritePrivate::recreateBuffers()
+void CtTextSprite::recreateBuffers()
 {
     releaseBuffers();
 
-    const char *str = text.data();
+    const char *str = mText.data();
     const int len = strlen(str);
 
-    if (!font || len == 0)
+    if (!mFont || len == 0)
         return;
 
     GLfloat vertices[24 * len];
@@ -1030,7 +827,7 @@ void CtTextSpritePrivate::recreateBuffers()
     int fx = 0;
 
     for (int i = 0; i < len; i++) {
-        CtFontGlyph *glyph = font->mGlyphs.value((wchar_t)str[i], 0);
+        CtFontGlyph *glyph = mFont->mGlyphs.value((wchar_t)str[i], 0);
 
         if (!glyph)
             continue;
@@ -1040,7 +837,7 @@ void CtTextSpritePrivate::recreateBuffers()
         const int y  = glyph->yOffset;
         const int w  = glyph->width;
         const int h  = glyph->height;
-        const int by = font->mAscender;
+        const int by = mFont->mAscender;
 
         ct_setTriangle2Array(vertices + offset,
                              fx + x, by - y, fx + x + w, by - y + h,
@@ -1056,141 +853,95 @@ void CtTextSpritePrivate::recreateBuffers()
     }
 
     if (n > 0) {
-        CtGL::glGenBuffers(1, &vertexBuffer);
-        CtGL::glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+        CtGL::glGenBuffers(1, &mVertexBuffer);
+        CtGL::glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
         CtGL::glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-        CtGL::glGenBuffers(1, &indexBuffer);
-        CtGL::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+        CtGL::glGenBuffers(1, &mIndexBuffer);
+        CtGL::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
         CtGL::glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_STATIC_DRAW);
 
         CtGL::glBindBuffer(GL_ARRAY_BUFFER, 0);
         CtGL::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
-    glyphCount = n;
+    mGlyphCount = n;
 }
 
 CtTextSprite::CtTextSprite(CtSprite *parent)
-    : CtSprite(new CtTextSpritePrivate(this))
+    : CtSprite(parent),
+      mColor(0, 0, 0),
+      mGlyphCount(0),
+      mIndexBuffer(0),
+      mVertexBuffer(0),
+      mFont(0),
+      mShaderEffect(ct_sharedTextShaderEffect())
 {
-    CT_D(CtTextSprite);
-    d->init(parent);
+
+}
+
+CtTextSprite::~CtTextSprite()
+{
+    releaseBuffers();
 }
 
 void CtTextSprite::paint(CtRenderer *renderer)
 {
-    CT_D(CtTextSprite);
-
-    if (!d->font || !d->shaderEffect || d->glyphCount <= 0)
+    if (!mFont || !mShaderEffect || mGlyphCount <= 0)
         return;
 
-    if (!d->font->mAtlas)
+    if (!mFont->mAtlas)
         return;
 
-    renderer->drawVboTextTexture(d->shaderEffect, d->font->mAtlas, d->indexBuffer,
-                                 d->vertexBuffer, d->glyphCount, d->color);
-}
-
-CtColor CtTextSprite::color() const
-{
-    CT_D(CtTextSprite);
-    return d->color;
+    renderer->drawVboTextTexture(mShaderEffect, mFont->mAtlas, mIndexBuffer,
+                                 mVertexBuffer, mGlyphCount, mColor);
 }
 
 void CtTextSprite::setColor(const CtColor &color)
 {
-    CT_D(CtTextSprite);
-    d->color = color;
-}
-
-CtString CtTextSprite::text() const
-{
-    CT_D(CtTextSprite);
-    return d->text;
+    mColor = color;
 }
 
 void CtTextSprite::setText(const CtString &text)
 {
-    CT_D(CtTextSprite);
-    if (d->text != text) {
-        d->text = text;
-        d->recreateBuffers();
+    if (mText != text) {
+        mText = text;
+        recreateBuffers();
     }
-}
-
-CtFont *CtTextSprite::font() const
-{
-    CT_D(CtTextSprite);
-    return d->font;
 }
 
 void CtTextSprite::setFont(CtFont *font)
 {
-    CT_D(CtTextSprite);
-    if (d->font != font) {
-        d->font = font;
-        d->recreateBuffers();
+    if (mFont != font) {
+        mFont = font;
+        recreateBuffers();
     }
-}
-
-CtShaderEffect *CtTextSprite::shaderEffect() const
-{
-    CT_D(CtTextSprite);
-    return d->shaderEffect;
 }
 
 void CtTextSprite::setShaderEffect(CtShaderEffect *effect)
 {
-    CT_D(CtTextSprite);
-    d->shaderEffect = effect;
+    mShaderEffect = effect;
 }
 
 /////////////////////////////////////////////////
 // CtFrameBufferSprite
 /////////////////////////////////////////////////
 
-CtFrameBufferSpritePrivate::CtFrameBufferSpritePrivate(CtFrameBufferSprite *q)
-    : CtSpritePrivate(q),
-      bufferWidth(0),
-      bufferHeight(0),
-      framebuffer(0),
-      depthbuffer(0),
-      texture(0),
-      shaderEffect(0)
+void CtFrameBufferSprite::recursivePaint(CtRenderer *renderer)
 {
-    isFrameBuffer = true;
-}
-
-void CtFrameBufferSpritePrivate::init(CtSprite *parent)
-{
-    CtSpritePrivate::init(parent);
-
-    shaderEffect = ct_sharedTextureShaderEffect();
-    texture = new CtTexture();
-}
-
-void CtFrameBufferSpritePrivate::release()
-{
-    CtSpritePrivate::release();
-    delete texture;
-}
-
-void CtFrameBufferSpritePrivate::recursivePaint(CtRenderer *renderer)
-{
-    if (!texture->isValid()) {
+    if (!mTexture->isValid()) {
         // invalid framebuffer
-        CtSpritePrivate::recursivePaint(renderer);
+        CtSprite::recursivePaint(renderer);
         return;
     }
 
-    renderer->bindBuffer(framebuffer);
+    renderer->bindBuffer(mFramebuffer);
 
     const CtList<CtSprite *> &lst = orderedChildren();
 
     foreach (CtSprite *item, lst) {
         if (item->isVisible())
-            item->d_ptr->recursivePaint(renderer);
+            item->recursivePaint(renderer);
     }
 
     renderer->releaseBuffer();
@@ -1198,61 +949,61 @@ void CtFrameBufferSpritePrivate::recursivePaint(CtRenderer *renderer)
     renderer->begin();
     renderer->m_opacity = relativeOpacity();
     renderer->m_projectionMatrix = currentViewportProjectionMatrix();
-    q->paint(renderer);
+    paint(renderer);
     renderer->end();
 }
 
-void CtFrameBufferSpritePrivate::deleteBuffers()
+void CtFrameBufferSprite::deleteBuffers()
 {
-    if (framebuffer > 0) {
-        glDeleteFramebuffers(1, &framebuffer);
-        framebuffer = 0;
+    if (mFramebuffer > 0) {
+        glDeleteFramebuffers(1, &mFramebuffer);
+        mFramebuffer = 0;
     }
 
-    if (depthbuffer > 0) {
-        glDeleteRenderbuffers(1, &depthbuffer);
-        depthbuffer = 0;
+    if (mDepthbuffer > 0) {
+        glDeleteRenderbuffers(1, &mDepthbuffer);
+        mDepthbuffer = 0;
     }
 }
 
-void CtFrameBufferSpritePrivate::resizeBuffer(int w, int h)
+void CtFrameBufferSprite::resizeBuffer(int w, int h)
 {
-    if (w == bufferWidth && h == bufferHeight)
+    if (w == mBufferWidth && h == mBufferHeight)
         return;
 
-    bufferWidth = w;
-    bufferHeight = h;
+    mBufferWidth = w;
+    mBufferHeight = h;
 
     deleteBuffers();
-    texture->release();
+    mTexture->release();
 
     if (w <= 0 || h <= 0)
         return;
 
-    texture->loadFromData(w, h, 4, 0);
+    mTexture->loadFromData(w, h, 4, 0);
 
     GLint defaultFBO;
     CtGL::glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 
-    CtGL::glGenFramebuffers(1, &framebuffer);
+    CtGL::glGenFramebuffers(1, &mFramebuffer);
 
     // create render buffer object
-    CtGL::glGenRenderbuffers(1, &depthbuffer);
+    CtGL::glGenRenderbuffers(1, &mDepthbuffer);
 
     // bind render buffer
-    CtGL::glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
+    CtGL::glBindRenderbuffer(GL_RENDERBUFFER, mDepthbuffer);
     // set render buffer storage
     CtGL::glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, w, h);
 
     // bind framebuffer object
-    CtGL::glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    CtGL::glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
 
     // attach texture and render buffer
     CtGL::glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                 GL_TEXTURE_2D, texture->id(), 0);
+                                 GL_TEXTURE_2D, mTexture->id(), 0);
 
     CtGL::glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                    GL_RENDERBUFFER, depthbuffer);
+                                    GL_RENDERBUFFER, mDepthbuffer);
 
     // check if framebuffer is ready
     GLuint status = CtGL::glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -1265,159 +1016,114 @@ void CtFrameBufferSpritePrivate::resizeBuffer(int w, int h)
 
 
 CtFrameBufferSprite::CtFrameBufferSprite(CtSprite *parent)
-    : CtSprite(new CtFrameBufferSpritePrivate(this))
+    : CtSprite(parent),
+      mBufferWidth(0),
+      mBufferHeight(0),
+      mFramebuffer(0),
+      mDepthbuffer(0),
+      mTexture(new CtTexture()),
+      mShaderEffect(ct_sharedTextureShaderEffect())
 {
-    CT_D(CtFrameBufferSprite);
-    d->init(parent);
+    setIsFrameBuffer(true);
+}
+
+CtFrameBufferSprite::~CtFrameBufferSprite()
+{
+    delete mTexture;
 }
 
 void CtFrameBufferSprite::paint(CtRenderer *renderer)
 {
-    CT_D(CtFrameBufferSprite);
-    renderer->drawTexture(d->shaderEffect, d->texture, d->width, d->height);
-}
-
-CtShaderEffect *CtFrameBufferSprite::shaderEffect() const
-{
-    CT_D(CtFrameBufferSprite);
-    return d->shaderEffect;
+    renderer->drawTexture(mShaderEffect, mTexture, width(), height());
 }
 
 void CtFrameBufferSprite::setShaderEffect(CtShaderEffect *effect)
 {
-    CT_D(CtFrameBufferSprite);
-    d->shaderEffect = effect;
+    mShaderEffect = effect;
 }
 
 bool CtFrameBufferSprite::isValidBuffer() const
 {
-    CT_D(CtFrameBufferSprite);
-    return d->texture->isValid();
+    return mTexture->isValid();
 }
 
 void CtFrameBufferSprite::setBufferSize(int width, int height)
 {
-    CT_D(CtFrameBufferSprite);
-    d->resizeBuffer(width, height);
+    resizeBuffer(width, height);
 }
 
 /////////////////////////////////////////////////
 // CtTextureSprite
 /////////////////////////////////////////////////
 
-CtTextureSpritePrivate::CtTextureSpritePrivate(CtTextureSprite *q)
-    : CtSpritePrivate(q),
-      textureAtlasIndex(-1),
-      ownTexture(false),
-      texture(0),
-      shaderEffect(0)
-{
-
-}
-
-void CtTextureSpritePrivate::init(CtSprite *parent)
-{
-    CtSpritePrivate::init(parent);
-
-    if (texture) {
-        q->setWidth(texture->width());
-        q->setHeight(texture->height());
-    }
-
-    shaderEffect = ct_sharedTextureShaderEffect();
-}
-
-void CtTextureSpritePrivate::release()
-{
-    if (texture && ownTexture) {
-        delete texture;
-        texture = 0;
-    }
-
-    CtSpritePrivate::release();
-}
-
-
 CtTextureSprite::CtTextureSprite(CtSprite *parent)
-    : CtSprite(new CtTextureSpritePrivate(this))
+    : CtSprite(parent),
+      mTextureAtlasIndex(-1),
+      mOwnTexture(false),
+      mTexture(0),
+      mShaderEffect(ct_sharedTextureShaderEffect())
 {
-    CT_D(CtTextureSprite);
-    d->init(parent);
+
 }
 
 CtTextureSprite::CtTextureSprite(CtTexture *texture, CtSprite *parent)
-    : CtSprite(new CtTextureSpritePrivate(this))
+    : CtSprite(parent),
+      mTextureAtlasIndex(-1),
+      mOwnTexture(false),
+      mTexture(texture),
+      mShaderEffect(ct_sharedTextureShaderEffect())
 {
-    CT_D(CtTextureSprite);
-    d->texture = texture;
-    d->init(parent);
+    if (texture) {
+        setWidth(texture->width());
+        setHeight(texture->height());
+    }
 }
 
-CtTextureSprite::CtTextureSprite(CtTextureSpritePrivate *dd)
-    : CtSprite(dd)
+CtTextureSprite::~CtTextureSprite()
 {
-
+    releaseTexture();
 }
 
-CtTexture *CtTextureSprite::texture() const
+void CtTextureSprite::releaseTexture()
 {
-    CT_D(CtTextureSprite);
-    return d->texture;
+    if (mTexture && mOwnTexture) {
+        delete mTexture;
+        mTexture = 0;
+        mOwnTexture = false;
+    }
 }
 
 void CtTextureSprite::setTexture(CtTexture *texture)
 {
-    CT_D(CtTextureSprite);
-    if (d->texture == texture)
+    if (mTexture == texture)
         return;
 
-    if (d->texture && d->ownTexture) {
-        delete d->texture;
-        d->texture = 0;
-        d->ownTexture = false;
-    }
-
-    d->texture = texture;
-}
-
-int CtTextureSprite::textureAtlasIndex() const
-{
-    CT_D(CtTextureSprite);
-    return d->textureAtlasIndex;
+    releaseTexture();
+    mTexture = texture;
 }
 
 void CtTextureSprite::setTextureAtlasIndex(int index)
 {
-    CT_D(CtTextureSprite);
-    d->textureAtlasIndex = index;
-}
-
-CtShaderEffect *CtTextureSprite::shaderEffect() const
-{
-    CT_D(CtTextureSprite);
-    return d->shaderEffect;
+    mTextureAtlasIndex = index;
 }
 
 void CtTextureSprite::setShaderEffect(CtShaderEffect *effect)
 {
-    CT_D(CtTextureSprite);
-    d->shaderEffect = effect;
+    mShaderEffect = effect;
 }
 
 bool CtTextureSprite::load(const CtString &filePath)
 {
-    CT_D(CtTextureSprite);
-
-    if (!d->ownTexture) {
-        d->texture = new CtTexture();
-        d->ownTexture = true;
+    if (!mOwnTexture) {
+        mTexture = new CtTexture();
+        mOwnTexture = true;
     }
 
-    if (!d->texture->load(filePath))
+    if (!mTexture->load(filePath))
         return false;
 
-    setWidth(d->texture->width());
-    setHeight(d->texture->height());
+    setWidth(mTexture->width());
+    setHeight(mTexture->height());
 
     return true;
 }
@@ -1426,113 +1132,81 @@ bool CtTextureSprite::load(const CtString &filePath)
 // CtImageSprite
 /////////////////////////////////////////////////
 
-CtImageSpritePrivate::CtImageSpritePrivate(CtImageSprite *q)
-    : CtTextureSpritePrivate(q),
-      fillMode(CtImageSprite::Stretch)
-{
-
-}
-
 CtImageSprite::CtImageSprite(CtSprite *parent)
-    : CtTextureSprite(new CtImageSpritePrivate(this))
+    : CtTextureSprite(parent),
+      mFillMode(CtImageSprite::Stretch)
 {
-    CT_D(CtImageSprite);
-    d->init(parent);
+
 }
 
 CtImageSprite::CtImageSprite(CtTexture *texture, CtSprite *parent)
-    : CtTextureSprite(new CtImageSpritePrivate(this))
-{
-    CT_D(CtImageSprite);
-    d->texture = texture;
-    d->init(parent);
-}
-
-CtImageSprite::CtImageSprite(CtImageSpritePrivate *dd)
-    : CtTextureSprite(dd)
+    : CtTextureSprite(texture, parent),
+      mFillMode(CtImageSprite::Stretch)
 {
 
-}
-
-CtImageSprite::FillMode CtImageSprite::fillMode() const
-{
-    CT_D(CtImageSprite);
-    return d->fillMode;
-}
-
-void CtImageSprite::setFillMode(FillMode mode)
-{
-    CT_D(CtImageSprite);
-    d->fillMode = mode;
 }
 
 void CtImageSprite::paint(CtRenderer *renderer)
 {
-    CT_D(CtImageSprite);
+    const bool vTile = (mFillMode == CtImageSprite::Tile ||
+                        mFillMode == CtImageSprite::TileVertically);
 
-    const bool vTile = (d->fillMode == CtImageSprite::Tile ||
-                        d->fillMode == CtImageSprite::TileVertically);
+    const bool hTile = (mFillMode == CtImageSprite::Tile ||
+                        mFillMode == CtImageSprite::TileHorizontally);
 
-    const bool hTile = (d->fillMode == CtImageSprite::Tile ||
-                        d->fillMode == CtImageSprite::TileHorizontally);
-
-    renderer->drawTexture(d->shaderEffect, d->texture, d->width, d->height,
-                          vTile, hTile, d->textureAtlasIndex);
+    renderer->drawTexture(shaderEffect(), texture(), width(), height(),
+                          vTile, hTile, textureAtlasIndex());
 }
 
 /////////////////////////////////////////////////
 // CtImagePolygonSprite
 /////////////////////////////////////////////////
 
-CtImagePolygonSpritePrivate::CtImagePolygonSpritePrivate(CtImagePolygonSprite *q)
-    : CtImageSpritePrivate(q)
-{
-
-}
-
 CtImagePolygonSprite::CtImagePolygonSprite(CtSprite *parent)
-    : CtImageSprite(new CtImagePolygonSpritePrivate(this))
+    : CtImageSprite(parent)
 {
-    CT_D(CtImagePolygonSprite);
-    d->init(parent);
+
 }
 
 CtImagePolygonSprite::CtImagePolygonSprite(CtTexture *texture, CtSprite *parent)
-    : CtImageSprite(new CtImagePolygonSpritePrivate(this))
+    : CtImageSprite(texture, parent)
 {
-    CT_D(CtImagePolygonSprite);
-    d->texture = texture;
-    d->init(parent);
+
+}
+
+CtImagePolygonSprite::~CtImagePolygonSprite()
+{
+
 }
 
 void CtImagePolygonSprite::paint(CtRenderer *renderer)
 {
-    CT_D(CtImagePolygonSprite);
+    const int count = mVertices.size();
 
-    const int count = d->vertices.size();
-
-    if (!d->texture || count < 3)
+    if (!texture() || count < 3)
         return;
 
-    if (d->textureAtlasIndex >= 0) {
+    if (textureAtlasIndex() >= 0) {
         CT_WARNING("CtImagePolygonSprite does not support atlas texture yet!");
         return;
     }
 
-    const bool vTile = (d->fillMode == CtImagePolygonSprite::Tile ||
-                        d->fillMode == CtImagePolygonSprite::TileVertically);
+    FillMode mode = fillMode();
 
-    const bool hTile = (d->fillMode == CtImagePolygonSprite::Tile ||
-                        d->fillMode == CtImagePolygonSprite::TileHorizontally);
+    const bool vTile = (mode == CtImagePolygonSprite::Tile ||
+                        mode == CtImagePolygonSprite::TileVertically);
+
+    const bool hTile = (mode == CtImagePolygonSprite::Tile ||
+                        mode == CtImagePolygonSprite::TileHorizontally);
 
     int i = 0;
     GLfloat *vertices = new GLfloat[count * 2];
     GLfloat *texCoords = new GLfloat[count * 2];
 
-    const ctreal w = hTile ? d->texture->width() : width();
-    const ctreal h = vTile ? d->texture->height() : height();
+    const ctreal w = hTile ? texture()->width() : width();
+    const ctreal h = vTile ? texture()->height() : height();
 
-    foreach (const CtPoint &p, d->vertices) {
+    foreach (const CtPoint &p, mVertices) {
         vertices[i] = p.x();
         vertices[i + 1] = p.y();
 
@@ -1542,50 +1216,17 @@ void CtImagePolygonSprite::paint(CtRenderer *renderer)
         i += 2;
     }
 
-    renderer->drawTexture(d->shaderEffect, d->texture, vertices, texCoords, count,
+    renderer->drawTexture(shaderEffect(), texture(), vertices, texCoords, count,
                           vTile, hTile);
 
     delete [] vertices;
     delete [] texCoords;
 }
 
-CtVector<CtPoint> CtImagePolygonSprite::vertices() const
-{
-    CT_D(CtImagePolygonSprite);
-    return d->vertices;
-}
-
-void CtImagePolygonSprite::setVertices(const CtVector<CtPoint> &vertices)
-{
-    CT_D(CtImagePolygonSprite);
-    d->vertices = vertices;
-}
-
 
 /////////////////////////////////////////////////
 // CtFragmentsSprite
 /////////////////////////////////////////////////
-
-CtFragmentsSpritePrivate::CtFragmentsSpritePrivate(CtFragmentsSprite *q)
-    : CtTextureSpritePrivate(q)
-{
-
-}
-
-void CtFragmentsSpritePrivate::init(CtSprite *parent)
-{
-    CtTextureSpritePrivate::init(parent);
-    shaderEffect = ct_sharedFragmentShaderEffect();
-}
-
-void CtFragmentsSpritePrivate::release()
-{
-    CtTextureSpritePrivate::release();
-
-    foreach (CtFragmentsSprite::Fragment *f, fragments)
-        delete f;
-}
-
 
 CtFragmentsSprite::Fragment::Fragment()
     : m_x(0),
@@ -1631,34 +1272,28 @@ void CtFragmentsSprite::Fragment::setUserData(void *data)
 
 
 CtFragmentsSprite::CtFragmentsSprite(CtSprite *parent)
-    : CtTextureSprite(new CtFragmentsSpritePrivate(this))
+    : CtTextureSprite(parent)
 {
-    CT_D(CtFragmentsSprite);
-    d->init(parent);
+    setShaderEffect(ct_sharedFragmentShaderEffect());
 }
 
 CtFragmentsSprite::CtFragmentsSprite(CtTexture *texture, CtSprite *parent)
-    : CtTextureSprite(new CtFragmentsSpritePrivate(this))
+    : CtTextureSprite(texture, parent)
 {
-    CT_D(CtFragmentsSprite);
-    d->texture = texture;
-    d->init(parent);
+    setShaderEffect(ct_sharedFragmentShaderEffect());
 }
 
-CtList<CtFragmentsSprite::Fragment *> CtFragmentsSprite::fragments() const
+CtFragmentsSprite::~CtFragmentsSprite()
 {
-    CT_D(CtFragmentsSprite);
-    return d->fragments;
+    clearFragments();
 }
 
 void CtFragmentsSprite::clearFragments()
 {
-    CT_D(CtFragmentsSprite);
-
-    foreach (Fragment *f, d->fragments)
+    foreach (Fragment *f, mFragments)
         delete f;
 
-    d->fragments.clear();
+    mFragments.clear();
 }
 
 bool CtFragmentsSprite::appendFragment(Fragment *fragment)
@@ -1668,20 +1303,18 @@ bool CtFragmentsSprite::appendFragment(Fragment *fragment)
 
 bool CtFragmentsSprite::insertFragment(int index, Fragment *fragment)
 {
-    CT_D(CtFragmentsSprite);
-
-    foreach (Fragment *f, d->fragments) {
+    foreach (Fragment *f, mFragments) {
         if (fragment == f)
             return false;
     }
 
-    if (index < 0 || index >= d->fragments.size()) {
-        d->fragments.append(fragment);
+    if (index < 0 || index >= mFragments.size()) {
+        mFragments.append(fragment);
     } else {
         CtList<Fragment *>::iterator it;
-        it = d->fragments.begin();
+        it = mFragments.begin();
         std::advance(it, index);
-        d->fragments.insert(it, fragment);
+        mFragments.insert(it, fragment);
     }
 
     return true;
@@ -1689,13 +1322,11 @@ bool CtFragmentsSprite::insertFragment(int index, Fragment *fragment)
 
 bool CtFragmentsSprite::removeFragment(Fragment *fragment)
 {
-    CT_D(CtFragmentsSprite);
-
     CtList<Fragment *>::iterator it;
 
-    for (it = d->fragments.begin(); it != d->fragments.end(); it++) {
+    for (it = mFragments.begin(); it != mFragments.end(); it++) {
         if (*it == fragment) {
-            d->fragments.remove(it);
+            mFragments.remove(it);
             delete fragment;
             return true;
         }
@@ -1706,15 +1337,13 @@ bool CtFragmentsSprite::removeFragment(Fragment *fragment)
 
 void CtFragmentsSprite::paint(CtRenderer *renderer)
 {
-    CT_D(CtFragmentsSprite);
-
-    if (!d->shaderEffect)
+    if (!shaderEffect())
         return;
 
     CtShaderEffect::Element e;
     CtList<CtShaderEffect::Element> elements;
 
-    foreach (CtFragmentsSprite::Fragment *f, d->fragments) {
+    foreach (CtFragmentsSprite::Fragment *f, mFragments) {
         e.x = f->x();
         e.y = f->y();
         e.width = f->width();
@@ -1724,7 +1353,7 @@ void CtFragmentsSprite::paint(CtRenderer *renderer)
         elements.append(e);
     }
 
-    renderer->drawElements(d->shaderEffect, d->texture, elements);
+    renderer->drawElements(shaderEffect(), texture(), elements);
 }
 
 
@@ -1732,49 +1361,20 @@ void CtFragmentsSprite::paint(CtRenderer *renderer)
 // CtParticlesSprite
 /////////////////////////////////////////////////
 
-CtParticlesSpritePrivate::CtParticlesSpritePrivate(CtParticlesSprite *q)
-    : CtTextureSpritePrivate(q),
-      vertices(0),
-      attrCount(7),
-      vertexSize(7 * sizeof(GLfloat)),
-      vertexCount(0)
+
+void CtParticlesSprite::recreateVertexBuffer()
 {
-
-}
-
-void CtParticlesSpritePrivate::init(CtSprite *parent)
-{
-    CtTextureSpritePrivate::init(parent);
-    shaderEffect = ct_sharedParticleShaderEffect();
-}
-
-void CtParticlesSpritePrivate::release()
-{
-    CtTextureSpritePrivate::release();
-
-    foreach (CtParticlesSprite::Particle *f, particles)
-        delete f;
-
-    if (vertices) {
-        delete [] vertices;
-        vertices = 0;
-    }
-}
-
-void CtParticlesSpritePrivate::recreateVertexBuffer()
-{
-    if (vertices) {
-        delete [] vertices;
-        vertices = 0;
+    if (mVertices) {
+        delete [] mVertices;
+        mVertices = 0;
     }
 
-    vertexCount = particles.size();
-    const size_t size = vertexSize * vertexCount;
+    mVertexCount = mParticles.size();
+    const size_t size = mVertexSize * mVertexCount;
 
     if (size > 0)
-        vertices = new GLfloat[size];
+        mVertices = new GLfloat[size];
 }
-
 
 CtParticlesSprite::Particle::Particle()
     : m_x(0),
@@ -1787,50 +1387,58 @@ CtParticlesSprite::Particle::Particle()
 }
 
 CtParticlesSprite::CtParticlesSprite(CtSprite *parent)
-    : CtTextureSprite(new CtParticlesSpritePrivate(this))
+    : CtTextureSprite(parent),
+      mVertices(0),
+      mAttrCount(7),
+      mVertexSize(7 * sizeof(GLfloat)),
+      mVertexCount(0)
 {
-    CT_D(CtParticlesSprite);
-    d->init(parent);
+    setShaderEffect(ct_sharedParticleShaderEffect());
 }
 
 CtParticlesSprite::CtParticlesSprite(CtTexture *texture, CtSprite *parent)
-    : CtTextureSprite(new CtParticlesSpritePrivate(this))
+    : CtTextureSprite(texture, parent),
+      mVertices(0),
+      mAttrCount(7),
+      mVertexSize(7 * sizeof(GLfloat)),
+      mVertexCount(0)
 {
-    CT_D(CtParticlesSprite);
-    d->texture = texture;
-    d->init(parent);
+    setShaderEffect(ct_sharedParticleShaderEffect());
 }
 
-CtVector<CtParticlesSprite::Particle *> CtParticlesSprite::particles() const
+CtParticlesSprite::~CtParticlesSprite()
 {
-    CT_D(CtParticlesSprite);
-    return d->particles;
+    foreach (Particle *p, mParticles)
+        delete p;
+
+    mParticles.clear();
+
+    if (mVertices) {
+        delete [] mVertices;
+        mVertices = 0;
+    }
 }
 
 bool CtParticlesSprite::addParticle(Particle *particle)
 {
-    CT_D(CtParticlesSprite);
-
-    foreach (Particle *p, d->particles) {
+    foreach (Particle *p, mParticles) {
         if (particle == p)
             return false;
     }
 
-    d->particles.append(particle);
-    d->recreateVertexBuffer();
+    mParticles.append(particle);
+    recreateVertexBuffer();
     return true;
 }
 
 bool CtParticlesSprite::removeParticle(Particle *fragment)
 {
-    CT_D(CtParticlesSprite);
-
     bool found = false;
     CtVector<Particle *>::iterator it;
 
-    for (it = d->particles.begin(); it != d->particles.end(); it++) {
+    for (it = mParticles.begin(); it != mParticles.end(); it++) {
         if (*it == fragment) {
-            d->particles.remove(it);
+            mParticles.remove(it);
             delete fragment;
 
             found = true;
@@ -1839,34 +1447,30 @@ bool CtParticlesSprite::removeParticle(Particle *fragment)
     }
 
     if (found)
-        d->recreateVertexBuffer();
+        recreateVertexBuffer();
 
     return found;
 }
 
 void CtParticlesSprite::clearParticles()
 {
-    CT_D(CtParticlesSprite);
-
-    foreach (Particle *p, d->particles)
+    foreach (Particle *p, mParticles)
         delete p;
 
-    d->particles.clear();
-    d->recreateVertexBuffer();
+    mParticles.clear();
+    recreateVertexBuffer();
 }
 
 void CtParticlesSprite::paint(CtRenderer *renderer)
 {
-    CT_D(CtParticlesSprite);
+    CtTexture *tex = texture();
 
-    CtTexture *texture = d->texture;
-
-    if (!texture || !d->vertices || !d->shaderEffect || !d->shaderEffect->init())
+    if (!tex || !mVertices || !shaderEffect() || !shaderEffect()->init())
         return;
 
-    GLfloat *vptr = d->vertices;
+    GLfloat *vptr = mVertices;
 
-    foreach (CtParticlesSprite::Particle *p, d->particles) {
+    foreach (CtParticlesSprite::Particle *p, mParticles) {
         const CtColor &c = p->color();
 
         vptr[0] = p->x();
@@ -1877,11 +1481,11 @@ void CtParticlesSprite::paint(CtRenderer *renderer)
         vptr[5] = c.blue();
         vptr[6] = c.alpha();
 
-        vptr += d->attrCount;
+        vptr += mAttrCount;
     }
 
     // use program
-    CtGpuProgram *program = d->shaderEffect->program();
+    CtGpuProgram *program = shaderEffect()->program();
 
     int locMatrix = program->uniformLocation("ct_Matrix");
     int locOpacity = program->uniformLocation("ct_Opacity");
@@ -1901,21 +1505,21 @@ void CtParticlesSprite::paint(CtRenderer *renderer)
     program->enableVertexAttributeArray(locPointSize);
     program->enableVertexAttributeArray(locColor);
 
-    GLfloat *vertexPtr = d->vertices;
-    program->setVertexAttributePointer(locPosition, GL_FLOAT, 2, d->vertexSize, vertexPtr);
+    GLfloat *vertexPtr = mVertices;
+    program->setVertexAttributePointer(locPosition, GL_FLOAT, 2, mVertexSize, vertexPtr);
     vertexPtr += 2;
-    program->setVertexAttributePointer(locPointSize, GL_FLOAT, 1, d->vertexSize, vertexPtr);
+    program->setVertexAttributePointer(locPointSize, GL_FLOAT, 1, mVertexSize, vertexPtr);
     vertexPtr += 1;
-    program->setVertexAttributePointer(locColor, GL_FLOAT, 4, d->vertexSize, vertexPtr);
+    program->setVertexAttributePointer(locColor, GL_FLOAT, 4, mVertexSize, vertexPtr);
 
     // apply texture
     CtGL::glActiveTexture(GL_TEXTURE0);
-    CtGL::glBindTexture(GL_TEXTURE_2D, texture->id());
+    CtGL::glBindTexture(GL_TEXTURE_2D, tex->id());
     program->setUniformValue(locTexture, int(0));
     CtGL::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     CtGL::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    CtGL::glDrawArrays(GL_POINTS, 0, d->vertexCount);
+    CtGL::glDrawArrays(GL_POINTS, 0, mVertexCount);
 
     program->release();
 }
