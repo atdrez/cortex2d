@@ -69,24 +69,6 @@ ctreal CtSprite::relativeOpacity() const
     }
 }
 
-bool CtSprite::relativeVisible() const
-{
-    // XXX: optimize
-    if (!mParent)
-        return mVisible;
-    else
-        return mVisible && mParent->isVisible();
-}
-
-bool CtSprite::relativeFrozen() const
-{
-    // XXX: optimize
-    if (!mParent)
-        return mIsFrozen;
-    else
-        return mIsFrozen || mParent->isFrozen();
-}
-
 CtFrameBufferSprite *CtSprite::frameBufferItem() const
 {
     // XXX: optimize
@@ -502,9 +484,22 @@ void CtSprite::advance(ctuint ms)
     CT_UNUSED(ms);
 }
 
+bool CtSprite::isFrozen() const
+{
+    // XXX: optimize
+    if (!mParent)
+        return mIsFrozen;
+    else
+        return mIsFrozen || mParent->isFrozen();
+}
+
 bool CtSprite::isVisible() const
 {
-    return relativeVisible();
+    // XXX: optimize
+    if (!mParent)
+        return mVisible;
+    else
+        return mVisible && mParent->isVisible();
 }
 
 void CtSprite::setVisible(bool visible)
@@ -774,6 +769,11 @@ CtRectSprite::CtRectSprite(ctreal r, ctreal g, ctreal b, CtSprite *parent)
 
 }
 
+CtRectSprite::~CtRectSprite()
+{
+
+}
+
 void CtRectSprite::paint(CtRenderer *renderer)
 {
     renderer->drawSolid(mShaderEffect, width(), height(),
@@ -1029,6 +1029,7 @@ CtFrameBufferSprite::CtFrameBufferSprite(CtSprite *parent)
 
 CtFrameBufferSprite::~CtFrameBufferSprite()
 {
+    deleteBuffers();
     delete mTexture;
 }
 
@@ -1146,6 +1147,11 @@ CtImageSprite::CtImageSprite(CtTexture *texture, CtSprite *parent)
 
 }
 
+CtImageSprite::~CtImageSprite()
+{
+
+}
+
 void CtImageSprite::paint(CtRenderer *renderer)
 {
     const bool vTile = (mFillMode == CtImageSprite::Tile ||
@@ -1229,45 +1235,15 @@ void CtImagePolygonSprite::paint(CtRenderer *renderer)
 /////////////////////////////////////////////////
 
 CtFragmentsSprite::Fragment::Fragment()
-    : m_x(0),
-      m_y(0),
-      m_width(0),
-      m_height(0),
-      m_opacity(1.0),
-      m_atlasIndex(-1),
-      m_userData(0)
+    : mX(0),
+      mY(0),
+      mWidth(0),
+      mHeight(0),
+      mOpacity(1.0),
+      mAtlasIndex(-1),
+      mUserData(0)
 {
 
-}
-
-void CtFragmentsSprite::Fragment::setX(ctreal x)
-{
-    m_x = x;
-}
-
-void CtFragmentsSprite::Fragment::setY(ctreal y)
-{
-    m_y = y;
-}
-
-void CtFragmentsSprite::Fragment::setWidth(ctreal w)
-{
-    m_width = w;
-}
-
-void CtFragmentsSprite::Fragment::setHeight(ctreal h)
-{
-    m_height = h;
-}
-
-void CtFragmentsSprite::Fragment::setAtlasIndex(int index)
-{
-    m_atlasIndex = index;
-}
-
-void CtFragmentsSprite::Fragment::setUserData(void *data)
-{
-    m_userData = data;
 }
 
 
@@ -1308,7 +1284,7 @@ bool CtFragmentsSprite::insertFragment(int index, Fragment *fragment)
             return false;
     }
 
-    if (index < 0 || index >= mFragments.size()) {
+    if (index < 0 || index >= (int)mFragments.size()) {
         mFragments.append(fragment);
     } else {
         CtList<Fragment *>::iterator it;
@@ -1361,30 +1337,16 @@ void CtFragmentsSprite::paint(CtRenderer *renderer)
 // CtParticlesSprite
 /////////////////////////////////////////////////
 
-
-void CtParticlesSprite::recreateVertexBuffer()
-{
-    if (mVertices) {
-        delete [] mVertices;
-        mVertices = 0;
-    }
-
-    mVertexCount = mParticles.size();
-    const size_t size = mVertexSize * mVertexCount;
-
-    if (size > 0)
-        mVertices = new GLfloat[size];
-}
-
 CtParticlesSprite::Particle::Particle()
-    : m_x(0),
-      m_y(0),
-      m_size(10),
-      m_color(1, 1, 1, 1),
-      m_userData(0)
+    : mX(0),
+      mY(0),
+      mSize(10),
+      mColor(1, 1, 1, 1),
+      mUserData(0)
 {
 
 }
+
 
 CtParticlesSprite::CtParticlesSprite(CtSprite *parent)
     : CtTextureSprite(parent),
@@ -1417,6 +1379,20 @@ CtParticlesSprite::~CtParticlesSprite()
         delete [] mVertices;
         mVertices = 0;
     }
+}
+
+void CtParticlesSprite::recreateVertexBuffer()
+{
+    if (mVertices) {
+        delete [] mVertices;
+        mVertices = 0;
+    }
+
+    mVertexCount = mParticles.size();
+    const size_t size = mVertexSize * mVertexCount;
+
+    if (size > 0)
+        mVertices = new GLfloat[size];
 }
 
 bool CtParticlesSprite::addParticle(Particle *particle)

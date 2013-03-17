@@ -93,7 +93,7 @@ public:
     inline ctreal yScale() const { return mYScale; }
     void setYScale(ctreal scale);
 
-    inline bool isFrozen() const { return mIsFrozen; }
+    bool isFrozen() const;
     void setFrozen(bool frozen);
 
     void scale(ctreal xScale, ctreal yScale);
@@ -175,9 +175,7 @@ private:
     void checkTransformMatrix() const;
     CtMatrix mappedTransformMatrix(CtSprite *root) const;
 
-    bool relativeVisible() const;
     ctreal relativeOpacity() const;
-    bool relativeFrozen() const;
 
     void fillItems(CtList<CtSprite *> &lst);
 
@@ -222,6 +220,7 @@ class CtRectSprite : public CtSprite
 public:
     CtRectSprite(CtSprite *parent = 0);
     CtRectSprite(ctreal r, ctreal g, ctreal b, CtSprite *parent = 0);
+    ~CtRectSprite();
 
     inline CtColor color() const { return mColor; }
     void setColor(const CtColor &color);
@@ -343,6 +342,7 @@ public:
 
     CtImageSprite(CtSprite *parent = 0);
     CtImageSprite(CtTexture *texture, CtSprite *parent = 0);
+    ~CtImageSprite();
 
     FillMode fillMode() const { return mFillMode; }
     void setFillMode(FillMode mode) { mFillMode = mode; }
@@ -380,35 +380,35 @@ public:
     public:
         Fragment();
 
-        ctreal x() const { return m_x; }
-        void setX(ctreal x);
+        inline ctreal x() const { return mX; }
+        void setX(ctreal x) { mX = x; }
 
-        ctreal y() const { return m_y; }
-        void setY(ctreal y);
+        inline ctreal y() const { return mY; }
+        void setY(ctreal y) { mY = y; }
 
-        ctreal width() const { return m_width; }
-        void setWidth(ctreal w);
+        inline ctreal width() const { return mWidth; }
+        void setWidth(ctreal w) { mWidth = w; }
 
-        ctreal height() const { return m_height; }
-        void setHeight(ctreal h);
+        inline ctreal height() const { return mHeight; }
+        void setHeight(ctreal h) { mHeight = h; }
 
-        int atlasIndex() const { return m_atlasIndex; }
-        void setAtlasIndex(int index);
+        inline int atlasIndex() const { return mAtlasIndex; }
+        void setAtlasIndex(int index) { mAtlasIndex = index; }
 
-        ctreal opacity() const { return m_opacity; }
-        void setOpacity(ctreal opacity) { m_opacity = opacity; }
+        inline ctreal opacity() const { return mOpacity; }
+        void setOpacity(ctreal opacity) { mOpacity = opacity; }
 
-        void *userData() const { return m_userData; }
-        void setUserData(void *data);
+        inline void *userData() const { return mUserData; }
+        void setUserData(void *data) { mUserData = data; }
 
     private:
-        ctreal m_x;
-        ctreal m_y;
-        ctreal m_width;
-        ctreal m_height;
-        ctreal m_opacity;
-        int m_atlasIndex;
-        void *m_userData;
+        ctreal mX;
+        ctreal mY;
+        ctreal mWidth;
+        ctreal mHeight;
+        ctreal mOpacity;
+        int mAtlasIndex;
+        void *mUserData;
     };
 
     CtFragmentsSprite(CtSprite *parent = 0);
@@ -437,27 +437,27 @@ public:
     public:
         Particle();
 
-        ctreal x() const { return m_x; }
-        void setX(ctreal x) { m_x = x; }
+        inline ctreal x() const { return mX; }
+        inline void setX(ctreal x) { mX = x; }
 
-        ctreal y() const { return m_y; }
-        void setY(ctreal y) { m_y = y; }
+        inline ctreal y() const { return mY; }
+        inline void setY(ctreal y) { mY = y; }
 
-        ctreal pointSize() const { return m_size; }
-        void setPointSize(ctreal size) { m_size = size; }
+        inline ctreal pointSize() const { return mSize; }
+        inline void setPointSize(ctreal size) { mSize = size; }
 
-        CtColor color() const { return m_color; }
-        void setColor(const CtColor &color) { m_color = color; }
+        inline CtColor color() const { return mColor; }
+        inline void setColor(const CtColor &color) { mColor = color; }
 
-        void *userData() const { return m_userData; }
-        void setUserData(void *data) { m_userData = data; }
+        inline void *userData() const { return mUserData; }
+        inline void setUserData(void *data) { mUserData = data; }
 
     private:
-        ctreal m_x;
-        ctreal m_y;
-        ctreal m_size;
-        CtColor m_color;
-        void *m_userData;
+        ctreal mX;
+        ctreal mY;
+        ctreal mSize;
+        CtColor mColor;
+        void *mUserData;
     };
 
     CtParticlesSprite(CtSprite *parent = 0);
