@@ -92,6 +92,8 @@ public:
     static void glDeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers);
     static void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers);
     static void glDeleteBuffers(GLsizei n,  const GLuint *buffers);
+
+    static void glGetRenderbufferParameteriv(GLenum target,  GLenum pname,  GLint * params);
 };
 
 #endif

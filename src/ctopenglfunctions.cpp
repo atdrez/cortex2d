@@ -160,6 +160,7 @@ CT_GL_FPTR(void, glGenBuffers, (GLsizei n,  GLuint *buffers))
 CT_GL_FPTR(void, glDeleteBuffers, (GLsizei n, const GLuint *buffers))
 CT_GL_FPTR(void, glDeleteRenderbuffers, (GLsizei n, const GLuint *renderbuffers))
 CT_GL_FPTR(void, glDeleteFramebuffers, (GLsizei n, const GLuint *framebuffers))
+CT_GL_FPTR(void, glGetRenderbufferParameteriv, (GLenum target,  GLenum pname,  GLint * params))
 
 #undef CT_GL_FPTR
 
@@ -232,6 +233,7 @@ void CtGL::assignFunctions(Func_GetProcAddress f)
     CT_GL_FASSIGN(glDeleteRenderbuffers);
     CT_GL_FASSIGN(glDeleteFramebuffers);
     CT_GL_FASSIGN(glDeleteBuffers);
+    CT_GL_FASSIGN(glGetRenderbufferParameteriv);
 
 #   undef CT_GL_FASSIGN
 
@@ -535,4 +537,9 @@ void CtGL::glBufferData(GLenum  target,  GLsizeiptr  size,  const GLvoid *  data
 void CtGL::glGenBuffers(GLsizei  n,  GLuint *  buffers)
 {
     return ct_glGenBuffers(n, buffers);
+}
+
+void CtGL::glGetRenderbufferParameteriv(GLenum target,  GLenum pname,  GLint * params)
+{
+    return ct_glGetRenderbufferParameteriv(target, pname, params);
 }
