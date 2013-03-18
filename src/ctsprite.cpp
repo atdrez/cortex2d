@@ -803,12 +803,12 @@ void CtRectSprite::setShaderEffect(CtShaderEffect *effect)
 void CtTextSprite::releaseBuffers()
 {
     if (mIndexBuffer > 0) {
-        glDeleteBuffers(1, &mIndexBuffer);
+        CtGL::glDeleteBuffers(1, &mIndexBuffer);
         mIndexBuffer = 0;
     }
 
     if (mVertexBuffer > 0) {
-        glDeleteBuffers(1, &mVertexBuffer);
+        CtGL::glDeleteBuffers(1, &mVertexBuffer);
         mVertexBuffer = 0;
     }
 
@@ -963,13 +963,13 @@ void CtFrameBufferSprite::recursivePaint(CtRenderer *renderer)
 void CtFrameBufferSprite::deleteBuffers()
 {
     if (mFramebuffer > 0) {
-        glDeleteFramebuffers(1, &mFramebuffer);
+        CtGL::glDeleteFramebuffers(1, &mFramebuffer);
         mFramebuffer = 0;
     }
 
-    if (mDepthbuffer > 0) {
-        glDeleteRenderbuffers(1, &mDepthbuffer);
-        mDepthbuffer = 0;
+    if (mColorbuffer > 0) {
+        CtGL::glDeleteRenderbuffers(1, &mColorbuffer);
+        mColorbuffer = 0;
     }
 }
 
@@ -993,24 +993,21 @@ void CtFrameBufferSprite::resizeBuffer(int w, int h)
     CtGL::glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 
     CtGL::glGenFramebuffers(1, &mFramebuffer);
+    CtGL::glGenRenderbuffers(1, &mColorbuffer);
 
-    // create render buffer object
-    CtGL::glGenRenderbuffers(1, &mDepthbuffer);
-
-    // bind render buffer
-    CtGL::glBindRenderbuffer(GL_RENDERBUFFER, mDepthbuffer);
-    // set render buffer storage
-    CtGL::glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, w, h);
-
-    // bind framebuffer object
+    // bind
     CtGL::glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
+    CtGL::glBindRenderbuffer(GL_RENDERBUFFER, mColorbuffer);
 
-    // attach texture and render buffer
+    CtGL::glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, w, h);
+    CtGL::glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                    GL_RENDERBUFFER, mColorbuffer);
+
     CtGL::glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                  GL_TEXTURE_2D, mTexture->id(), 0);
 
-    CtGL::glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                    GL_RENDERBUFFER, mDepthbuffer);
+    CtGL::glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &mBufferWidth);
+    CtGL::glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &mBufferHeight);
 
     // check if framebuffer is ready
     GLuint status = CtGL::glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -1027,7 +1024,7 @@ CtFrameBufferSprite::CtFrameBufferSprite(CtSprite *parent)
       mBufferWidth(0),
       mBufferHeight(0),
       mFramebuffer(0),
-      mDepthbuffer(0),
+      mColorbuffer(0),
       mTexture(new CtTexture()),
       mShaderEffect(ct_sharedTextureShaderEffect())
 {

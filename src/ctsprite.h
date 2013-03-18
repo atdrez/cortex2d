@@ -303,7 +303,7 @@ private:
     int mBufferWidth;
     int mBufferHeight;
     GLuint mFramebuffer;
-    GLuint mDepthbuffer;
+    GLuint mColorbuffer;
     CtTexture *mTexture;
     CtShaderEffect *mShaderEffect;
 
