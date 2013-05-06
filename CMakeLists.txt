@@ -10,7 +10,15 @@ file(GLOB cortex2d_src
 "src/audio/*.cpp"
 "src/filesystem/*.cpp"
 "src/ios/*.cpp"
-"src/utils/*.cpp")
+"src/utils/*.cpp"
+"src/*.c"
+"src/3rdparty/*.c"
+"src/3rdparty/alut/*.c"
+"src/3rdparty/freetypegl/*.c"
+"src/audio/*.c"
+"src/filesystem/*.c"
+"src/ios/*.c"
+"src/utils/*.c")
 
 file(GLOB cortex2d_includes
 "src/*.h"
