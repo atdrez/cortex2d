@@ -40,7 +40,8 @@ include_directories(
 "src/ios/"
 "src/utils/"
 "/usr/include/SDL2/"
-"/usr/include/libpng12/")
+"/usr/include/libpng12/"
+"/usr/include/freetype2/")
 
 
 add_library(cortex2d SHARED ${cortex2d_src})
