@@ -23,7 +23,7 @@ public:
 
     static GLuint glCreateShader(GLenum  shaderType);
     static void glDeleteShader(GLenum  shaderType);
-    static void glShaderSource(GLuint shader,  GLsizei count, const GLchar **string, const GLint *length);
+    static void glShaderSource(GLuint shader,  GLsizei count, const GLchar* const* string, const GLint *length);
     static void glCompileShader(GLenum  shaderType);
     static void glGetShaderiv(GLuint shader,  GLenum pname,  GLint *params);
     static void glGetShaderInfoLog(GLuint shader,  GLsizei maxLength,  GLsizei *length,  GLchar *infoLog);

@@ -7,3 +7,4 @@ Makefile
 *.moc
 *.swp
 moc_*.cpp
+bin/
