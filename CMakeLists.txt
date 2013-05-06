@@ -36,7 +36,7 @@ include_directories(
 
 
 add_library(cortex2d SHARED ${cortex2d_src})
-target_link_libraries(cortex2d SDL2 png12 GLESv2 openal freetype)
+target_link_libraries(cortex2d SDL2 png12 GLESv2 openal freetype alut)
 
 install(TARGETS cortex2d DESTINATION lib)
 
