@@ -97,7 +97,7 @@ CtString CtGL::getGlErrorMessage(GLenum error)
 
 CT_GL_FPTR(GLuint, glCreateShader, (GLenum  shaderType))
 CT_GL_FPTR(void, glDeleteShader, (GLenum  shaderType))
-CT_GL_FPTR(void, glShaderSource, (GLuint shader, GLsizei count, const GLchar **string, const GLint *length))
+CT_GL_FPTR(void, glShaderSource, (GLuint shader, GLsizei count, const GLchar* const* string, const GLint *length))
 CT_GL_FPTR(void, glCompileShader, (GLenum  shaderType))
 CT_GL_FPTR(void, glGetShaderiv, (GLuint shader,  GLenum pname,  GLint *params))
 CT_GL_FPTR(void, glGetShaderInfoLog, (GLuint shader,  GLsizei maxLength,  GLsizei *length,  GLchar *infoLog))
@@ -251,7 +251,7 @@ void CtGL::glDeleteShader(GLenum shaderType)
     return ct_glDeleteShader(shaderType);
 }
 
-void CtGL::glShaderSource(GLuint shader,  GLsizei count, const GLchar **string, const GLint *length)
+void CtGL::glShaderSource(GLuint shader,  GLsizei count, const GLchar* const* string, const GLint *length)
 {
     return ct_glShaderSource(shader, count, string, length);
 }
