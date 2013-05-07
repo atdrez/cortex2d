@@ -21,6 +21,7 @@ file(GLOB cortex2d_src
 "src/utils/*.c")
 
 file(GLOB cortex2d_includes
+"include/Cortex2D"
 "src/*.h"
 "src/3rdparty/*.h"
 "src/3rdparty/alut/*.h"
