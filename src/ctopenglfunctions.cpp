@@ -95,9 +95,13 @@ CtString CtGL::getGlErrorMessage(GLenum error)
     typedef ret (CT_GL_APIENTRYP Func_##name)params;             \
     static Func_##name ct_##name = name;
 
+#define CT_GL_FPTR_REINTERPRET(ret, name, params)                \
+    typedef ret (CT_GL_APIENTRYP Func_##name)params;             \
+    static Func_##name ct_##name = reinterpret_cast<Func_##name>(name);
+
 CT_GL_FPTR(GLuint, glCreateShader, (GLenum  shaderType))
 CT_GL_FPTR(void, glDeleteShader, (GLenum  shaderType))
-CT_GL_FPTR(void, glShaderSource, (GLuint shader, GLsizei count, const GLchar* const* string, const GLint *length))
+CT_GL_FPTR_REINTERPRET(void, glShaderSource, (GLuint shader, GLsizei count, const GLchar **string, const GLint *length))
 CT_GL_FPTR(void, glCompileShader, (GLenum  shaderType))
 CT_GL_FPTR(void, glGetShaderiv, (GLuint shader,  GLenum pname,  GLint *params))
 CT_GL_FPTR(void, glGetShaderInfoLog, (GLuint shader,  GLsizei maxLength,  GLsizei *length,  GLchar *infoLog))
@@ -176,9 +180,13 @@ void CtGL::assignFunctions(Func_GetProcAddress f)
     ct_##name = (Func_##name)f(#name);                      \
     if (!ct_##name) CT_FATAL("Unable to load " #name " function");
 
+#   define CT_GL_FASSIGN_REINTERPRET(name)                          \
+    ct_##name = reinterpret_cast<Func_##name>(f(#name));            \
+    if (!ct_##name) CT_FATAL("Unable to load " #name " function");
+
     CT_GL_FASSIGN(glCreateShader);
     CT_GL_FASSIGN(glDeleteShader);
-    CT_GL_FASSIGN(glShaderSource);
+    CT_GL_FASSIGN_REINTERPRET(glShaderSource); // backward compatibility for old gles 2
     CT_GL_FASSIGN(glCompileShader);
     CT_GL_FASSIGN(glGetShaderiv);
     CT_GL_FASSIGN(glGetShaderInfoLog);
@@ -251,7 +259,7 @@ void CtGL::glDeleteShader(GLenum shaderType)
     return ct_glDeleteShader(shaderType);
 }
 
-void CtGL::glShaderSource(GLuint shader,  GLsizei count, const GLchar* const* string, const GLint *length)
+void CtGL::glShaderSource(GLuint shader,  GLsizei count, const GLchar **string, const GLint *length)
 {
     return ct_glShaderSource(shader, count, string, length);
 }
