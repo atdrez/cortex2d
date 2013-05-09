@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 project(cortex2d)
 add_definitions(-DCT_SDL_BACKEND)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+find_package(SDL2 REQUIRED)
+find_package(FreeType REQUIRED)
+find_package(PNG12 REQUIRED)
+
 file(GLOB cortex2d_src
 "src/*.cpp"
 "src/3rdparty/*.cpp"
@@ -40,9 +45,9 @@ include_directories(
 "src/filesystem/"
 "src/ios/"
 "src/utils/"
-"/usr/include/SDL2/"
-"/usr/include/libpng12/"
-"/usr/include/freetype2/")
+${SDL2_INCLUDE_DIR}
+${PNG12_INCLUDE}
+${FREETYPE_INCLUDE_DIR_freetype2})
 
 
 add_library(cortex2d SHARED ${cortex2d_src})
