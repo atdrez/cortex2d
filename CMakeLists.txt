@@ -10,9 +10,18 @@ file(GLOB cortex2d_src
 "src/audio/*.cpp"
 "src/filesystem/*.cpp"
 "src/ios/*.cpp"
-"src/utils/*.cpp")
+"src/utils/*.cpp"
+"src/*.c"
+"src/3rdparty/*.c"
+"src/3rdparty/alut/*.c"
+"src/3rdparty/freetypegl/*.c"
+"src/audio/*.c"
+"src/filesystem/*.c"
+"src/ios/*.c"
+"src/utils/*.c")
 
 file(GLOB cortex2d_includes
+"include/Cortex2D"
 "src/*.h"
 "src/3rdparty/*.h"
 "src/3rdparty/alut/*.h"
@@ -32,11 +41,12 @@ include_directories(
 "src/ios/"
 "src/utils/"
 "/usr/include/SDL2/"
-"/usr/include/libpng12/")
+"/usr/include/libpng12/"
+"/usr/include/freetype2/")
 
 
 add_library(cortex2d SHARED ${cortex2d_src})
-target_link_libraries(cortex2d SDL2 png12 GLESv2 openal freetype)
+target_link_libraries(cortex2d SDL2 png12 GLESv2 openal freetype alut)
 
 install(TARGETS cortex2d DESTINATION lib)
 
