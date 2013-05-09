@@ -51,7 +51,7 @@ ${FREETYPE_INCLUDE_DIR_freetype2})
 
 
 add_library(cortex2d SHARED ${cortex2d_src})
-target_link_libraries(cortex2d SDL2 png12 GLESv2 openal freetype alut)
+target_link_libraries(cortex2d ${SDL2_LIBRARY} ${PNG12_LIBRARIES} GLESv2 openal ${FREETYPE_LIBRARY} alut)
 
 install(TARGETS cortex2d DESTINATION lib)
 
