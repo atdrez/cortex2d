@@ -105,7 +105,7 @@ CtWindowSdlPrivate *CtApplicationSdlPrivate::findWindowById(int winId)
     // XXX: SDL has a bug and it's delivering events with winID = 0
     // This should be fixed in order to handle more than a window correctly
     if (winId == 0) {
-        if (windows.empty())
+        if (windows.isEmpty())
             return 0;
         else
             return  static_cast<CtWindowSdlPrivate *>(windows.front());
