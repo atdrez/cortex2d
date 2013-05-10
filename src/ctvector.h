@@ -15,6 +15,12 @@ public:
 
     CtVector() : mData() {}
 
+    CtVector(const CtVector &vector)
+        : mData(vector.mData) {}
+
+    explicit CtVector(size_t n, const T &value = T())
+        : mData(n, value) {}
+
     inline iterator begin() { return mData.begin(); }
     inline const_iterator begin() const { return mData.begin(); }
 
