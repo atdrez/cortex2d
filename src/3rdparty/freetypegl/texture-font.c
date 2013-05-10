@@ -384,7 +384,7 @@ texture_font_load_glyphs( texture_font_t * self,
         }
 
 
-#ifndef CT_IOS_BACKEND
+#if !defined(CT_IOS_BACKEND) && !defined(CT_ANDROID)
 // XXX: iOS freetype2 doesn't implement lcd filter
         if( depth == 3 )
         {
