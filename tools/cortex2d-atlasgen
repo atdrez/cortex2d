@@ -27,6 +27,7 @@ def process(fileNames, scale):
 
     for path in fileNames:
         image = Image.open(path)
+        image.load()
 
         if scale != 1.0:
             image = image.resize((int(image.size[0] * scale),
