@@ -179,7 +179,8 @@ def findFreeSlot(slots, w, h, spacing, globalW, globalH):
     return None
 
 
-def generate(fileNames, outputName, atlasWidth, atlasHeight, scale, outputFormat, spacing):
+def generate(fileNames, outputName, atlasWidth, atlasHeight, scale,
+             outputFormat, spacing, keepExtension):
     images = process(fileNames, scale)
 
     # sort images by area (from bigger to smaller)
@@ -264,12 +265,12 @@ def generate(fileNames, outputName, atlasWidth, atlasHeight, scale, outputFormat
     if outputFormat == "json":
         generateJsonAtlases(atlases, fullSlots, outputName, ".png")
     elif outputFormat == "bin-tga":
-        generateBinaryAtlases(atlases, fullSlots, outputName, ".tga")
+        generateBinaryAtlases(atlases, fullSlots, outputName, ".tga", keepExtension)
     elif outputFormat == "bin-png":
-        generateBinaryAtlases(atlases, fullSlots, outputName, ".png")
+        generateBinaryAtlases(atlases, fullSlots, outputName, ".png", keepExtension)
 
 
-def generateBinaryAtlases(atlases, slots, outputName, ext):
+def generateBinaryAtlases(atlases, slots, outputName, ext, keepExtension):
     for atlasIdx, atlas in enumerate(atlases):
         if atlasIdx == 0:
             name = "%s.atlas" % (outputName,)
@@ -299,6 +300,9 @@ def generateBinaryAtlases(atlases, slots, outputName, ext):
 
             if idx != atlasIdx:
                 continue
+
+            if not keepExtension:
+                path = os.path.splitext(path)[0]
 
             fmt = "<I%ssIIIIIIII" % (len(path), )
             entry = struct.pack(fmt, len(path), path, x, y, imageWidth, imageHeight,
@@ -358,6 +362,7 @@ def main(argv):
     parser.add_option('--scale', help="scale ratio", dest="scale", default=1.0, type=float)
     parser.add_option('--spacing', help="tile spacing", dest="spacing", default=1, type=int)
     parser.add_option('--format', help="atlas format", dest="format", default="bin-tga", type='string')
+    parser.add_option('--keepextension', help="keep file extension", dest="keepExtension", default="1", type='int')
 
     (options, arguments) = parser.parse_args()
 
@@ -377,7 +382,7 @@ def main(argv):
 
     print "Processing %d files..." % (len(infiles), )
     generate(infiles, options.output, options.width, options.height,
-             options.scale, options.format, options.spacing)
+             options.scale, options.format, options.spacing, options.keepExtension != 0)
 
 
 if __name__ == "__main__":
