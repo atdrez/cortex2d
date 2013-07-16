@@ -603,7 +603,7 @@ bool CtSprite::collidesWith(CtSprite *item) const
                           {a1.x(), a1.y(), 0}, {a3.x(), a3.y(), 0}, {a4.x(), a4.y(), 0}};
 
     const float U[][3] = {{b1.x(), b1.y(), 0}, {b2.x(), b2.y(), 0}, {b3.x(), b3.y(), 0},
-                           {b1.x(), b1.y(), 0}, {b3.x(), b3.y(), 0}, {b4.x(), b4.y(), 0}};
+                          {b1.x(), b1.y(), 0}, {b3.x(), b3.y(), 0}, {b4.x(), b4.y(), 0}};
 
     // check collisions
     if (tri_tri_intersect(V[0], V[1], V[2], U[0], U[1], U[2])) return true;
@@ -831,6 +831,7 @@ void CtTextSprite::recreateBuffers()
     int n = 0;
     int j = 0;
     int fx = 0;
+    int mh = 0;
 
     for (int i = 0; i < len; i++) {
         CtFontGlyph *glyph = mFont->mGlyphs.value((wchar_t)str[i], 0);
@@ -850,6 +851,7 @@ void CtTextSprite::recreateBuffers()
                              glyph->s0, glyph->t0, glyph->s1, glyph->t1);
 
         fx += glyph->xAdvance;
+        mh = ctMax<int>(h, mh);
 
         // indexes
         for (int kk = j + 6; j < kk; j++)
@@ -857,6 +859,9 @@ void CtTextSprite::recreateBuffers()
 
         n++;
     }
+
+    setImplicitWidth(fx);
+    setImplicitHeight(mh);
 
     if (n > 0) {
         CtGL::glGenBuffers(1, &mVertexBuffer);
